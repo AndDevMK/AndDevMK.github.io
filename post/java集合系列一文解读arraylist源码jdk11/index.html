@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta name="google-site-verification" content="QndSJXZ90UYw4sAk6Qr-OT9iwAji2VP8yBCyX8vn5Yk" />
+  <meta name="msvalidate.01" content="0389850515E39A5234CFD8600FC6DCA5" />
+  <meta name="baidu-site-verification" content="codeva-elylgGVSCG" />
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Java集合系列：一文解读ArrayList源码「JDK11」 - AndDevMK&#39;s android blog site</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="AndDevMK" /><meta name="description" content="一、概述 ArrayList是经常用到的一个容器，它是Java Collections Framework的一个成员，然后底层是基于定长数组来实现的，如果数组存放满了" /><meta name="keywords" content="Android, Java, Kotlin, C&#43;&#43;, C, Flutter, Dart, NDK" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.111.3 with theme even" />
+
+
+<link rel="canonical" href="https://AndDevMK.github.io/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBarraylist%E6%BA%90%E7%A0%81jdk11/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.8d8ed79b2c35ec3796101bd0b86561c78e7cf914cfabfc307dc047036cae674a.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="Java集合系列：一文解读ArrayList源码「JDK11」" />
+<meta property="og:description" content="一、概述 ArrayList是经常用到的一个容器，它是Java Collections Framework的一个成员，然后底层是基于定长数组来实现的，如果数组存放满了" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://AndDevMK.github.io/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBarraylist%E6%BA%90%E7%A0%81jdk11/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2023-04-16T14:41:31+08:00" />
+<meta property="article:modified_time" content="2023-04-16T14:41:31+08:00" />
+<meta itemprop="name" content="Java集合系列：一文解读ArrayList源码「JDK11」">
+<meta itemprop="description" content="一、概述 ArrayList是经常用到的一个容器，它是Java Collections Framework的一个成员，然后底层是基于定长数组来实现的，如果数组存放满了"><meta itemprop="datePublished" content="2023-04-16T14:41:31+08:00" />
+<meta itemprop="dateModified" content="2023-04-16T14:41:31+08:00" />
+<meta itemprop="wordCount" content="7409">
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Java集合系列：一文解读ArrayList源码「JDK11」"/>
+<meta name="twitter:description" content="一、概述 ArrayList是经常用到的一个容器，它是Java Collections Framework的一个成员，然后底层是基于定长数组来实现的，如果数组存放满了"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">AndDevMK</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">首页</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">归档</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">关于</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">AndDevMK</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">首页</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">归档</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">关于</a>
+      </li>
+    
+    <div id="open_search" class="open_search">
+      搜索
+    </div>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Java集合系列：一文解读ArrayList源码「JDK11」</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2023-04-16 </span>
+        <div class="post-category">
+            <a href="/categories/java/"> Java </a>
+            </div>
+          <span class="more-meta"> 约 7409 字 </span>
+          <span class="more-meta"> 预计阅读 15 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#一概述">一、概述</a></li>
+    <li><a href="#二arraylist源码解读">二、<em>ArrayList</em>源码解读</a>
+      <ul>
+        <li><a href="#21继承关系">2.1、继承关系</a>
+          <ul>
+            <li><a href="#211iterable接口">2.1.1、<em>Iterable</em>接口</a>
+              <ul>
+                <li><a href="#2111概述">2.1.1.1、概述</a></li>
+                <li><a href="#2112fail-fast机制">2.1.1.2、<em>fail-fast</em>机制</a></li>
+                <li><a href="#2113迭代器的原理">2.1.1.3、迭代器的原理</a></li>
+              </ul>
+            </li>
+            <li><a href="#212randomaccess接口">2.1.2、<em>RandomAccess</em>接口</a></li>
+          </ul>
+        </li>
+        <li><a href="#22成员变量">2.2、成员变量</a></li>
+        <li><a href="#23构造方法">2.3、构造方法</a></li>
+        <li><a href="#24核心方法">2.4、核心方法</a>
+          <ul>
+            <li><a href="#241add方法">2.4.1、add方法</a></li>
+            <li><a href="#242grow方法扩容机制">2.4.2、grow方法（扩容机制）</a></li>
+            <li><a href="#243remove方法">2.4.3、remove方法</a></li>
+            <li><a href="#244set方法">2.4.4、set方法</a></li>
+            <li><a href="#245get方法">2.4.5、get方法</a></li>
+          </ul>
+        </li>
+        <li><a href="#25其它方法">2.5、其它方法</a>
+          <ul>
+            <li><a href="#251ensurecapacity方法">2.5.1、ensureCapacity方法</a></li>
+            <li><a href="#252trimtosize方法">2.5.2、trimToSize方法</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#三总结">三、总结</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h1 id="一概述">一、概述</h1>
+<p><em>ArrayList</em>是经常用到的一个容器，它是<em>Java Collections Framework</em>的一个成员，然后底层是基于定长数组来实现的，如果数组存放满了，就会通过扩容机制重新生成一个更大的数组来存放数据。</p>
+<p>因此，扩容机制是<em>ArrayList</em>的核心所在，这一点是务必要掌握的；除此之外，本文还会叙述<em>ArrayList</em>的基本操作是怎样实现的，以及其它的细节。</p>
+<h1 id="二arraylist源码解读">二、<em>ArrayList</em>源码解读</h1>
+<h2 id="21继承关系">2.1、继承关系</h2>
+<img src="/img/java/ArrayList继承关系.png" title="" alt="" width="535">
+<p>从<em>UML</em>类图中可以看到，<em>ArrayList</em>直接或间接实现了<em>Iterable</em>、<em>Collection</em>、<em>List</em>、<em>RandomAccess</em>、<em>Cloneable</em>、<em>Serializable</em>这6个接口；<em>ArrayList</em>直接或间接继承了<em>AbstractList</em>、<em>AbstractCollection</em>这2个抽象类。</p>
+<p><em><strong>疑问来了：为什么AbstractList实现了List接口，ArrayList还要去再实现一次List接口，是吃饱了撑着吗？</strong></em></p>
+<p>带着疑问，我立马去网上冲浪一波，然后发现了3个对此的解释。</p>
+<p>观点1：如果<em>ArrayList</em>没去实现<em>List</em>接口，会导致<em>class</em>的<em>getInterfaces</em>方法返回不同的结果，这么做是为了方便基于<em>List</em>接口的动态代理。</p>
+<p>观点2：这可能是为了增加继承结构的可追踪性。当浏览<em>Javadoc</em>或类似的东西时，就不必遍历整个继承树，它不会有任何不良影响，并且可以帮助理解代码。</p>
+<p>观点3：<em>ArrayList</em>的作者<em>Josh Bloch</em>曾经认为<em>ArrayList</em>再实现一次<em>List</em>接口是有一些价值的，但后来发现这是个错误。</p>
+<p>以上3个观点均出自<a href="https://stackoverflow.com/questions/2165204/why-does-linkedhashsete-extend-hashsete-and-implement-sete"><em>stackoverflow</em></a>的一个帖子，我们了解下就好了，深究意义不大，具体原因还得是作者自己才知道。</p>
+<h3 id="211iterable接口">2.1.1、<em>Iterable</em>接口</h3>
+<h4 id="2111概述">2.1.1.1、概述</h4>
+<p><em>Iterable</em>表示可迭代的，它有个<em>iterator</em>方法，需要返回<em>Iterator</em>对象，<em>Iterator</em>是一个接口，表示为迭代器。<em>Iterable</em>接口的定义如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Iterable</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">Iterator</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="nf">iterator</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">    </span><span class="c1">// .....省略
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>那么实现<em>Iterable</em>接口有什么作用呢？先说结论：<em><strong>只要对象实现了Iterable接口，就可以使用for-each语法，编译器会转换为调用Iterable和Iterator接口的方法。</strong></em></p>
+<p>我们平常用<em>for-each</em>语法遍历<em>list</em>时，你可能会写下如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">List</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;&gt;(</span><span class="mi">3</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">list</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">list</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">2</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">list</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">3</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="o">(</span><span class="n">Integer</span> <span class="n">value</span> <span class="o">:</span> <span class="n">list</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;value: &#34;</span> <span class="o">+</span> <span class="n">value</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这种<em>for-each</em>语法背后是怎么实现的呢？其实，编译器会将它转换为类似如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">Iterator</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">iterator</span> <span class="o">=</span> <span class="n">list</span><span class="o">.</span><span class="na">iterator</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl"><span class="k">while</span> <span class="o">(</span><span class="n">iterator</span><span class="o">.</span><span class="na">hasNext</span><span class="o">()){</span>
+</span></span><span class="line"><span class="cl">    <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;value: &#34;</span> <span class="o">+</span> <span class="n">iterator</span><span class="o">.</span><span class="na">next</span><span class="o">());</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>除了<em>Iterable</em>接口的<em>iterator</em>方法外，<em>List</em>接口也有一个<em>listIterator</em>方法，需要返回<em>ListIterator</em>对象，<em>ListIterator</em>是一个接口，它对<em>Iterator</em>接口做了扩展。比如，可以从末尾往前遍历，如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">ListIterator</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">iterator</span> <span class="o">=</span> <span class="n">list</span><span class="o">.</span><span class="na">listIterator</span><span class="o">(</span><span class="n">list</span><span class="o">.</span><span class="na">size</span><span class="o">());</span>
+</span></span><span class="line"><span class="cl"><span class="k">while</span> <span class="o">(</span><span class="n">iterator</span><span class="o">.</span><span class="na">hasPrevious</span><span class="o">()){</span>
+</span></span><span class="line"><span class="cl">    <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;value: &#34;</span> <span class="o">+</span> <span class="n">iterator</span><span class="o">.</span><span class="na">previous</span><span class="o">());</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="2112fail-fast机制">2.1.1.2、<em>fail-fast</em>机制</h4>
+<p>那些年，年少时所犯下的错误，想起自己刚入门<em>Java</em>时，曾经写过如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="k">for</span> <span class="o">(</span><span class="n">Integer</span> <span class="n">value</span> <span class="o">:</span> <span class="n">list</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">(</span><span class="n">value</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">list</span><span class="o">.</span><span class="na">remove</span><span class="o">(</span><span class="n">value</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>当年的直觉告诉你，这么写不存在问题，但是运行却会报并发修改的错误：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">Exception</span> <span class="n">in</span> <span class="n">thread</span> <span class="s">&#34;main&#34;</span> <span class="n">java</span><span class="o">.</span><span class="na">util</span><span class="o">.</span><span class="na">ConcurrentModificationException</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>显然，这里是没有并发的代码，我们去看看<em>ConcurrentModificationException</em>的注释描述。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 当不允许进行此类修改时，已检测到对象的并发修改的方法可能会抛出此异常。
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * This exception may be thrown by methods that have detected concurrent
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * modification of an object when such modification is not permissible.
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * &lt;p&gt;
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 例如，通常不允许一个线程在另一个线程迭代集合时修改集合。
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * For example, it is not generally permissible for one thread to modify a Collection
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * while another thread is iterating over it.  
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 通常，在这些情况下迭代的结果是不确定的。
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * In general, the results of the iteration are undefined under these circumstances. 
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 如果检测到此行为，某些 Iterator 实现（包括 JRE 提供的所有通用集合实现）可能会选择抛出此异常。
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * Some Iterator implementations (including those of all the general purpose collection implementations
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * provided by the JRE) may choose to throw this exception if this behavior is
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * detected.  
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 执行此操作的迭代器被称为fail-fast迭代器，因为它们快速而干净地失败，而不是冒着在未来不确定的时间出现任意的、不确定的行为的风险。
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * Iterators that do this are known as &lt;i&gt;fail-fast&lt;/i&gt; iterators,
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * as they fail quickly and cleanly, rather that risking arbitrary,
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * non-deterministic behavior at an undetermined time in the future.
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * &lt;p&gt;
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 请注意，此异常并不总是表示对象已被不同的线程并发修改。
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * Note that this exception does not always indicate that an object has
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * been concurrently modified by a &lt;i&gt;different&lt;/i&gt; thread.  
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 如果单个线程发出一系列违反对象契约的方法调用，则该对象可能会抛出此异常。
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * If a single thread issues a sequence of method invocations that violates the
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * contract of an object, the object may throw this exception. 
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 例如，如果线程在使用fail-fast迭代器迭代集合时直接修改集合，则迭代器将抛出此异常。
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * For example, if a thread modifies a collection directly while it is
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * iterating over the collection with a fail-fast iterator, the iterator
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * will throw this exception.
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 请注意，不能保证fail-fast行为，因为一般来说，在存在非同步并发修改的情况下不可能做出任何硬性保证。
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * &lt;p&gt;Note that fail-fast behavior cannot be guaranteed as it is, generally
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * speaking, impossible to make any hard guarantees in the presence of
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * unsynchronized concurrent modification. 
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * ail-fast操作会尽最大努力抛出ConcurrentModificationException。
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * Fail-fast operations throw {@code ConcurrentModificationException} on a best-effort basis.
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 因此，编写依赖于此异常的正确性的程序是错误的： ConcurrentModificationException应该仅用于检测错误。
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * Therefore, it would be wrong to write a program that depended on this
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * exception for its correctness: &lt;i&gt;{@code ConcurrentModificationException}
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * should be used only to detect bugs.&lt;/i&gt;
+</span></span></span><span class="line"><span class="cl"><span class="cm"> *
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * @author  Josh Bloch
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * @see     Collection
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * @see     Iterator
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * @see     Spliterator
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * @see     ListIterator
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * @see     Vector
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * @see     LinkedList
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * @see     HashSet
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * @see     Hashtable
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * @see     TreeMap
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * @see     AbstractList
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * @since   1.2
+</span></span></span><span class="line"><span class="cl"><span class="cm"> */</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>上面的注释说的很明显了，如果线程在使用<em>fail-fast</em>迭代器迭代集合时直接修改集合，则迭代器将抛出此异常。</p>
+<p>那么如何避免异常呢？可以使用迭代器的<em>remove</em>方法，如下所示：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">Iterator</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">iterator</span> <span class="o">=</span> <span class="n">list</span><span class="o">.</span><span class="na">iterator</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl"><span class="k">while</span> <span class="o">(</span><span class="n">iterator</span><span class="o">.</span><span class="na">hasNext</span><span class="o">())</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">(</span><span class="n">iterator</span><span class="o">.</span><span class="na">next</span><span class="o">()</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">iterator</span><span class="o">.</span><span class="na">remove</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>它自己的<em>remove</em>方法为何又可以使用呢？我们需要看下迭代器的原理了。</p>
+<h4 id="2113迭代器的原理">2.1.1.3、迭代器的原理</h4>
+<p>我们先来看下<em>ArrayList</em>中<em>iterator</em>方法的实现，代码如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="kd">extends</span> <span class="n">AbstractList</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="kd">implements</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;,</span> <span class="n">RandomAccess</span><span class="o">,</span> <span class="n">Cloneable</span><span class="o">,</span> <span class="n">java</span><span class="o">.</span><span class="na">io</span><span class="o">.</span><span class="na">Serializable</span>
+</span></span><span class="line"><span class="cl"><span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">Iterator</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="nf">iterator</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="k">new</span> <span class="n">Itr</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><em>iterator</em>方法实现很简单，直接<em>new</em>一个<em>Itr</em>对象返回，<em>Itr</em>是<em>ArrayList</em>的一个成员内部类，实现了<em>Iterator</em>接口，它的代码量并不多，所以直接贴出来了，看注释应该就能明白。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">private</span> <span class="kd">class</span> <span class="nc">Itr</span> <span class="kd">implements</span> <span class="n">Iterator</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">cursor</span><span class="o">;</span>       <span class="c1">// index of next element to return  下一个要返回的元素位置
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">int</span> <span class="n">lastRet</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span> <span class="c1">// index of last element returned; -1 if no such  最后一个返回的索引位置，如果没有，为-1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">int</span> <span class="n">expectedModCount</span> <span class="o">=</span> <span class="n">modCount</span><span class="o">;</span>  <span class="c1">// 期望的修改次数，初始化为外部类当前的修改次数modCount
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// prevent creating a synthetic constructor
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">Itr</span><span class="o">()</span> <span class="o">{}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">hasNext</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">cursor</span> <span class="o">!=</span> <span class="n">size</span><span class="o">;</span>     <span class="c1">// cursor与数组元素数量的比较
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nd">@SuppressWarnings</span><span class="o">(</span><span class="s">&#34;unchecked&#34;</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">E</span> <span class="nf">next</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 校验是否发生了结构性变化
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">checkForComodification</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="o">(</span><span class="n">i</span> <span class="o">&gt;=</span> <span class="n">size</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl">            <span class="k">throw</span> <span class="k">new</span> <span class="n">NoSuchElementException</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Object</span><span class="o">[]</span> <span class="n">elementData</span> <span class="o">=</span> <span class="n">ArrayList</span><span class="o">.</span><span class="na">this</span><span class="o">.</span><span class="na">elementData</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="o">(</span><span class="n">i</span> <span class="o">&gt;=</span> <span class="n">elementData</span><span class="o">.</span><span class="na">length</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl">            <span class="k">throw</span> <span class="k">new</span> <span class="n">ConcurrentModificationException</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 更新cursor的值，每次+1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">cursor</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 更新lastRet值，返回对应的元素
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">return</span> <span class="o">(</span><span class="n">E</span><span class="o">)</span> <span class="n">elementData</span><span class="o">[</span><span class="n">lastRet</span> <span class="o">=</span> <span class="n">i</span><span class="o">];</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">remove</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 注意：lastRet &lt; 0时会抛出异常，所以调用remove()之前需要先调用next()去更新lastRet的值
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span> <span class="o">(</span><span class="n">lastRet</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl">            <span class="k">throw</span> <span class="k">new</span> <span class="n">IllegalStateException</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl"><span class="err">        </span><span class="c1">// 校验是否发生了结构性变化
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">checkForComodification</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">try</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">// 执行ArrayList的remove方法，modCount++
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="n">ArrayList</span><span class="o">.</span><span class="na">this</span><span class="o">.</span><span class="na">remove</span><span class="o">(</span><span class="n">lastRet</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">// 更新cursor的值，remove后元素数量少了一个，相当于cursor=cursor-1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="n">cursor</span> <span class="o">=</span> <span class="n">lastRet</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">// 重置lastRet
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="n">lastRet</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">// 更新expectedModCount
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="n">expectedModCount</span> <span class="o">=</span> <span class="n">modCount</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">IndexOutOfBoundsException</span> <span class="n">ex</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">throw</span> <span class="k">new</span> <span class="n">ConcurrentModificationException</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 校验是否发生了结构性变化，所谓结构性变化就是添加、插入和删除元素，只是修改元素内容不算结构性变化。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kd">final</span> <span class="kt">void</span> <span class="nf">checkForComodification</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="o">(</span><span class="n">modCount</span> <span class="o">!=</span> <span class="n">expectedModCount</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl">            <span class="k">throw</span> <span class="k">new</span> <span class="n">ConcurrentModificationException</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>迭代器源码中<em>next</em>方法，<em>remove</em>方法都会调用<em>checkForComodification</em>方法进行校验是否发生了结构性变化，由此可见，迭代器的内部维护了索引位置相关的数据，要求在迭代过程中，不能发生结构性变化，否则这些索引位置功能就会失效。</p>
+<h3 id="212randomaccess接口">2.1.2、<em>RandomAccess</em>接口</h3>
+<p><em>RandomAccess</em>内部是没有任何代码的接口，它属于标记接口，其定义如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">RandomAccess</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>实现了<em>RandomAccess</em>接口的类表示支持快速随机访问，用在一些通用的算法代码中，它可以根据这个声明而选择效率更高的实现，比如<em>Collections</em>类的<em>binarySearch</em>方法，会根据<em>List</em>是否实现了<em>RandomAccess</em>接口而采用不同的实现，代码如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">static</span> <span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">binarySearch</span><span class="o">(</span><span class="n">List</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">Comparable</span><span class="o">&lt;?</span> <span class="kd">super</span> <span class="n">T</span><span class="o">&gt;&gt;</span> <span class="n">list</span><span class="o">,</span> <span class="n">T</span> <span class="n">key</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">(</span><span class="n">list</span> <span class="k">instanceof</span> <span class="n">RandomAccess</span> <span class="o">||</span> <span class="n">list</span><span class="o">.</span><span class="na">size</span><span class="o">()&lt;</span><span class="n">BINARYSEARCH_THRESHOLD</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">Collections</span><span class="o">.</span><span class="na">indexedBinarySearch</span><span class="o">(</span><span class="n">list</span><span class="o">,</span> <span class="n">key</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">Collections</span><span class="o">.</span><span class="na">iteratorBinarySearch</span><span class="o">(</span><span class="n">list</span><span class="o">,</span> <span class="n">key</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="22成员变量">2.2、成员变量</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// 默认初始容量
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">DEFAULT_CAPACITY</span> <span class="o">=</span> <span class="mi">10</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 用于空实例的共享空数组实例
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">Object</span><span class="o">[]</span> <span class="n">EMPTY_ELEMENTDATA</span> <span class="o">=</span> <span class="o">{};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 用于默认大小的空实例的共享空数组实例。注意：要将它与EMPTY_ELEMENTDATA区分开来，以了解添加第一个元素时要膨胀多少
+</span></span></span><span class="line"><span class="cl"><span class="c1">// 可以理解为标记调空参数构造方法
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">Object</span><span class="o">[]</span> <span class="n">DEFAULTCAPACITY_EMPTY_ELEMENTDATA</span> <span class="o">=</span> <span class="o">{};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 存储ArrayList元素的数组缓冲区。ArrayList的容量就是这个数组缓冲区的长度。添加第一个元素时，任何具有 elementData == DEFAULTCAPACITY_EMPTY_ELEMENTDATA 的空 ArrayList 都将扩展为 DEFAULT_CAPACITY。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">transient</span> <span class="n">Object</span><span class="o">[]</span> <span class="n">elementData</span><span class="o">;</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// ArrayList的大小（它包含的元素数）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">private</span> <span class="kt">int</span> <span class="n">size</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 要分配的数组的最大大小（除非必要）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">MAX_ARRAY_SIZE</span> <span class="o">=</span> <span class="n">Integer</span><span class="o">.</span><span class="na">MAX_VALUE</span> <span class="o">-</span> <span class="mi">8</span><span class="o">;</span>  
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 此列表在结构上被修改的次数。结构修改是那些改变列表大小的修改，或者以其他方式扰乱列表，使得正在进行的迭代可能会产生不正确的结果。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">protected</span> <span class="kd">transient</span> <span class="kt">int</span> <span class="n">modCount</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>  
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><em><strong>疑问来了：我们知道了ArrayList实现了Serializable接口，但是elementData为何要用transient修饰，这不表示elementData不能被序列化？</strong></em></p>
+<p>其实玄机在于<em>ArrayList</em>中的两个方法：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// 将ArrayList实例的状态保存到流中（即序列化它）。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">private</span> <span class="kt">void</span> <span class="nf">writeObject</span><span class="o">(</span><span class="n">java</span><span class="o">.</span><span class="na">io</span><span class="o">.</span><span class="na">ObjectOutputStream</span> <span class="n">s</span><span class="o">)</span>                      
+</span></span><span class="line"><span class="cl">        <span class="kd">throws</span> <span class="n">java</span><span class="o">.</span><span class="na">io</span><span class="o">.</span><span class="na">IOException</span> <span class="o">{</span>                                        
+</span></span><span class="line"><span class="cl">    <span class="c1">// Write out element count, and any hidden stuff                        
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">int</span> <span class="n">expectedModCount</span> <span class="o">=</span> <span class="n">modCount</span><span class="o">;</span>                                        
+</span></span><span class="line"><span class="cl">    <span class="n">s</span><span class="o">.</span><span class="na">defaultWriteObject</span><span class="o">();</span>                                                 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Write out size as capacity for behavioral compatibility with clone() 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">s</span><span class="o">.</span><span class="na">writeInt</span><span class="o">(</span><span class="n">size</span><span class="o">);</span>                                                       
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Write out all elements in the proper order.                          
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">size</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>                                        
+</span></span><span class="line"><span class="cl">        <span class="n">s</span><span class="o">.</span><span class="na">writeObject</span><span class="o">(</span><span class="n">elementData</span><span class="o">[</span><span class="n">i</span><span class="o">]);</span>                                      
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>                                                                       
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">(</span><span class="n">modCount</span> <span class="o">!=</span> <span class="n">expectedModCount</span><span class="o">)</span> <span class="o">{</span>                                     
+</span></span><span class="line"><span class="cl">        <span class="k">throw</span> <span class="k">new</span> <span class="n">ConcurrentModificationException</span><span class="o">();</span>                        
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>                                                                       
+</span></span><span class="line"><span class="cl"><span class="o">}</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 从流中重构ArrayList实例（即反序列化）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">private</span> <span class="kt">void</span> <span class="nf">readObject</span><span class="o">(</span><span class="n">java</span><span class="o">.</span><span class="na">io</span><span class="o">.</span><span class="na">ObjectInputStream</span> <span class="n">s</span><span class="o">)</span>                                       
+</span></span><span class="line"><span class="cl">    <span class="kd">throws</span> <span class="n">java</span><span class="o">.</span><span class="na">io</span><span class="o">.</span><span class="na">IOException</span><span class="o">,</span> <span class="n">ClassNotFoundException</span> <span class="o">{</span>                                   
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Read in size, and any hidden stuff                                                  
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">s</span><span class="o">.</span><span class="na">defaultReadObject</span><span class="o">();</span>                                                                 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Read in capacity                                                                    
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">s</span><span class="o">.</span><span class="na">readInt</span><span class="o">();</span> <span class="c1">// ignored                                                                
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">(</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>                                                                        
+</span></span><span class="line"><span class="cl">        <span class="c1">// like clone(), allocate array based upon size not capacity                       
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">SharedSecrets</span><span class="o">.</span><span class="na">getJavaObjectInputStreamAccess</span><span class="o">().</span><span class="na">checkArray</span><span class="o">(</span><span class="n">s</span><span class="o">,</span> <span class="n">Object</span><span class="o">[].</span><span class="na">class</span><span class="o">,</span> <span class="n">size</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Object</span><span class="o">[]</span> <span class="n">elements</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[</span><span class="n">size</span><span class="o">];</span>                                              
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// Read in all elements in the proper order.                                       
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">size</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>                                                   
+</span></span><span class="line"><span class="cl">            <span class="n">elements</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="na">readObject</span><span class="o">();</span>                                                  
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>                                                                                  
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">elementData</span> <span class="o">=</span> <span class="n">elements</span><span class="o">;</span>                                                            
+</span></span><span class="line"><span class="cl">    <span class="o">}</span> <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>                                                                
+</span></span><span class="line"><span class="cl">        <span class="n">elementData</span> <span class="o">=</span> <span class="n">EMPTY_ELEMENTDATA</span><span class="o">;</span>                                                   
+</span></span><span class="line"><span class="cl">    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>                                                                               
+</span></span><span class="line"><span class="cl">        <span class="k">throw</span> <span class="k">new</span> <span class="n">java</span><span class="o">.</span><span class="na">io</span><span class="o">.</span><span class="na">InvalidObjectException</span><span class="o">(</span><span class="s">&#34;Invalid size: &#34;</span> <span class="o">+</span> <span class="n">size</span><span class="o">);</span>                 
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>                                                                                      
+</span></span><span class="line"><span class="cl"><span class="o">}</span>                                                                                                                                                                                                                                                 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><em>ArrayList</em>在序列化的时候会调用<em>writeObject</em>方法，直接将<em>size</em>和<em>element</em>写入<em>ObjectOutputStream</em>；反序列化时调用<em>readObject</em>方法，从<em>ObjectInputStream</em>获取<em>size</em>和<em>element</em>，再恢复到<em>elementData</em>。</p>
+<p><em>elementData</em>是存储<em>ArrayList</em>元素的数组缓冲区，通常扩容后都会预留一些空间，也就是说有部分空间实际没有存储元素，序列化时只序列化实际存储的那些元素，而不是整个数组，从而可以节省空间和时间。</p>
+<p><em><strong>疑问来了：为什么MAX_ARRAY_SIZE的值是Integer.MAX_VALUE - 8而不是Integer.MAX_VALUE？</strong></em></p>
+<p>因为存储了<em>Array</em>的头部信息，所以这里需要减去8。</p>
+<h2 id="23构造方法">2.3、构造方法</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// 空参构造方法
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="nf">ArrayList</span><span class="o">()</span> <span class="o">{</span>    
+</span></span><span class="line"><span class="cl">    <span class="c1">// 由于没有指定初始容量，所以赋值一个空实例的共享空数组实例，可以理解为标记调空参数构造方法                           
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">this</span><span class="o">.</span><span class="na">elementData</span> <span class="o">=</span> <span class="n">DEFAULTCAPACITY_EMPTY_ELEMENTDATA</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>            
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 指定了初始容量的构造方法
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="nf">ArrayList</span><span class="o">(</span><span class="kt">int</span> <span class="n">initialCapacity</span><span class="o">)</span> <span class="o">{</span>                                                  
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">(</span><span class="n">initialCapacity</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span> 
+</span></span><span class="line"><span class="cl">        <span class="c1">// 创建指定大小的Object数组                                                          
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">this</span><span class="o">.</span><span class="na">elementData</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[</span><span class="n">initialCapacity</span><span class="o">];</span>                                  
+</span></span><span class="line"><span class="cl">    <span class="o">}</span> <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">initialCapacity</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 这里单纯就是元素个数为0后，赋值一个空实例的共享空数组实例                                              
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">this</span><span class="o">.</span><span class="na">elementData</span> <span class="o">=</span> <span class="n">EMPTY_ELEMENTDATA</span><span class="o">;</span>                                            
+</span></span><span class="line"><span class="cl">    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>                                                                             
+</span></span><span class="line"><span class="cl">        <span class="k">throw</span> <span class="k">new</span> <span class="n">IllegalArgumentException</span><span class="o">(</span><span class="s">&#34;Illegal Capacity: &#34;</span><span class="o">+</span>                         
+</span></span><span class="line"><span class="cl">                                           <span class="n">initialCapacity</span><span class="o">);</span>                             
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>                                                                                    
+</span></span><span class="line"><span class="cl"><span class="o">}</span>        
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="nf">ArrayList</span><span class="o">(</span><span class="n">Collection</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">E</span><span class="o">&gt;</span> <span class="n">c</span><span class="o">)</span> <span class="o">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="c1">// c.toArray()底层实际调用的也是Arrays.copyOf()，根据集合c的长度创建一个Object[]新数组，把数据拷贝到新数组上                                                           
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">elementData</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="na">toArray</span><span class="o">();</span>                                                                                
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">((</span><span class="n">size</span> <span class="o">=</span> <span class="n">elementData</span><span class="o">.</span><span class="na">length</span><span class="o">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 重复调用Arrays.copyOf()是为了防止c.toArray()不返回Object[]                                                                   
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="c1">// defend against c.toArray (incorrectly) not returning Object[]                                      
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="c1">// (see e.g. https://bugs.openjdk.java.net/browse/JDK-6260652)                                        
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span> <span class="o">(</span><span class="n">elementData</span><span class="o">.</span><span class="na">getClass</span><span class="o">()</span> <span class="o">!=</span> <span class="n">Object</span><span class="o">[].</span><span class="na">class</span><span class="o">)</span>                                                         
+</span></span><span class="line"><span class="cl">            <span class="n">elementData</span> <span class="o">=</span> <span class="n">Arrays</span><span class="o">.</span><span class="na">copyOf</span><span class="o">(</span><span class="n">elementData</span><span class="o">,</span> <span class="n">size</span><span class="o">,</span> <span class="n">Object</span><span class="o">[].</span><span class="na">class</span><span class="o">);</span>                                   
+</span></span><span class="line"><span class="cl">    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>                                                                                                  
+</span></span><span class="line"><span class="cl">        <span class="c1">// replace with empty array. 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="c1">// 这里单纯就是元素个数为0后，赋值一个空实例的共享空数组实例                                                                            
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">this</span><span class="o">.</span><span class="na">elementData</span> <span class="o">=</span> <span class="n">EMPTY_ELEMENTDATA</span><span class="o">;</span>                                                                 
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>                                                                                                         
+</span></span><span class="line"><span class="cl"><span class="o">}</span>                                                                                                                                                                                                                                         
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="24核心方法">2.4、核心方法</h2>
+<h3 id="241add方法">2.4.1、add方法</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// 将指定的元素附加到此列表的末尾
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">add</span><span class="o">(</span><span class="n">E</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>  
+</span></span><span class="line"><span class="cl">    <span class="c1">// 此列表在结构上被修改的次数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">modCount</span><span class="o">++;</span>               
+</span></span><span class="line"><span class="cl">    <span class="n">add</span><span class="o">(</span><span class="n">e</span><span class="o">,</span> <span class="n">elementData</span><span class="o">,</span> <span class="n">size</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>              
+</span></span><span class="line"><span class="cl"><span class="o">}</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">private</span> <span class="kt">void</span> <span class="nf">add</span><span class="o">(</span><span class="n">E</span> <span class="n">e</span><span class="o">,</span> <span class="n">Object</span><span class="o">[]</span> <span class="n">elementData</span><span class="o">,</span> <span class="kt">int</span> <span class="n">s</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 数组容量满了，执行扩容机制  
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="o">(</span><span class="n">s</span> <span class="o">==</span> <span class="n">elementData</span><span class="o">.</span><span class="na">length</span><span class="o">)</span>   
+</span></span><span class="line"><span class="cl">        <span class="c1">// 得到一个扩容后的新数组                 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">elementData</span> <span class="o">=</span> <span class="n">grow</span><span class="o">();</span>   
+</span></span><span class="line"><span class="cl">    <span class="c1">// size位置插入元素                    
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">elementData</span><span class="o">[</span><span class="n">s</span><span class="o">]</span> <span class="o">=</span> <span class="n">e</span><span class="o">;</span>   
+</span></span><span class="line"><span class="cl">    <span class="c1">// 更新size大小：原元素个数大小+1                                 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">size</span> <span class="o">=</span> <span class="n">s</span> <span class="o">+</span> <span class="mi">1</span><span class="o">;</span>                                   
+</span></span><span class="line"><span class="cl"><span class="o">}</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 在此列表中的指定位置插入指定元素
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="kt">void</span> <span class="nf">add</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">,</span> <span class="n">E</span> <span class="n">element</span><span class="o">)</span> <span class="o">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="c1">// 校验index的范围                      
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">rangeCheckForAdd</span><span class="o">(</span><span class="n">index</span><span class="o">);</span>                                  
+</span></span><span class="line"><span class="cl">    <span class="n">modCount</span><span class="o">++;</span> 
+</span></span><span class="line"><span class="cl">    <span class="c1">// 当前元素个数大小                                              
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kd">final</span> <span class="kt">int</span> <span class="n">s</span><span class="o">;</span>                                              
+</span></span><span class="line"><span class="cl">    <span class="n">Object</span><span class="o">[]</span> <span class="n">elementData</span><span class="o">;</span> 
+</span></span><span class="line"><span class="cl">    <span class="c1">// 数组容量满了，执行扩容机制                                    
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="o">((</span><span class="n">s</span> <span class="o">=</span> <span class="n">size</span><span class="o">)</span> <span class="o">==</span> <span class="o">(</span><span class="n">elementData</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="na">elementData</span><span class="o">).</span><span class="na">length</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 得到一个扩容后的新数组
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">elementData</span> <span class="o">=</span> <span class="n">grow</span><span class="o">();</span> 
+</span></span><span class="line"><span class="cl">    <span class="c1">// 将当前位于该位置的元素（如果有）和任何后续元素向右移动（将其索引加一）。                                
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">System</span><span class="o">.</span><span class="na">arraycopy</span><span class="o">(</span><span class="n">elementData</span><span class="o">,</span> <span class="n">index</span><span class="o">,</span>                      
+</span></span><span class="line"><span class="cl">                     <span class="n">elementData</span><span class="o">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="o">,</span>                  
+</span></span><span class="line"><span class="cl">                     <span class="n">s</span> <span class="o">-</span> <span class="n">index</span><span class="o">);</span>    
+</span></span><span class="line"><span class="cl">    <span class="c1">// 移动后，index位置空余出来，即可将element插入到index位置                          
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">elementData</span><span class="o">[</span><span class="n">index</span><span class="o">]</span> <span class="o">=</span> <span class="n">element</span><span class="o">;</span>      
+</span></span><span class="line"><span class="cl">    <span class="c1">// 更新size大小：原元素个数大小+1                       
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">size</span> <span class="o">=</span> <span class="n">s</span> <span class="o">+</span> <span class="mi">1</span><span class="o">;</span>                                             
+</span></span><span class="line"><span class="cl"><span class="o">}</span>  
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 将指定集合中的所有元素追加到此列表的末尾
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">addAll</span><span class="o">(</span><span class="n">Collection</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">E</span><span class="o">&gt;</span> <span class="n">c</span><span class="o">)</span> <span class="o">{</span>    
+</span></span><span class="line"><span class="cl">    <span class="c1">// c.toArray()底层实际调用的也是Arrays.copyOf()，根据集合c的长度创建一个Object[]新数组，把数据拷贝到新数组上              
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">Object</span><span class="o">[]</span> <span class="n">a</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="na">toArray</span><span class="o">();</span>                                          
+</span></span><span class="line"><span class="cl">    <span class="n">modCount</span><span class="o">++;</span>                                                        
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">numNew</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="na">length</span><span class="o">;</span>                                             
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">(</span><span class="n">numNew</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span>                                                   
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="kc">false</span><span class="o">;</span>                                                  
+</span></span><span class="line"><span class="cl">    <span class="n">Object</span><span class="o">[]</span> <span class="n">elementData</span><span class="o">;</span>                                              
+</span></span><span class="line"><span class="cl">    <span class="kd">final</span> <span class="kt">int</span> <span class="n">s</span><span class="o">;</span> 
+</span></span><span class="line"><span class="cl">    <span class="c1">// 原数组的剩余容量不够插入数组的大小时，就进行扩容                                                      
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="o">(</span><span class="n">numNew</span> <span class="o">&gt;</span> <span class="o">(</span><span class="n">elementData</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="na">elementData</span><span class="o">).</span><span class="na">length</span> <span class="o">-</span> <span class="o">(</span><span class="n">s</span> <span class="o">=</span> <span class="n">size</span><span class="o">))</span> 
+</span></span><span class="line"><span class="cl">        <span class="c1">// 得到一个扩容后的新数组
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">elementData</span> <span class="o">=</span> <span class="n">grow</span><span class="o">(</span><span class="n">s</span> <span class="o">+</span> <span class="n">numNew</span><span class="o">);</span> 
+</span></span><span class="line"><span class="cl">    <span class="c1">// 将插入数组的元素拷贝到扩容数组上                               
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">System</span><span class="o">.</span><span class="na">arraycopy</span><span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">elementData</span><span class="o">,</span> <span class="n">s</span><span class="o">,</span> <span class="n">numNew</span><span class="o">);</span>       
+</span></span><span class="line"><span class="cl">    <span class="c1">// 更新size大小：原元素个数大小+插入数组的长度          
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">size</span> <span class="o">=</span> <span class="n">s</span> <span class="o">+</span> <span class="n">numNew</span><span class="o">;</span>                                                 
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>                                                       
+</span></span><span class="line"><span class="cl"><span class="o">}</span>                                                                        
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>关于<em>add</em>方法，如果是末尾插入，那么平均时间复杂度为<em>O(1)</em>；如果是非末尾插入，因为需要移动元素，那么平均时间复杂度为<em>O(n)</em>。因此，我们应该尽量避免在大数据量中调用<em>add</em>带索引参数的方法。</p>
+<h3 id="242grow方法扩容机制">2.4.2、grow方法（扩容机制）</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">private</span> <span class="n">Object</span><span class="o">[]</span> <span class="nf">grow</span><span class="o">()</span> <span class="o">{</span>              
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">grow</span><span class="o">(</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span><span class="o">);</span>         
+</span></span><span class="line"><span class="cl"><span class="o">}</span>  
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 增加容量以确保它至少可以容纳最小容量参数指定的元素数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">private</span> <span class="n">Object</span><span class="o">[]</span> <span class="nf">grow</span><span class="o">(</span><span class="kt">int</span> <span class="n">minCapacity</span><span class="o">)</span> <span class="o">{</span>    <span class="c1">//  minCapacity = size + 1 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 先计算新容量大小，再根据新容量大小创建一个Object[]新数组，把数据拷贝到新数组上                           
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="n">elementData</span> <span class="o">=</span> <span class="n">Arrays</span><span class="o">.</span><span class="na">copyOf</span><span class="o">(</span><span class="n">elementData</span><span class="o">,</span>              
+</span></span><span class="line"><span class="cl">                                       <span class="n">newCapacity</span><span class="o">(</span><span class="n">minCapacity</span><span class="o">));</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>     
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 返回至少与给定最小容量一样大的容量。如果足够，返回增加 50% 的当前容量。除非给定的最小容量大于 MAX_ARRAY_SIZE，否则不会返回大于 MAX_ARRAY_SIZE 的容量。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">private</span> <span class="kt">int</span> <span class="nf">newCapacity</span><span class="o">(</span><span class="kt">int</span> <span class="n">minCapacity</span><span class="o">)</span> <span class="o">{</span>                    
+</span></span><span class="line"><span class="cl">    <span class="c1">// overflow-conscious code             
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 旧容量 = 原数组的长度                  
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">int</span> <span class="n">oldCapacity</span> <span class="o">=</span> <span class="n">elementData</span><span class="o">.</span><span class="na">length</span><span class="o">;</span> 
+</span></span><span class="line"><span class="cl">    <span class="c1">// 新容量 = 旧容量 + 旧容量右移一位（相当于除于2）                    
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">int</span> <span class="n">newCapacity</span> <span class="o">=</span> <span class="n">oldCapacity</span> <span class="o">+</span> <span class="o">(</span><span class="n">oldCapacity</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="o">);</span>       
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">(</span><span class="n">newCapacity</span> <span class="o">-</span> <span class="n">minCapacity</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>  
+</span></span><span class="line"><span class="cl">        <span class="c1">// 如果是调用了无参数构造方法，没有指定初始容量时                   
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span> <span class="o">(</span><span class="n">elementData</span> <span class="o">==</span> <span class="n">DEFAULTCAPACITY_EMPTY_ELEMENTDATA</span><span class="o">)</span> 
+</span></span><span class="line"><span class="cl">            <span class="c1">// 默认初始容量就为10
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="k">return</span> <span class="n">Math</span><span class="o">.</span><span class="na">max</span><span class="o">(</span><span class="n">DEFAULT_CAPACITY</span><span class="o">,</span> <span class="n">minCapacity</span><span class="o">);</span>   
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="o">(</span><span class="n">minCapacity</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span> <span class="c1">// overflow                      
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="k">throw</span> <span class="k">new</span> <span class="n">OutOfMemoryError</span><span class="o">();</span> 
+</span></span><span class="line"><span class="cl">        <span class="c1">// 其它情况一律size + 1                   
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">return</span> <span class="n">minCapacity</span><span class="o">;</span>                                   
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>  
+</span></span><span class="line"><span class="cl">    <span class="c1">// 如果还没达到最大容量，那就是新容量大小，否则返回一个返回一个巨大的容量                                                
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="o">(</span><span class="n">newCapacity</span> <span class="o">-</span> <span class="n">MAX_ARRAY_SIZE</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="o">)</span>                
+</span></span><span class="line"><span class="cl">        <span class="o">?</span> <span class="n">newCapacity</span>                                         
+</span></span><span class="line"><span class="cl">        <span class="o">:</span> <span class="n">hugeCapacity</span><span class="o">(</span><span class="n">minCapacity</span><span class="o">);</span>                          
+</span></span><span class="line"><span class="cl"><span class="o">}</span>   
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">private</span> <span class="kd">static</span> <span class="kt">int</span> <span class="nf">hugeCapacity</span><span class="o">(</span><span class="kt">int</span> <span class="n">minCapacity</span><span class="o">)</span> <span class="o">{</span>  
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">(</span><span class="n">minCapacity</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span> <span class="c1">// overflow                
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">throw</span> <span class="k">new</span> <span class="n">OutOfMemoryError</span><span class="o">();</span>   
+</span></span><span class="line"><span class="cl">    <span class="c1">//  size+1 &gt; MAX_ARRAY_SIZE时，那么返回一个巨大的容量Integer.MAX_VALUE，否则MAX_ARRAY_SIZE       
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="o">(</span><span class="n">minCapacity</span> <span class="o">&gt;</span> <span class="n">MAX_ARRAY_SIZE</span><span class="o">)</span>           
+</span></span><span class="line"><span class="cl">        <span class="o">?</span> <span class="n">Integer</span><span class="o">.</span><span class="na">MAX_VALUE</span>                         
+</span></span><span class="line"><span class="cl">        <span class="o">:</span> <span class="n">MAX_ARRAY_SIZE</span><span class="o">;</span>                           
+</span></span><span class="line"><span class="cl"><span class="o">}</span>                                                                                                                                                                                                            
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="243remove方法">2.4.3、remove方法</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// 移除此列表中指定位置的元素
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="n">E</span> <span class="nf">remove</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 校验index的范围                                     
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">Objects</span><span class="o">.</span><span class="na">checkIndex</span><span class="o">(</span><span class="n">index</span><span class="o">,</span> <span class="n">size</span><span class="o">);</span>                           
+</span></span><span class="line"><span class="cl">    <span class="kd">final</span> <span class="n">Object</span><span class="o">[]</span> <span class="n">es</span> <span class="o">=</span> <span class="n">elementData</span><span class="o">;</span>                           
+</span></span><span class="line"><span class="cl">    <span class="c1">// 取出要移除的元素                                                           
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nd">@SuppressWarnings</span><span class="o">(</span><span class="s">&#34;unchecked&#34;</span><span class="o">)</span> <span class="n">E</span> <span class="n">oldValue</span> <span class="o">=</span> <span class="o">(</span><span class="n">E</span><span class="o">)</span> <span class="n">es</span><span class="o">[</span><span class="n">index</span><span class="o">];</span> 
+</span></span><span class="line"><span class="cl">    <span class="c1">// 删除元素
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">fastRemove</span><span class="o">(</span><span class="n">es</span><span class="o">,</span> <span class="n">index</span><span class="o">);</span>                                     
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 返回要移除的元素       
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="n">oldValue</span><span class="o">;</span>                                           
+</span></span><span class="line"><span class="cl"><span class="o">}</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 跳过边界检查并且不返回删除的值的私有删除方法
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">private</span> <span class="kt">void</span> <span class="nf">fastRemove</span><span class="o">(</span><span class="n">Object</span><span class="o">[]</span> <span class="n">es</span><span class="o">,</span> <span class="kt">int</span> <span class="n">i</span><span class="o">)</span> <span class="o">{</span>                           
+</span></span><span class="line"><span class="cl">    <span class="n">modCount</span><span class="o">++;</span>                                                         
+</span></span><span class="line"><span class="cl">    <span class="kd">final</span> <span class="kt">int</span> <span class="n">newSize</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 如果删除的元素索引位置非最后一个元素位置，那么将当前位于该位置的元素（如果有）和任何后续元素向左移动（将其索引减一）。                                                    
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="o">((</span><span class="n">newSize</span> <span class="o">=</span> <span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="o">)</span> <span class="o">&gt;</span> <span class="n">i</span><span class="o">)</span>                                       
+</span></span><span class="line"><span class="cl">        <span class="n">System</span><span class="o">.</span><span class="na">arraycopy</span><span class="o">(</span><span class="n">es</span><span class="o">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="o">,</span> <span class="n">es</span><span class="o">,</span> <span class="n">i</span><span class="o">,</span> <span class="n">newSize</span> <span class="o">-</span> <span class="n">i</span><span class="o">);</span> 
+</span></span><span class="line"><span class="cl">    <span class="c1">// 移动原size-1位置多余了，需要置null               
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">es</span><span class="o">[</span><span class="n">size</span> <span class="o">=</span> <span class="n">newSize</span><span class="o">]</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>                                          
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 从此列表中移除第一次出现的指定元素（如果存在）。如果列表不包含该元素，则它不变。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">remove</span><span class="o">(</span><span class="n">Object</span> <span class="n">o</span><span class="o">)</span> <span class="o">{</span>    
+</span></span><span class="line"><span class="cl">    <span class="kd">final</span> <span class="n">Object</span><span class="o">[]</span> <span class="n">es</span> <span class="o">=</span> <span class="n">elementData</span><span class="o">;</span> 
+</span></span><span class="line"><span class="cl">    <span class="kd">final</span> <span class="kt">int</span> <span class="n">size</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="na">size</span><span class="o">;</span>      
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>  
+</span></span><span class="line"><span class="cl">    <span class="c1">// 使用了java label语法                     
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">found</span><span class="o">:</span> <span class="o">{</span> 
+</span></span><span class="line"><span class="cl">        <span class="c1">// 如果传入null，那么遍历去查看是否存在null的元素，找到就跳出循环                   
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span> <span class="o">(</span><span class="n">o</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>             
+</span></span><span class="line"><span class="cl">            <span class="k">for</span> <span class="o">(;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">size</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span>    
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="o">(</span><span class="n">es</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span>   
+</span></span><span class="line"><span class="cl">                    <span class="k">break</span> <span class="n">found</span><span class="o">;</span>     
+</span></span><span class="line"><span class="cl">        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span> 
+</span></span><span class="line"><span class="cl">            <span class="c1">// 如果传入不为null，那么遍历去查看是否存在相同的元素，找到就跳出循环                        
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="k">for</span> <span class="o">(;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">size</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span>    
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="o">(</span><span class="n">o</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">es</span><span class="o">[</span><span class="n">i</span><span class="o">]))</span> 
+</span></span><span class="line"><span class="cl">                    <span class="k">break</span> <span class="n">found</span><span class="o">;</span>     
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>  
+</span></span><span class="line"><span class="cl">        <span class="c1">// 上面两个条件下都找不到要查找的元素，则返回false                          
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">return</span> <span class="kc">false</span><span class="o">;</span>                
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>  
+</span></span><span class="line"><span class="cl">    <span class="c1">// 找到要删除的元素后执行删除                              
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">fastRemove</span><span class="o">(</span><span class="n">es</span><span class="o">,</span> <span class="n">i</span><span class="o">);</span>               
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>                     
+</span></span><span class="line"><span class="cl"><span class="o">}</span>                                                                                                                                                                        
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="244set方法">2.4.4、set方法</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// 用指定元素替换此列表中指定位置的元素
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="n">E</span> <span class="nf">set</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">,</span> <span class="n">E</span> <span class="n">element</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl"><span class="err">    </span><span class="c1">// 校验index的范围           
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">Objects</span><span class="o">.</span><span class="na">checkIndex</span><span class="o">(</span><span class="n">index</span><span class="o">,</span> <span class="n">size</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="err">    </span><span class="c1">// 获取索引位置对应的元素
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">E</span> <span class="n">oldValue</span> <span class="o">=</span> <span class="n">elementData</span><span class="o">(</span><span class="n">index</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="err">    </span><span class="c1">// 设置索引位置对应的元素
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">elementData</span><span class="o">[</span><span class="n">index</span><span class="o">]</span> <span class="o">=</span> <span class="n">element</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl"><span class="err">    </span><span class="c1">// 返回要修改的元素   
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="n">oldValue</span><span class="o">;</span>                
+</span></span><span class="line"><span class="cl"><span class="o">}</span>    
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 返回索引位置对应的元素
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">E</span> <span class="nf">elementData</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span> <span class="o">{</span>        
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="o">(</span><span class="n">E</span><span class="o">)</span> <span class="n">elementData</span><span class="o">[</span><span class="n">index</span><span class="o">];</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>                                                                
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="245get方法">2.4.5、get方法</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// 返回此列表中指定位置的元素
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="n">E</span> <span class="nf">get</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span> <span class="o">{</span>        
+</span></span><span class="line"><span class="cl">    <span class="c1">// 校验index的范围    
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">Objects</span><span class="o">.</span><span class="na">checkIndex</span><span class="o">(</span><span class="n">index</span><span class="o">,</span> <span class="n">size</span><span class="o">);</span> 
+</span></span><span class="line"><span class="cl">    <span class="c1">// 返回索引位置对应的元素
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="n">elementData</span><span class="o">(</span><span class="n">index</span><span class="o">);</span>       
+</span></span><span class="line"><span class="cl"><span class="o">}</span>                                    
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="25其它方法">2.5、其它方法</h2>
+<h3 id="251ensurecapacity方法">2.5.1、ensureCapacity方法</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// 如有必要，增加此ArrayList实例的容量，以确保它至少可以容纳最小容量参数指定的元素数。
+</span></span></span><span class="line"><span class="cl"><span class="c1">// 也就是说，这个方法的使用场景是如果已经预知ArrayList需要比较大的容量，调用这个方法可以减少ArrayList内部分配和扩展的次数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="kt">void</span> <span class="nf">ensureCapacity</span><span class="o">(</span><span class="kt">int</span> <span class="n">minCapacity</span><span class="o">)</span> <span class="o">{</span>                 
+</span></span><span class="line"><span class="cl">    <span class="c1">// 最小容量不得低于原数组的长度，同时原数组不是第一次调用空参数构造方法和第一次扩容
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="o">(</span><span class="n">minCapacity</span> <span class="o">&gt;</span> <span class="n">elementData</span><span class="o">.</span><span class="na">length</span>                      
+</span></span><span class="line"><span class="cl">        <span class="o">&amp;&amp;</span> <span class="o">!(</span><span class="n">elementData</span> <span class="o">==</span> <span class="n">DEFAULTCAPACITY_EMPTY_ELEMENTDATA</span> 
+</span></span><span class="line"><span class="cl">             <span class="o">&amp;&amp;</span> <span class="n">minCapacity</span> <span class="o">&lt;=</span> <span class="n">DEFAULT_CAPACITY</span><span class="o">))</span> <span class="o">{</span>           
+</span></span><span class="line"><span class="cl">        <span class="n">modCount</span><span class="o">++;</span>       
+</span></span><span class="line"><span class="cl">        <span class="c1">// 进行扩容                                    
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">grow</span><span class="o">(</span><span class="n">minCapacity</span><span class="o">);</span>                                    
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>                                                         
+</span></span><span class="line"><span class="cl"><span class="o">}</span>                                                             
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="252trimtosize方法">2.5.2、trimToSize方法</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// 将此ArrayList实例的容量修剪为列表的当前大小。应用程序可以使用此操作来最小化ArrayList实例的存储
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="kt">void</span> <span class="nf">trimToSize</span><span class="o">()</span> <span class="o">{</span>                   
+</span></span><span class="line"><span class="cl">    <span class="n">modCount</span><span class="o">++;</span>   
+</span></span><span class="line"><span class="cl">    <span class="c1">// 数组容量没装满元素                        
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="o">(</span><span class="n">size</span> <span class="o">&lt;</span> <span class="n">elementData</span><span class="o">.</span><span class="na">length</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 如果元素个数为0，那么赋值一个空实例的共享空数组实例         
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">elementData</span> <span class="o">=</span> <span class="o">(</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span>            
+</span></span><span class="line"><span class="cl">          <span class="o">?</span> <span class="n">EMPTY_ELEMENTDATA</span>  
+</span></span><span class="line"><span class="cl">          <span class="c1">// 否则拷贝元素到新数组上，新数组的大小就是元素个数的数量              
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>          <span class="o">:</span> <span class="n">Arrays</span><span class="o">.</span><span class="na">copyOf</span><span class="o">(</span><span class="n">elementData</span><span class="o">,</span> <span class="n">size</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>                                        
+</span></span><span class="line"><span class="cl"><span class="o">}</span>                                            
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h1 id="三总结">三、总结</h1>
+<p>在<em>ArrayList</em>的源码中，并没有与并发相关的代码，所以说<em>ArrayList</em>是非线程安全类，在并发环境下多个线程同时操作，会引发不可预知的错误。应该使用<em>Collections.synchronizedList</em>方法包装列表，最好在创建时完成，如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">List</span> <span class="n">list</span> <span class="o">=</span> <span class="n">Collections</span><span class="o">.</span><span class="na">synchronizedList</span><span class="o">(</span><span class="k">new</span> <span class="n">ArrayList</span><span class="o">(...));</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>另外，<em>ArrayList</em>是经常用到的一个容器，要根据实际的业务场景来使用，比如说，当添加、删除数据不是在前面或中间，并且需要随机地访问其中的元素时，使用<em>ArrayList</em>会有更好的性能。</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">文章作者</span>
+    <span class="item-content">AndDevMK</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">上次更新</span>
+    <span class="item-content">
+        2023-04-16
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">赞赏支持</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat-qr-code.JPG">
+        <span>微信打赏</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay-qr-code.JPG">
+        <span>支付宝打赏</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      
+      <nav class="post-nav">
+        <a class="prev" href="/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBlinkedlist%E6%BA%90%E7%A0%81jdk11/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">Java集合系列：一文解读LinkedList源码「JDK11」</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="AndDevMK/blog-utterances"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    <div id="search_mask" class="search_mask">
+    <div class="search_modal">
+        <div id="close_search" class="close_search">关闭</div>
+        <div class="search_divider"></div>
+        <input id="input_search_key" class="input_search_key" placeholder="请输入你要搜索的内容" tabindex="0">
+        <ul id="search_list">
+        </ul>
+    </div>
+</div>
+
+<script src="/js/fuse.js"></script> 
+<script src="/js/fastsearch.js"></script>
+
+    <footer id="footer" class="footer">
+      
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2023<span class="heart"><i class="iconfont icon-heart"></i></span><span>AndDevMK</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.4ae89da218555efa0e7093a20b92017d2e1202b66fff9fc2edf4cb8d44b44c6e.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>
