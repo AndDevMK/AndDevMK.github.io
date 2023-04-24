@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta name="google-site-verification" content="QndSJXZ90UYw4sAk6Qr-OT9iwAji2VP8yBCyX8vn5Yk" />
+  <meta name="msvalidate.01" content="0389850515E39A5234CFD8600FC6DCA5" />
+  <meta name="baidu-site-verification" content="codeva-elylgGVSCG" />
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Java集合系列：一文解读ArrayDeque源码「JDK11」 - AndDevMK&#39;s android blog site</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="AndDevMK" /><meta name="description" content="一、概述 假设你对ArrayDeque的源码一无所知，那么仅凭ArrayDeque名字来看的话，大概可以猜到它的实现和Array数组有关。 Ar" /><meta name="keywords" content="Android, Java, Kotlin, C&#43;&#43;, C, Flutter, Dart, NDK" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.111.3 with theme even" />
+
+
+<link rel="canonical" href="https://AndDevMK.github.io/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBarraydeque%E6%BA%90%E7%A0%81jdk11/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.8d8ed79b2c35ec3796101bd0b86561c78e7cf914cfabfc307dc047036cae674a.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="Java集合系列：一文解读ArrayDeque源码「JDK11」" />
+<meta property="og:description" content="一、概述 假设你对ArrayDeque的源码一无所知，那么仅凭ArrayDeque名字来看的话，大概可以猜到它的实现和Array数组有关。 Ar" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://AndDevMK.github.io/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBarraydeque%E6%BA%90%E7%A0%81jdk11/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2023-04-24T14:41:31+08:00" />
+<meta property="article:modified_time" content="2023-04-24T14:41:31+08:00" />
+<meta itemprop="name" content="Java集合系列：一文解读ArrayDeque源码「JDK11」">
+<meta itemprop="description" content="一、概述 假设你对ArrayDeque的源码一无所知，那么仅凭ArrayDeque名字来看的话，大概可以猜到它的实现和Array数组有关。 Ar"><meta itemprop="datePublished" content="2023-04-24T14:41:31+08:00" />
+<meta itemprop="dateModified" content="2023-04-24T14:41:31+08:00" />
+<meta itemprop="wordCount" content="6020">
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Java集合系列：一文解读ArrayDeque源码「JDK11」"/>
+<meta name="twitter:description" content="一、概述 假设你对ArrayDeque的源码一无所知，那么仅凭ArrayDeque名字来看的话，大概可以猜到它的实现和Array数组有关。 Ar"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">AndDevMK</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">首页</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">归档</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">关于</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">AndDevMK</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">首页</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">归档</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">关于</a>
+      </li>
+    
+    <div id="open_search" class="open_search">
+      搜索
+    </div>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Java集合系列：一文解读ArrayDeque源码「JDK11」</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2023-04-24 </span>
+        <div class="post-category">
+            <a href="/categories/java/"> Java </a>
+            </div>
+          <span class="more-meta"> 约 6020 字 </span>
+          <span class="more-meta"> 预计阅读 13 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#一概述">一、概述</a></li>
+    <li><a href="#二arraydeque源码解读">二、<em>ArrayDeque</em>源码解读</a>
+      <ul>
+        <li><a href="#21继承关系">2.1、继承关系</a></li>
+        <li><a href="#22成员变量">2.2、成员变量</a></li>
+        <li><a href="#23构造方法">2.3、构造方法</a></li>
+        <li><a href="#24核心方法">2.4、核心方法</a>
+          <ul>
+            <li><a href="#241插入">2.4.1、插入</a></li>
+            <li><a href="#242删除">2.4.2、删除</a></li>
+            <li><a href="#243检索">2.4.3、检索</a></li>
+            <li><a href="#244扩容机制">2.4.4、扩容机制</a></li>
+          </ul>
+        </li>
+        <li><a href="#25其它方法">2.5、其它方法</a></li>
+      </ul>
+    </li>
+    <li><a href="#三总结">三、总结</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h1 id="一概述">一、概述</h1>
+<p>假设你对<em>ArrayDeque</em>的源码一无所知，那么仅凭<em>ArrayDeque</em>名字来看的话，大概可以猜到它的实现和<em>Array</em>数组有关。</p>
+<p><em>ArrayDeque</em>是<em>Java Collections Framework</em>的一个成员，它的底层是基于定长数组实现的一个双端队列，如果数组存放满了，就会通过扩容机制重新生成一个更大的数组来存放数据，并且维护了双端队列头部元素的索引<em>head</em>和尾部元素的索引<em>tail</em>，使得它成为了一个逻辑上的循环数组，所谓循环是指元素到数组尾之后可以接着从数组头开始。</p>
+<p>我们知道，数组非尾部的插入和删除效率是比较低的，然而，这在<em>ArrayDeque</em>上的表现却是效率高，这是怎么实现的呢？</p>
+<p>接下来，本文会叙述<em>ArrayDeque</em>是如何维护这样一个循环数组，它的扩容机制是怎么实现的，这些都是<em>ArrayDeque</em>的核心所在；除此之外，本文还会叙述<em>ArrayDeque</em>的基本操作是怎样实现的，以及其它的细节。</p>
+<p>好了，让我们一起逐步揭开它的神秘面纱。</p>
+<h1 id="二arraydeque源码解读">二、<em>ArrayDeque</em>源码解读</h1>
+<h2 id="21继承关系">2.1、继承关系</h2>
+<img title="" src="/img/java/ArrayDeque继承关系.png" alt="" width="535">
+<p>从<em>UML</em>类图中可以看到，<em>ArrayDeque</em>直接或间接实现了<em>Iterable</em>、<em>Collection</em>、<em>Deque</em>、<em>Queue</em>、<em>Cloneable</em>、<em>Serializable</em>这6个接口；<em>ArrayDeque</em>继承了<em>AbstractCollection</em>这个抽象类。</p>
+<p><em>ArrayDeque</em>和<em>LinkedList</em>在继承关系上是比较相似的，所以针对相同继承关系内容的叙述，比如说<em>Deque</em>接口、<em>Queue</em>接口的解读，本文不再次叙述，想去了解的话，可参考之前的<a href="https://anddevmk.github.io/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBlinkedlist%E6%BA%90%E7%A0%81jdk11/"><em>Java集合系列：一文解读LinkedList源码「JDK11」</em></a>一文。</p>
+<h2 id="22成员变量">2.2、成员变量</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// 存储双端队列元素的数组。所有不包含双端队列元素的数组单元格始终为空。该数组始终至少有一个空槽（在尾部）。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">transient</span> <span class="n">Object</span><span class="o">[]</span> <span class="n">elements</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 双端队列头部元素的索引（这是将被 remove() 或 pop() 删除的元素）；或者任意数字 0 &lt;= head &lt; elements.length 等于 tail 如果双端队列为空。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">transient</span> <span class="kt">int</span> <span class="n">head</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 将下一个元素添加到双端队列尾部的索引（通过 addLast(E)、add(E) 或 push(E)）； elements[tail] 始终为空。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">transient</span> <span class="kt">int</span> <span class="n">tail</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 要分配的数组的最大大小。一些 VM 在数组中保留一些标题字。尝试分配更大的数组可能会导致 OutOfMemoryError: Requested array size exceeds VM limit
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">MAX_ARRAY_SIZE</span> <span class="o">=</span> <span class="n">Integer</span><span class="o">.</span><span class="na">MAX_VALUE</span> <span class="o">-</span> <span class="mi">8</span><span class="o">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>从成员变量<em>head</em>、<em>tail</em>的注释可以知道，数组的长度、头部元素、尾部元素都和这两个变量有关，那么当数组初始化后，这样的数组表现形式有4种情况：</p>
+<ul>
+<li>头部元素的索引<em>head</em> == 尾部元素的索引<em>tail</em>，那么数组为空，也就是数组内部没有元素，如下图所示：</li>
+</ul>
+<img title="" src="/img/java/情况一：head==tail.png" alt="" width="535">
+<ul>
+<li>头部元素的索引<em>head</em> &lt; 尾部元素的索引<em>tail</em>，那么头部元素为<em>elements[head]</em>，尾部元素为<em>elements[tail-1]</em>，元素索引从<em>head</em>到<em>tail-1</em>，如下图所示：</li>
+</ul>
+<img title="" src="/img/java/情况二：head<tail.png" alt="" width="535">
+<ul>
+<li>头部元素的索引<em>head</em> &gt; 尾部元素的索引<em>tail</em> &amp;&amp; 尾部元素的索引<em>tail</em> == 0，那么头部元素为<em>elements[head]</em>，尾部元素为<em>elements[elements.length-1]</em>，元素索引从<em>head</em>到<em>elements.length-1</em>，如下图所示：</li>
+</ul>
+<img title="" src="/img/java/情况三：head>tail&&tail==0.png" alt="" width="535">
+<ul>
+<li>头部元素的索引<em>head</em> &gt; 尾部元素的索引<em>tail</em> &amp;&amp; 尾部元素的索引<em>tail</em> != 0，那么头部元素为<em>elements[head]</em>，尾部元素为<em>elements[tail-1]</em>，元素索引从<em>head</em>到<em>elements.length-1</em>，然后再从0到<em>tail-1</em>，如下图所示：</li>
+</ul>
+<img title="" src="/img/java/情况四：head>tail&&tail!=0.png" alt="" width="535">
+<h2 id="23构造方法">2.3、构造方法</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// 构造一个空数组双端队列，其初始容量足以容纳16个元素
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="nf">ArrayDeque</span><span class="o">()</span> <span class="o">{</span>          
+</span></span><span class="line"><span class="cl">    <span class="n">elements</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[</span><span class="mi">16</span><span class="o">];</span> 
+</span></span><span class="line"><span class="cl"><span class="o">}</span>  
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 构造一个空数组双端队列，其初始容量足以容纳指定数量的元素
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="nf">ArrayDeque</span><span class="o">(</span><span class="kt">int</span> <span class="n">numElements</span><span class="o">)</span> <span class="o">{</span>                                        
+</span></span><span class="line"><span class="cl">    <span class="n">elements</span> <span class="o">=</span>                                                              
+</span></span><span class="line"><span class="cl">        <span class="k">new</span> <span class="n">Object</span><span class="o">[(</span><span class="n">numElements</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="o">)</span> <span class="o">?</span> <span class="mi">1</span> <span class="o">:</span>                                  
+</span></span><span class="line"><span class="cl">                   <span class="o">(</span><span class="n">numElements</span> <span class="o">==</span> <span class="n">Integer</span><span class="o">.</span><span class="na">MAX_VALUE</span><span class="o">)</span> <span class="o">?</span> <span class="n">Integer</span><span class="o">.</span><span class="na">MAX_VALUE</span> <span class="o">:</span> 
+</span></span><span class="line"><span class="cl">                   <span class="n">numElements</span> <span class="o">+</span> <span class="mi">1</span><span class="o">];</span>                                        
+</span></span><span class="line"><span class="cl"><span class="o">}</span>  
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 构造一个包含指定集合元素的双端队列，按照集合迭代器返回元素的顺序。（集合的迭代器返回的第一个元素成为第一个元素，或双端队列的前面。）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="nf">ArrayDeque</span><span class="o">(</span><span class="n">Collection</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">E</span><span class="o">&gt;</span> <span class="n">c</span><span class="o">)</span> <span class="o">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="k">this</span><span class="o">(</span><span class="n">c</span><span class="o">.</span><span class="na">size</span><span class="o">());</span>                            
+</span></span><span class="line"><span class="cl">    <span class="n">copyElements</span><span class="o">(</span><span class="n">c</span><span class="o">);</span>                           
+</span></span><span class="line"><span class="cl"><span class="o">}</span>   
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 将集合c的元素循环添加到队尾
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">private</span> <span class="kt">void</span> <span class="nf">copyElements</span><span class="o">(</span><span class="n">Collection</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">E</span><span class="o">&gt;</span> <span class="n">c</span><span class="o">)</span> <span class="o">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="n">c</span><span class="o">.</span><span class="na">forEach</span><span class="o">(</span><span class="k">this</span><span class="o">::</span><span class="n">addLast</span><span class="o">);</span>                          
+</span></span><span class="line"><span class="cl"><span class="o">}</span>                                                                                                                                                                                                      
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>我们看下第二个构造方法，需要传入一个<em>numElements</em>，这里有3种情况确定数组大小：</p>
+<ul>
+<li>
+<p>如果<em>numElements</em> &lt; 1，那么数组大小为1；</p>
+</li>
+<li>
+<p>如果<em>numElements</em> == <em>Integer.MAX_VALUE</em>，那么数组大小为<em>Integer.MAX_VALUE</em>；</p>
+</li>
+<li>
+<p>如果<em>numElements</em> &gt;= 1 &amp;&amp; <em>numElements</em> &lt; <em>Integer.MAX_VALUE</em>，那么数组大小为<em>numElements</em> + 1;</p>
+</li>
+</ul>
+<p><em><strong>第三种情况：为什么要numElements + 1呢？</strong></em></p>
+<p>因为循环数组必须时刻至少留一个空位，<em>tail</em>变量指向下一个空位，为了容纳<em>numElements</em>个元素，至少需要<em>numElements</em>+1个位置。</p>
+<h2 id="24核心方法">2.4、核心方法</h2>
+<h3 id="241插入">2.4.1、插入</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// ***********尾部插入***********
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="c1">// 在此双端队列的末尾插入指定的元素
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">add</span><span class="o">(</span><span class="n">E</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>         
+</span></span><span class="line"><span class="cl">    <span class="n">addLast</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>                   
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>                  
+</span></span><span class="line"><span class="cl"><span class="o">}</span>   
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 在此双端队列的末尾插入指定的元素
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="kt">void</span> <span class="nf">addLast</span><span class="o">(</span><span class="n">E</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>                    
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">(</span><span class="n">e</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span>                            
+</span></span><span class="line"><span class="cl">        <span class="k">throw</span> <span class="k">new</span> <span class="n">NullPointerException</span><span class="o">();</span>     
+</span></span><span class="line"><span class="cl">    <span class="kd">final</span> <span class="n">Object</span><span class="o">[]</span> <span class="n">es</span> <span class="o">=</span> <span class="n">elements</span><span class="o">;</span>      
+</span></span><span class="line"><span class="cl">    <span class="c1">// 上面说了，tail索引对应的位置是一个空位，所以这里用来存放元素e       
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">es</span><span class="o">[</span><span class="n">tail</span><span class="o">]</span> <span class="o">=</span> <span class="n">e</span><span class="o">;</span>    
+</span></span><span class="line"><span class="cl">    <span class="c1">// 计算tail的新索引位置，赋值给tail变量；如果(tail+1) &gt;= es.length，那么tail = 0，否则就是tail+1                         
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 判断是否head == tail，如果是则表示数组存满了，需要进行扩容
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="o">(</span><span class="n">head</span> <span class="o">==</span> <span class="o">(</span><span class="n">tail</span> <span class="o">=</span> <span class="n">inc</span><span class="o">(</span><span class="n">tail</span><span class="o">,</span> <span class="n">es</span><span class="o">.</span><span class="na">length</span><span class="o">)))</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 执行扩容
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">grow</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>                              
+</span></span><span class="line"><span class="cl"><span class="o">}</span>  
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="nf">inc</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">,</span> <span class="kt">int</span> <span class="n">modulus</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">(++</span><span class="n">i</span> <span class="o">&gt;=</span> <span class="n">modulus</span><span class="o">)</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>            
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">i</span><span class="o">;</span>                             
+</span></span><span class="line"><span class="cl"><span class="o">}</span>                                         
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 在此双端队列的末尾插入指定的元素
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">offer</span><span class="o">(</span><span class="n">E</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>        
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">offerLast</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>           
+</span></span><span class="line"><span class="cl"><span class="o">}</span>                             
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 在此双端队列的末尾插入指定的元素
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">offerLast</span><span class="o">(</span><span class="n">E</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>         
+</span></span><span class="line"><span class="cl">    <span class="n">addLast</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>                         
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>                        
+</span></span><span class="line"><span class="cl"><span class="o">}</span>  
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 将指定集合中的所有元素添加到此双端队列的末尾，就像对每个元素调用addLast一样，按照集合的迭代器返回它们的顺序。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">addAll</span><span class="o">(</span><span class="n">Collection</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">E</span><span class="o">&gt;</span> <span class="n">c</span><span class="o">)</span> <span class="o">{</span>    
+</span></span><span class="line"><span class="cl">    <span class="c1">// s：原数组的元素个数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// needed：所需的最低额外容量           
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kd">final</span> <span class="kt">int</span> <span class="n">s</span><span class="o">,</span> <span class="n">needed</span><span class="o">;</span>  
+</span></span><span class="line"><span class="cl">    <span class="c1">// needed = 原数组的元素个数 + 集合c的长度 + 1（tail索引占位）- 原数组长度
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 如果needed&gt;0，说明数组元素个数 + 集合c的长度 + 1（tail索引占位) &gt; 原数组长度，也就是原数组容量不够装集合c了，需要扩容                                      
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="o">((</span><span class="n">needed</span> <span class="o">=</span> <span class="o">(</span><span class="n">s</span> <span class="o">=</span> <span class="n">size</span><span class="o">())</span> <span class="o">+</span> <span class="n">c</span><span class="o">.</span><span class="na">size</span><span class="o">()</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">elements</span><span class="o">.</span><span class="na">length</span><span class="o">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span> 
+</span></span><span class="line"><span class="cl">        <span class="c1">// 执行扩容
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">grow</span><span class="o">(</span><span class="n">needed</span><span class="o">);</span>  
+</span></span><span class="line"><span class="cl">    <span class="c1">// 扩容完成后，将集合c的元素循环添加到队尾                                               
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">copyElements</span><span class="o">(</span><span class="n">c</span><span class="o">);</span>   
+</span></span><span class="line"><span class="cl">    <span class="c1">// 如果此双端队列发生了更改，那么返回true                                               
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="n">size</span><span class="o">()</span> <span class="o">&gt;</span> <span class="n">s</span><span class="o">;</span>                                                
+</span></span><span class="line"><span class="cl"><span class="o">}</span>    
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// ***********头部插入*********** 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="c1">// 在此双端队列的前面插入指定的元素
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="kt">void</span> <span class="nf">addFirst</span><span class="o">(</span><span class="n">E</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>              
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">(</span><span class="n">e</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span>                       
+</span></span><span class="line"><span class="cl">        <span class="k">throw</span> <span class="k">new</span> <span class="n">NullPointerException</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">final</span> <span class="n">Object</span><span class="o">[]</span> <span class="n">es</span> <span class="o">=</span> <span class="n">elements</span><span class="o">;</span> 
+</span></span><span class="line"><span class="cl">    <span class="c1">// 计算head的新索引位置，赋值给head变量；如果(head-1) &lt; 0，那么head = es.length-1，否则就是head-1              
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">es</span><span class="o">[</span><span class="n">head</span> <span class="o">=</span> <span class="n">dec</span><span class="o">(</span><span class="n">head</span><span class="o">,</span> <span class="n">es</span><span class="o">.</span><span class="na">length</span><span class="o">)]</span> <span class="o">=</span> <span class="n">e</span><span class="o">;</span> 
+</span></span><span class="line"><span class="cl">    <span class="c1">// 判断是否head==tail，如果是则表示数组存满了，需要进行扩容
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="o">(</span><span class="n">head</span> <span class="o">==</span> <span class="n">tail</span><span class="o">)</span>   
+</span></span><span class="line"><span class="cl">        <span class="c1">// 执行扩容                 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">grow</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>                         
+</span></span><span class="line"><span class="cl"><span class="o">}</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="nf">dec</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">,</span> <span class="kt">int</span> <span class="n">modulus</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">(--</span><span class="n">i</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span> <span class="n">i</span> <span class="o">=</span> <span class="n">modulus</span> <span class="o">-</span> <span class="mi">1</span><span class="o">;</span>         
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">i</span><span class="o">;</span>                             
+</span></span><span class="line"><span class="cl"><span class="o">}</span>                                          
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 在此双端队列的前面插入指定的元素
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">offerFirst</span><span class="o">(</span><span class="n">E</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>          
+</span></span><span class="line"><span class="cl">    <span class="n">addFirst</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>                          
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>                          
+</span></span><span class="line"><span class="cl"><span class="o">}</span>     
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 将一个元素压入此双端队列所代表的堆栈。换句话说，将元素插入到这个双端队列的前面
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="kt">void</span> <span class="nf">push</span><span class="o">(</span><span class="n">E</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>         
+</span></span><span class="line"><span class="cl">    <span class="n">addFirst</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>                
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="242删除">2.4.2、删除</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// ***********尾部删除***********
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="n">E</span> <span class="nf">removeLast</span><span class="o">()</span> <span class="o">{</span>                    
+</span></span><span class="line"><span class="cl">    <span class="n">E</span> <span class="n">e</span> <span class="o">=</span> <span class="n">pollLast</span><span class="o">();</span>                      
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">(</span><span class="n">e</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span>                         
+</span></span><span class="line"><span class="cl">        <span class="k">throw</span> <span class="k">new</span> <span class="n">NoSuchElementException</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">e</span><span class="o">;</span>                              
+</span></span><span class="line"><span class="cl"><span class="o">}</span>      
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="n">E</span> <span class="nf">pollLast</span><span class="o">()</span> <span class="o">{</span>                                        
+</span></span><span class="line"><span class="cl">    <span class="kd">final</span> <span class="n">Object</span><span class="o">[]</span> <span class="n">es</span><span class="o">;</span> 
+</span></span><span class="line"><span class="cl">    <span class="c1">// 记录tail的新索引位置                                      
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kd">final</span> <span class="kt">int</span> <span class="n">t</span><span class="o">;</span>  
+</span></span><span class="line"><span class="cl">    <span class="c1">// 计算tail的新索引位置，赋值给临时变量t；如果(tail-1) &lt; 0，那么tail = es.length-1，否则就是tail-1   
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 在数组中取出t索引对应的元素
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">E</span> <span class="n">e</span> <span class="o">=</span> <span class="n">elementAt</span><span class="o">(</span><span class="n">es</span> <span class="o">=</span> <span class="n">elements</span><span class="o">,</span> <span class="n">t</span> <span class="o">=</span> <span class="n">dec</span><span class="o">(</span><span class="n">tail</span><span class="o">,</span> <span class="n">es</span><span class="o">.</span><span class="na">length</span><span class="o">));</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">(</span><span class="n">e</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span>      
+</span></span><span class="line"><span class="cl">        <span class="c1">// 将t赋值给tail，然后将tail索引位置的元素置为null                              
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">es</span><span class="o">[</span><span class="n">tail</span> <span class="o">=</span> <span class="n">t</span><span class="o">]</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>                                 
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">e</span><span class="o">;</span>                                                
+</span></span><span class="line"><span class="cl"><span class="o">}</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// ***********头部删除***********
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="c1">// 检索并删除由此双端队列表示的队列的头部。此方法与poll()的不同之处仅在于，如果此双端队列为空，它会抛出异常。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="n">E</span> <span class="nf">remove</span><span class="o">()</span> <span class="o">{</span>        
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">removeFirst</span><span class="o">();</span>  
+</span></span><span class="line"><span class="cl"><span class="o">}</span>      
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 检索并移除此双端队列所表示的队列的头部（换句话说，此双端队列的第一个元素），或者如果此双端队列为空，则返回null 。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="n">E</span> <span class="nf">poll</span><span class="o">()</span> <span class="o">{</span>       
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">pollFirst</span><span class="o">();</span> 
+</span></span><span class="line"><span class="cl"><span class="o">}</span>          
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="n">E</span> <span class="nf">removeFirst</span><span class="o">()</span> <span class="o">{</span>                   
+</span></span><span class="line"><span class="cl">    <span class="n">E</span> <span class="n">e</span> <span class="o">=</span> <span class="n">pollFirst</span><span class="o">();</span>                     
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">(</span><span class="n">e</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span>                         
+</span></span><span class="line"><span class="cl">        <span class="k">throw</span> <span class="k">new</span> <span class="n">NoSuchElementException</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">e</span><span class="o">;</span>                              
+</span></span><span class="line"><span class="cl"><span class="o">}</span>         
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="n">E</span> <span class="nf">pollFirst</span><span class="o">()</span> <span class="o">{</span>                       
+</span></span><span class="line"><span class="cl">    <span class="kd">final</span> <span class="n">Object</span><span class="o">[]</span> <span class="n">es</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 记录head索引位置                       
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kd">final</span> <span class="kt">int</span> <span class="n">h</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 在数组中取出head索引对应的元素                          
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">E</span> <span class="n">e</span> <span class="o">=</span> <span class="n">elementAt</span><span class="o">(</span><span class="n">es</span> <span class="o">=</span> <span class="n">elements</span><span class="o">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">head</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">(</span><span class="n">e</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span> 
+</span></span><span class="line"><span class="cl">        <span class="c1">// 将head索引位置的元素置为null                     
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">es</span><span class="o">[</span><span class="n">h</span><span class="o">]</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span> 
+</span></span><span class="line"><span class="cl">        <span class="c1">// 计算head的新索引位置，赋值给head；如果(head+1) &gt;= es.length，那么head = 0，否则就是head+1                        
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">head</span> <span class="o">=</span> <span class="n">inc</span><span class="o">(</span><span class="n">h</span><span class="o">,</span> <span class="n">es</span><span class="o">.</span><span class="na">length</span><span class="o">);</span>            
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>      
+</span></span><span class="line"><span class="cl">    <span class="c1">// 返回head索引对应的元素                                 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="n">e</span><span class="o">;</span>                                
+</span></span><span class="line"><span class="cl"><span class="o">}</span>                                            
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 从此双端队列表示的堆栈中弹出一个元素。换句话说，删除并返回此双端队列的第一个元素。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="n">E</span> <span class="nf">pop</span><span class="o">()</span> <span class="o">{</span>          
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">removeFirst</span><span class="o">();</span> 
+</span></span><span class="line"><span class="cl"><span class="o">}</span>                                                                                                                                                                                          
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="243检索">2.4.3、检索</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// ***********头部检索*********** 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="c1">// 检索但不删除由此双端队列表示的队列的头部。此方法与peek不同之处仅在于，如果此双端队列为空，它会抛出异常。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="n">E</span> <span class="nf">element</span><span class="o">()</span> <span class="o">{</span>   
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">getFirst</span><span class="o">();</span> 
+</span></span><span class="line"><span class="cl"><span class="o">}</span>            
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 检索但不删除由此双端队列表示的队列的头部，或者如果此双端队列为空则返回null 。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="n">E</span> <span class="nf">peek</span><span class="o">()</span> <span class="o">{</span>       
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">peekFirst</span><span class="o">();</span> 
+</span></span><span class="line"><span class="cl"><span class="o">}</span>      
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="n">E</span> <span class="nf">getFirst</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 在数组中取出head索引对应的元素                      
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">E</span> <span class="n">e</span> <span class="o">=</span> <span class="n">elementAt</span><span class="o">(</span><span class="n">elements</span><span class="o">,</span> <span class="n">head</span><span class="o">);</span>       
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">(</span><span class="n">e</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span>                         
+</span></span><span class="line"><span class="cl">        <span class="k">throw</span> <span class="k">new</span> <span class="n">NoSuchElementException</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 返回head索引对应的元素 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="n">e</span><span class="o">;</span>                              
+</span></span><span class="line"><span class="cl"><span class="o">}</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 返回数组索引 i 处的元素。这是对泛型的轻微滥用，被 javac 所接受
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">static</span> <span class="kd">final</span> <span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">E</span> <span class="nf">elementAt</span><span class="o">(</span><span class="n">Object</span><span class="o">[]</span> <span class="n">es</span><span class="o">,</span> <span class="kt">int</span> <span class="n">i</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="o">(</span><span class="n">E</span><span class="o">)</span> <span class="n">es</span><span class="o">[</span><span class="n">i</span><span class="o">];</span>                             
+</span></span><span class="line"><span class="cl"><span class="o">}</span>                                                  
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="n">E</span> <span class="nf">peekFirst</span><span class="o">()</span> <span class="o">{</span>  
+</span></span><span class="line"><span class="cl">    <span class="c1">// 在数组中取出head索引对应的元素               
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="n">elementAt</span><span class="o">(</span><span class="n">elements</span><span class="o">,</span> <span class="n">head</span><span class="o">);</span>  
+</span></span><span class="line"><span class="cl"><span class="o">}</span>      
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// ***********尾部检索***********
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="n">E</span> <span class="nf">getLast</span><span class="o">()</span> <span class="o">{</span>                           
+</span></span><span class="line"><span class="cl">    <span class="kd">final</span> <span class="n">Object</span><span class="o">[]</span> <span class="n">es</span> <span class="o">=</span> <span class="n">elements</span><span class="o">;</span>  
+</span></span><span class="line"><span class="cl">    <span class="c1">// 计算tail的新索引位置，如果(tail-1) &lt; 0，那么tail = es.length-1，否则就是tail-1                                                        
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 在数组中取出tail新索引对应的元素            
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">E</span> <span class="n">e</span> <span class="o">=</span> <span class="n">elementAt</span><span class="o">(</span><span class="n">es</span><span class="o">,</span> <span class="n">dec</span><span class="o">(</span><span class="n">tail</span><span class="o">,</span> <span class="n">es</span><span class="o">.</span><span class="na">length</span><span class="o">));</span> 
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">(</span><span class="n">e</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span>                             
+</span></span><span class="line"><span class="cl">        <span class="k">throw</span> <span class="k">new</span> <span class="n">NoSuchElementException</span><span class="o">();</span>    
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">e</span><span class="o">;</span>                                  
+</span></span><span class="line"><span class="cl"><span class="o">}</span>                            
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="n">E</span> <span class="nf">peekLast</span><span class="o">()</span> <span class="o">{</span>                                     
+</span></span><span class="line"><span class="cl">    <span class="kd">final</span> <span class="n">Object</span><span class="o">[]</span> <span class="n">es</span><span class="o">;</span>  
+</span></span><span class="line"><span class="cl">    <span class="c1">// 计算tail的新索引位置，如果(tail-1) &lt; 0，那么tail = es.length-1，否则就是tail-1                                                        
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 在数组中取出tail新索引对应的元素                                    
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="n">elementAt</span><span class="o">(</span><span class="n">es</span> <span class="o">=</span> <span class="n">elements</span><span class="o">,</span> <span class="n">dec</span><span class="o">(</span><span class="n">tail</span><span class="o">,</span> <span class="n">es</span><span class="o">.</span><span class="na">length</span><span class="o">));</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>                                                                                                                                                                              
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="244扩容机制">2.4.4、扩容机制</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// 将此双端队列的容量至少增加给定的数量
+</span></span></span><span class="line"><span class="cl"><span class="c1">// need：所需的最低额外容量
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">private</span> <span class="kt">void</span> <span class="nf">grow</span><span class="o">(</span><span class="kt">int</span> <span class="n">needed</span><span class="o">)</span> <span class="o">{</span>                                                  
+</span></span><span class="line"><span class="cl">    <span class="c1">// overflow-conscious code 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 获取旧容量大小                                                  
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kd">final</span> <span class="kt">int</span> <span class="n">oldCapacity</span> <span class="o">=</span> <span class="n">elements</span><span class="o">.</span><span class="na">length</span><span class="o">;</span>    
+</span></span><span class="line"><span class="cl">    <span class="c1">// 记录新容量大小                                 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">int</span> <span class="n">newCapacity</span><span class="o">;</span>                                                             
+</span></span><span class="line"><span class="cl">    <span class="c1">// Double capacity if small; else grow by 50%   
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// jump：可译为跳跃，是基于旧容量计算的一个值，姑且叫跳跃容量
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 如果oldCapacity &lt; 64，那么jump = oldCapacity + 2，为什么这里是+2？+1不行吗？因为+2有两个含义，一个是给tail占位使用，另一个就是给新元素插入使用                             
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 如果oldCapacity &gt;= 64，那么jump = oldCapacity &gt;&gt; 1，右移一位表示除2，相当于oldCapacity/2
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">int</span> <span class="n">jump</span> <span class="o">=</span> <span class="o">(</span><span class="n">oldCapacity</span> <span class="o">&lt;</span> <span class="mi">64</span><span class="o">)</span> <span class="o">?</span> <span class="o">(</span><span class="n">oldCapacity</span> <span class="o">+</span> <span class="mi">2</span><span class="o">)</span> <span class="o">:</span> <span class="o">(</span><span class="n">oldCapacity</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="o">);</span>      
+</span></span><span class="line"><span class="cl">    <span class="c1">// 如果跳跃容量 &lt; 所需的最低额外容量，说明是计划赶不上变换，比如说调用构造方法时传入numElements为1，然后调用addAll方法，一次性添加一个很大的集合进来，就有可能出现这种情况
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 如果（跳跃容量 + 旧容量）&gt; MAX_ARRAY_SIZE，说明超过数组长度允许最大值了
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// newCapacity的值有两个情况：
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 如果oldCapacity &lt; 64，那newCapacity为oldCapacity * 2 + 2
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 如果oldCapacity &gt;= 64，那newCapacity为oldCapacity * 1.5
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="o">(</span><span class="n">jump</span> <span class="o">&lt;</span> <span class="n">needed</span>                                                            
+</span></span><span class="line"><span class="cl">        <span class="o">||</span> <span class="o">(</span><span class="n">newCapacity</span> <span class="o">=</span> <span class="o">(</span><span class="n">oldCapacity</span> <span class="o">+</span> <span class="n">jump</span><span class="o">))</span> <span class="o">-</span> <span class="n">MAX_ARRAY_SIZE</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span> 
+</span></span><span class="line"><span class="cl">        <span class="c1">// 出现上面说的两种情况时，需要重新调整新容量大小           
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">newCapacity</span> <span class="o">=</span> <span class="n">newCapacity</span><span class="o">(</span><span class="n">needed</span><span class="o">,</span> <span class="n">jump</span><span class="o">);</span> 
+</span></span><span class="line"><span class="cl">    <span class="c1">// 将原数组的元素全部拷贝到新数组中去                                
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kd">final</span> <span class="n">Object</span><span class="o">[]</span> <span class="n">es</span> <span class="o">=</span> <span class="n">elements</span> <span class="o">=</span> <span class="n">Arrays</span><span class="o">.</span><span class="na">copyOf</span><span class="o">(</span><span class="n">elements</span><span class="o">,</span> <span class="n">newCapacity</span><span class="o">);</span>         
+</span></span><span class="line"><span class="cl">    <span class="c1">// Exceptionally, here tail == head needs to be disambiguated    
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 此时数组只是扩大了，但是tail==head，即依然指向同一位置，为避免歧义，需要调整head和tail的位置  
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="o">(</span><span class="n">tail</span> <span class="o">&lt;</span> <span class="n">head</span> <span class="o">||</span> <span class="o">(</span><span class="n">tail</span> <span class="o">==</span> <span class="n">head</span> <span class="o">&amp;&amp;</span> <span class="n">es</span><span class="o">[</span><span class="n">head</span><span class="o">]</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">))</span> <span class="o">{</span>                     
+</span></span><span class="line"><span class="cl">        <span class="c1">// wrap around; slide first leg forward to end of array 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="c1">// 计算扩容后数组的剩余空间                 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="kt">int</span> <span class="n">newSpace</span> <span class="o">=</span> <span class="n">newCapacity</span> <span class="o">-</span> <span class="n">oldCapacity</span><span class="o">;</span>      
+</span></span><span class="line"><span class="cl">        <span class="c1">// 将旧数据复制到新位置                          
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">System</span><span class="o">.</span><span class="na">arraycopy</span><span class="o">(</span><span class="n">es</span><span class="o">,</span> <span class="n">head</span><span class="o">,</span>                                               
+</span></span><span class="line"><span class="cl">                         <span class="n">es</span><span class="o">,</span> <span class="n">head</span> <span class="o">+</span> <span class="n">newSpace</span><span class="o">,</span>                                    
+</span></span><span class="line"><span class="cl">                         <span class="n">oldCapacity</span> <span class="o">-</span> <span class="n">head</span><span class="o">);</span>  
+</span></span><span class="line"><span class="cl">        <span class="c1">//  将旧位置的旧数据全部清空，head成为新位置⾸元素的位置                                  
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">head</span><span class="o">,</span> <span class="n">to</span> <span class="o">=</span> <span class="o">(</span><span class="n">head</span> <span class="o">+=</span> <span class="n">newSpace</span><span class="o">);</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">to</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span>                 
+</span></span><span class="line"><span class="cl">            <span class="n">es</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>                                                        
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>                                                                            
+</span></span><span class="line"><span class="cl"><span class="o">}</span>     
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 边缘条件的容量计算，尤其是溢出
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">private</span> <span class="kt">int</span> <span class="nf">newCapacity</span><span class="o">(</span><span class="kt">int</span> <span class="n">needed</span><span class="o">,</span> <span class="kt">int</span> <span class="n">jump</span><span class="o">)</span> <span class="o">{</span>                     
+</span></span><span class="line"><span class="cl">    <span class="kd">final</span> <span class="kt">int</span> <span class="n">oldCapacity</span> <span class="o">=</span> <span class="n">elements</span><span class="o">.</span><span class="na">length</span><span class="o">,</span> <span class="n">minCapacity</span><span class="o">;</span>  
+</span></span><span class="line"><span class="cl">    <span class="c1">// 边界处理：判断旧容量 + 所需的最低额外容量是否超过数组长度允许最大值        
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="o">((</span><span class="n">minCapacity</span> <span class="o">=</span> <span class="n">oldCapacity</span> <span class="o">+</span> <span class="n">needed</span><span class="o">)</span> <span class="o">-</span> <span class="n">MAX_ARRAY_SIZE</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="o">(</span><span class="n">minCapacity</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span>                                        
+</span></span><span class="line"><span class="cl">            <span class="k">throw</span> <span class="k">new</span> <span class="n">IllegalStateException</span><span class="o">(</span><span class="s">&#34;Sorry, deque too big&#34;</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">Integer</span><span class="o">.</span><span class="na">MAX_VALUE</span><span class="o">;</span>                                   
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>        
+</span></span><span class="line"><span class="cl">    <span class="c1">// 如果跳跃容量 &lt; 所需的最低额外容量，说明是计划赶不上变换，比如说调用构造方法时传入numElements为1，然后调用addAll方法，一次性添加一个很大的集合进来，就有可能出现这种情况                                                      
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 返回minCapacity = oldCapacity + needed 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="o">(</span><span class="n">needed</span> <span class="o">&gt;</span> <span class="n">jump</span><span class="o">)</span>                                              
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">minCapacity</span><span class="o">;</span>  
+</span></span><span class="line"><span class="cl">    <span class="c1">// 如果最小容量minCapacity没有超过数组长度允许最大值，并且need &lt;= jump                                    
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="o">(</span><span class="n">oldCapacity</span> <span class="o">+</span> <span class="n">jump</span> <span class="o">-</span> <span class="n">MAX_ARRAY_SIZE</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span>                
+</span></span><span class="line"><span class="cl">        <span class="o">?</span> <span class="n">oldCapacity</span> <span class="o">+</span> <span class="n">jump</span>                                        
+</span></span><span class="line"><span class="cl">        <span class="o">:</span> <span class="n">MAX_ARRAY_SIZE</span><span class="o">;</span>                                           
+</span></span><span class="line"><span class="cl"><span class="o">}</span>                                                                                                                                              
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>下面通过一个小例子去演示扩容机制的执行流程，如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// 初始时，数组⻓度是5，真实索引是0-4，head = tail = 0
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">ArrayDeque</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">arrayDeque</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayDeque</span><span class="o">&lt;&gt;(</span><span class="mi">4</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// 执行完，head = 0, tail = 1；此时数组为：[1, null, null, null, null]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">arrayDeque</span><span class="o">.</span><span class="na">addLast</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// 执行完，head = 4，tail = 1；此时数组为：[1, null, null, null, 2]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">arrayDeque</span><span class="o">.</span><span class="na">addFirst</span><span class="o">(</span><span class="mi">2</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// 执行完，head = 3，tail = 1；此时数组为：[1, null, null, 3, 2]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">arrayDeque</span><span class="o">.</span><span class="na">addFirst</span><span class="o">(</span><span class="mi">3</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// 执行完，head = 2，tail = 1；此时数组为：[1, null, 4, 3, 2]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">arrayDeque</span><span class="o">.</span><span class="na">addFirst</span><span class="o">(</span><span class="mi">4</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// 执行完，head = tail = 1，触发扩容；此时数组为：[1, 5, 4, 3, 2]，扩容容量为5*2+2
+</span></span></span><span class="line"><span class="cl"><span class="c1">// 然后将旧数据复制到新位置，此时数组为：[1, 5, 4, 3, 2, null, null, null, 5, 4, 3, 2]
+</span></span></span><span class="line"><span class="cl"><span class="c1">// 接着清掉旧数据，这时head = 8，tail = 1；此时数组为：[1, null, null, null, null, null, null, null, 5, 4, 3, 2]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">arrayDeque</span><span class="o">.</span><span class="na">addFirst</span><span class="o">(</span><span class="mi">5</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// 执行完，head = 8, tail = 2；此时数组为：[1, 6, null, null, null, null, null, null, 5, 4, 3 ,2]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">arrayDeque</span><span class="o">.</span><span class="na">addLast</span><span class="o">(</span><span class="mi">6</span><span class="o">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="25其它方法">2.5、其它方法</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// 返回此双端队列中的元素数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="kt">int</span> <span class="nf">size</span><span class="o">()</span> <span class="o">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="c1">// i = tail，j = head，modulus = elements.length
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 那么i -= j为i = i-j，代入后是tail = tail - head，然后判断计算后的tail是否 &lt; 0
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 如果 &lt; 0，说明是head &gt; tail的情况，对应于前面讲成员变量提到的数组情况3或4，这种情况下， tail会再次计算，tail = tail + elements.length，这样计算就可以求出数组的元素个数，不明白可以对照图来看
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 如果 &gt;= 0，说明是head &lt;= tail的情况，对应于前面讲成员变量提到的数组情况1或2，这种情况下，直接把tail返回即可，因为if条件判断时已经计算过了，这样计算就可以求出数组的元素个数，不明白可以对照图来看
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="n">sub</span><span class="o">(</span><span class="n">tail</span><span class="o">,</span> <span class="n">head</span><span class="o">,</span> <span class="n">elements</span><span class="o">.</span><span class="na">length</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="nf">sub</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">,</span> <span class="kt">int</span> <span class="n">j</span><span class="o">,</span> <span class="kt">int</span> <span class="n">modulus</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">((</span><span class="n">i</span> <span class="o">-=</span> <span class="n">j</span><span class="o">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span> <span class="n">i</span> <span class="o">+=</span> <span class="n">modulus</span><span class="o">;</span>              
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">i</span><span class="o">;</span>                                    
+</span></span><span class="line"><span class="cl"><span class="o">}</span>                                                                                                                                                                  
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h1 id="三总结">三、总结</h1>
+<p>在<em>ArrayDeque</em>的源码中，并没有与并发相关的代码，所以说<em>ArrayDeque</em>是非线程安全类，在并发环境下多个线程同时操作，会引发不可预知的错误。</p>
+<p><em>ArrayDeque</em>没有索引位置的概念，不能根据索引位置进行操作，所以没有更改操作，如set方法。</p>
+<p>另外，<em>ArrayDeque</em>禁止添加空元素。<em><strong>最关键一点是：ArrayDeque用作堆栈时很可能比Stack快，用作队列时比LinkedList快。</strong></em></p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">文章作者</span>
+    <span class="item-content">AndDevMK</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">上次更新</span>
+    <span class="item-content">
+        2023-04-24
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">赞赏支持</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat-qr-code.JPG">
+        <span>微信打赏</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay-qr-code.JPG">
+        <span>支付宝打赏</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      
+      <nav class="post-nav">
+        
+        <a class="next" href="/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBlinkedlist%E6%BA%90%E7%A0%81jdk11/">
+            <span class="next-text nav-default">Java集合系列：一文解读LinkedList源码「JDK11」</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="AndDevMK/blog-utterances"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    <div id="search_mask" class="search_mask">
+    <div class="search_modal">
+        <div id="close_search" class="close_search">关闭</div>
+        <div class="search_divider"></div>
+        <input id="input_search_key" class="input_search_key" placeholder="请输入你要搜索的内容" tabindex="0">
+        <ul id="search_list">
+        </ul>
+    </div>
+</div>
+
+<script src="/js/fuse.js"></script> 
+<script src="/js/fastsearch.js"></script>
+
+    <footer id="footer" class="footer">
+      
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2023<span class="heart"><i class="iconfont icon-heart"></i></span><span>AndDevMK</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.4ae89da218555efa0e7093a20b92017d2e1202b66fff9fc2edf4cb8d44b44c6e.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>
