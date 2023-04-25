@@ -51,7 +51,7 @@
 <meta itemprop="name" content="Java集合系列：一文解读ArrayDeque源码「JDK11」">
 <meta itemprop="description" content="一、概述 假设你对ArrayDeque的源码一无所知，那么仅凭ArrayDeque名字来看的话，大概可以猜到它的实现和Array数组有关。 Ar"><meta itemprop="datePublished" content="2023-04-24T14:41:31+08:00" />
 <meta itemprop="dateModified" content="2023-04-24T14:41:31+08:00" />
-<meta itemprop="wordCount" content="6020">
+<meta itemprop="wordCount" content="6550">
 <meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Java集合系列：一文解读ArrayDeque源码「JDK11」"/>
 <meta name="twitter:description" content="一、概述 假设你对ArrayDeque的源码一无所知，那么仅凭ArrayDeque名字来看的话，大概可以猜到它的实现和Array数组有关。 Ar"/>
@@ -138,8 +138,8 @@
         <div class="post-category">
             <a href="/categories/java/"> Java </a>
             </div>
-          <span class="more-meta"> 约 6020 字 </span>
-          <span class="more-meta"> 预计阅读 13 分钟 </span>
+          <span class="more-meta"> 约 6550 字 </span>
+          <span class="more-meta"> 预计阅读 14 分钟 </span>
         
       </div>
     </header>
@@ -769,6 +769,7 @@
 </span><span class="lnt">58
 </span><span class="lnt">59
 </span><span class="lnt">60
+</span><span class="lnt">61
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// 将此双端队列的容量至少增加给定的数量
@@ -826,7 +827,8 @@
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 返回minCapacity = oldCapacity + needed 
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="o">(</span><span class="n">needed</span> <span class="o">&gt;</span> <span class="n">jump</span><span class="o">)</span>                                              
 </span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">minCapacity</span><span class="o">;</span>  
-</span></span><span class="line"><span class="cl">    <span class="c1">// 如果最小容量minCapacity没有超过数组长度允许最大值，并且need &lt;= jump                                    
+</span></span><span class="line"><span class="cl">    <span class="c1">// 如果最小容量minCapacity没有超过数组长度允许最大值，并且need &lt;= jump
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 边界处理：判断旧容量+跳跃容量是否超过数组长度允许最大值                                    
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="o">(</span><span class="n">oldCapacity</span> <span class="o">+</span> <span class="n">jump</span> <span class="o">-</span> <span class="n">MAX_ARRAY_SIZE</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span>                
 </span></span><span class="line"><span class="cl">        <span class="o">?</span> <span class="n">oldCapacity</span> <span class="o">+</span> <span class="n">jump</span>                                        
 </span></span><span class="line"><span class="cl">        <span class="o">:</span> <span class="n">MAX_ARRAY_SIZE</span><span class="o">;</span>                                           
@@ -888,6 +890,26 @@
 </span><span class="lnt">11
 </span><span class="lnt">12
 </span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// 返回此双端队列中的元素数
@@ -902,7 +924,27 @@
 </span></span><span class="line"><span class="cl"><span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="nf">sub</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">,</span> <span class="kt">int</span> <span class="n">j</span><span class="o">,</span> <span class="kt">int</span> <span class="n">modulus</span><span class="o">)</span> <span class="o">{</span>
 </span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">((</span><span class="n">i</span> <span class="o">-=</span> <span class="n">j</span><span class="o">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span> <span class="n">i</span> <span class="o">+=</span> <span class="n">modulus</span><span class="o">;</span>              
 </span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">i</span><span class="o">;</span>                                    
-</span></span><span class="line"><span class="cl"><span class="o">}</span>                                                                                                                                                                  
+</span></span><span class="line"><span class="cl"><span class="o">}</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 如果此双端队列包含指定元素，则返回true 。更正式地说，当且仅当此双端队列包含至少一个满足o.equals(e)的元素e时才返回true 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">contains</span><span class="o">(</span><span class="n">Object</span> <span class="n">o</span><span class="o">)</span> <span class="o">{</span>                                       
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">(</span><span class="n">o</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>                                                      
+</span></span><span class="line"><span class="cl">        <span class="kd">final</span> <span class="n">Object</span><span class="o">[]</span> <span class="n">es</span> <span class="o">=</span> <span class="n">elements</span><span class="o">;</span>  
+</span></span><span class="line"><span class="cl">        <span class="c1">// to = (i &lt;= end) ? end : es.length;  代入为：to = （head &lt;= tail）? tail : es.length;                                   
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="c1">// 这里要判断head &lt;= tail，如果是true，那么to==end，即to为tail，说明内层for循环只需要遍历区间[head,tail)中是否存在和o元素相同的元素，如果存在，返回true，否则break结束外层循环，返回false
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="c1">// 如果head &gt; tail，如果为true，那么to = es.length，说明内层for循环要遍历区间[head,es.length)中是否存在和o元素相同的元素，如果存在，返回true
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="c1">// 否则，内存for循环执行完成，外层for循环此时执行 i = 0, to = end；
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="c1">// 接着内存for循环继续要遍历区间[0,tail)中是否存在和o元素相同的元素，如果存在，返回true，否则break结束外层循环，返回false
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">head</span><span class="o">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">tail</span><span class="o">,</span> <span class="n">to</span> <span class="o">=</span> <span class="o">(</span><span class="n">i</span> <span class="o">&lt;=</span> <span class="n">end</span><span class="o">)</span> <span class="o">?</span> <span class="n">end</span> <span class="o">:</span> <span class="n">es</span><span class="o">.</span><span class="na">length</span><span class="o">;</span> 
+</span></span><span class="line"><span class="cl">             <span class="o">;</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">,</span> <span class="n">to</span> <span class="o">=</span> <span class="n">end</span><span class="o">)</span> <span class="o">{</span>                                         
+</span></span><span class="line"><span class="cl">            <span class="k">for</span> <span class="o">(;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">to</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span>                                           
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="o">(</span><span class="n">o</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">es</span><span class="o">[</span><span class="n">i</span><span class="o">]))</span>                                      
+</span></span><span class="line"><span class="cl">                    <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>                                          
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="o">(</span><span class="n">to</span> <span class="o">==</span> <span class="n">end</span><span class="o">)</span> <span class="k">break</span><span class="o">;</span>                                         
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>                                                                 
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>                                                                     
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="kc">false</span><span class="o">;</span>                                                         
+</span></span><span class="line"><span class="cl"><span class="o">}</span>                                                                                                                                                                                                                                          
 </span></span></code></pre></td></tr></table>
 </div>
 </div><h1 id="三总结">三、总结</h1>
