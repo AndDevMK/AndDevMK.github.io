@@ -69,7 +69,7 @@ mobileOpenSearch.onclick = function (e) {
   if (Even.slideout) {
     Even.slideout.close();
   }
-  // 延迟打开搜索框，不得已办法，因为和样式主页面有冲突，导致卡顿，不知道怎么解决
+  // 延迟打开搜索框，不得已办法，因为和主页面样式有冲突，导致卡顿，不是前端开发不知道怎么解决
   setTimeout(() => {
     doSearch(e);
   }, 500);
@@ -175,7 +175,7 @@ function loadSearch() {
 //
 function executeSearch(term) {
   let results = fuse.search(term); // the actual query being run using fuse.js
-  console.log("结果：" + JSON.stringify(results));
+  // console.log("结果：" + JSON.stringify(results));
   let searchitems = ''; // our results bucket
 
   if (results.length === 0) { // no results based on what was typed into the input box
@@ -198,8 +198,8 @@ function executeSearch(term) {
       var content = formatSearch(results[item].item.contents, term);
 
       searchitems = searchitems + '<li>'
-        + '<a href="' + results[item].item.permalink + '" tabindex="0" style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">' + title + '</a>'
-        + '<p style="overflow: hidden;text-overflow: ellipsis;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 2; font-size: 16px; color: rgb(138, 138, 138);">' + content + '</p>'
+        + '<a href="' + results[item].item.permalink + '" tabindex="0" style="overflow: hidden;text-overflow: ellipsis;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 2;">' + title + '</a>'
+        + '<p style="overflow: hidden;text-overflow: ellipsis;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 3; font-size: 16px; color: rgb(138, 138, 138);">' + content + '</p>'
         + '</li>';
       permalinks.push(results[item].item.permalink);
     }
