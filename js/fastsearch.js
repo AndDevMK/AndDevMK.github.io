@@ -63,6 +63,19 @@ openSearch.onclick = function (e) {
   doSearch(e);
 }
 
+// 手机搜索按钮点击事件
+var mobileOpenSearch = document.getElementById('mobile_open_search');
+mobileOpenSearch.onclick = function (e) {
+  if (Even.slideout) {
+    Even.slideout.close();
+  }
+  // 延迟打开搜索框，不得已办法，因为和样式主页面有冲突，导致卡顿，不知道怎么解决
+  setTimeout(() => {
+    doSearch(e);
+  }, 500);
+}
+
+
 var closeSearch = document.getElementById('close_search');
 closeSearch.onclick = function (e) {
   hideSearch();
