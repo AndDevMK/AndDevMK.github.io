@@ -6,7 +6,7 @@
     <description>Recent content in Posts on AndDevMK&#39;s android blog site</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <copyright>AndDevMK</copyright>
+    <copyright>AndDevMK, All rights reserved.</copyright>
     <lastBuildDate>Mon, 24 Apr 2023 14:41:31 +0800</lastBuildDate><atom:link href="https://AndDevMK.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Java集合系列：一文解读ArrayDeque源码「JDK11」</title>

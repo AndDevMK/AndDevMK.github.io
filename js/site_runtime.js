@@ -14,9 +14,9 @@ function runtime() {
     let seconds = Math.floor(leavel3 / (1000));
     let runbox = document.getElementById('run-time');
     runbox.innerHTML = '本站已运行'
-        + '<span style="font-weight: bold; color: #16982b; font-size: 20px;">' + ((days < 10) ? '0' : '') + days + '</span>' + ' 天 '
-        + '<span style="font-weight: bold; color: #16982b; font-size: 20px;">' +((hours < 10) ? '0' : '') + hours + '</span>' + ' 时 '
-        + '<span style="font-weight: bold; color: #16982b; font-size: 20px;">' +((minutes < 10) ? '0' : '') + minutes + '</span>' + ' 分 '
-        + '<span style="font-weight: bold; color: #16982b; font-size: 20px;">' +((seconds < 10) ? '0' : '') + seconds + '</span>' + ' 秒 ';
+        + '<span style="font-weight: bold; color: #16982b; font-size: 18px; font-style:italic;">' + ((days < 10) ? '0' : '') + days + '</span>' + ' 天 '
+        + '<span style="font-weight: bold; color: #16982b; font-size: 18px; font-style:italic;">' +((hours < 10) ? '0' : '') + hours + '</span>' + ' 时 '
+        + '<span style="font-weight: bold; color: #16982b; font-size: 18px; font-style:italic;">' +((minutes < 10) ? '0' : '') + minutes + '</span>' + ' 分 '
+        + '<span style="font-weight: bold; color: #16982b; font-size: 18px; font-style:italic;">' +((seconds < 10) ? '0' : '') + seconds + '</span>' + ' 秒 ';
 }
 runtime();
