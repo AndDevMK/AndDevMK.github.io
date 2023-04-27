@@ -8,6 +8,10 @@ var last = list.lastChild; // last child of search list
 var maininput = document.getElementById('input_search_key'); // input box for search
 var resultsAvailable = false; // Did we get any search results?
 
+// 不知道js怎么引用scss变量，所以曲线救国：获取关闭按钮的颜色来使用，因为关闭按钮是在scss里设置了主题颜色
+var closeSearch = document.getElementById('close_search');
+var closeSearchStyle = window.getComputedStyle ? window.getComputedStyle(closeSearch, null) : closeSearch.currentStyle;
+
 // ==========================================
 // The main keyboard event listener running the show
 //
@@ -215,7 +219,6 @@ function executeSearch(term) {
 
 function formatSearch(origin, search) {
   return origin.replace(new RegExp(search, 'ig'), function ($1) {
-    return `<span span style="background: #16982b; color: #ffffff">${$1}</span>`;
+    return `<span span style="background: ${closeSearchStyle.background}; color: #ffffff">${$1}</span>`;
   });
 }
-
