@@ -1,0 +1,28 @@
+  .highlight {
+    position: relative;
+  }
+  
+  .clipboard-button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 5px 10px;
+    background-color: #ededed;
+    border: 1px solid #34495e;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .clipboard-button > svg{
+      width: 12px;
+      height: 12px;
+      fill: #34495e;
+   }
+
+  .clipboard-button:hover {
+    cursor: pointer;
+    background-color: #e0e0e0;
+  }
+ 
