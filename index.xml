@@ -14,7 +14,7 @@
       <pubDate>Mon, 24 Apr 2023 14:41:31 +0800</pubDate>
       
       <guid>https://anddevmk.cn/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBarraydeque%E6%BA%90%E7%A0%81jdk11/</guid>
-      <description>一、概述 假设你对ArrayDeque的源码一无所知，那么仅凭ArrayDeque名字来看的话，大概可以猜到它的实现和Array数组有关。 Ar</description>
+      <description>一、概述 假设你对ArrayDeque的源码一无所知，那么仅凭ArrayDeque名字来看的话，大概可以猜到它的实现和Array数组有关。 ArrayDeque是Java Collections Framework的一个成员，它的底层是基于定长数组实现的一个双端队列，如果数组存放满了，就会通过扩容机制重新生</description>
     </item>
     
     <item>
@@ -23,7 +23,7 @@
       <pubDate>Wed, 19 Apr 2023 14:41:31 +0800</pubDate>
       
       <guid>https://anddevmk.cn/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBlinkedlist%E6%BA%90%E7%A0%81jdk11/</guid>
-      <description>一、概述 LinkedList是Java Collections Framework的一个成员，然后底层是基于双向链表来实现的。对于LinkedList来说，可能平常</description>
+      <description>一、概述 LinkedList是Java Collections Framework的一个成员，然后底层是基于双向链表来实现的。对于LinkedList来说，可能平常开发用的频率并没有ArrayList多，这并不是我们不去学习LinkedList原理的理由。我们知道，ArrayList的特点是随机访问效率</description>
     </item>
     
     <item>
@@ -41,7 +41,7 @@
       <pubDate>Sun, 16 Apr 2023 14:41:31 +0800</pubDate>
       
       <guid>https://anddevmk.cn/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBarraylist%E6%BA%90%E7%A0%81jdk11/</guid>
-      <description>一、概述 ArrayList是经常用到的一个容器，它是Java Collections Framework的一个成员，然后底层是基于定长数组来实现的，如果数组存放满了</description>
+      <description>一、概述 ArrayList是经常用到的一个容器，它是Java Collections Framework的一个成员，然后底层是基于定长数组来实现的，如果数组存放满了，就会通过扩容机制重新生成一个更大的数组来存放数据。 因此，扩容机制是ArrayList的核心所在，这一点是务必要掌握的；除此之外，本文还会叙</description>
     </item>
     
   </channel>
