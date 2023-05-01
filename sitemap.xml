@@ -1,64 +1,64 @@
-<?xml-stylesheet type="text/xsl" href="https://AndDevMK.github.io/sitemap.xsl"?>
+<?xml-stylesheet type="text/xsl" href="https://anddevmk.cn/sitemap.xsl"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://AndDevMK.github.io/</loc>
+    <loc>https://anddevmk.cn/</loc>
     <lastmod>2023-04-24T14:41:31+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://AndDevMK.github.io/categories/</loc>
+    <loc>https://anddevmk.cn/categories/</loc>
     <lastmod>2023-04-24T14:41:31+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://AndDevMK.github.io/categories/java/</loc>
+    <loc>https://anddevmk.cn/categories/java/</loc>
     <lastmod>2023-04-24T14:41:31+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://AndDevMK.github.io/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBarraydeque%E6%BA%90%E7%A0%81jdk11/</loc>
+    <loc>https://anddevmk.cn/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBarraydeque%E6%BA%90%E7%A0%81jdk11/</loc>
     <lastmod>2023-04-24T14:41:31+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://AndDevMK.github.io/post/</loc>
+    <loc>https://anddevmk.cn/post/</loc>
     <lastmod>2023-04-24T14:41:31+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://AndDevMK.github.io/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBlinkedlist%E6%BA%90%E7%A0%81jdk11/</loc>
+    <loc>https://anddevmk.cn/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBlinkedlist%E6%BA%90%E7%A0%81jdk11/</loc>
     <lastmod>2023-04-19T14:41:31+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://AndDevMK.github.io/about/</loc>
+    <loc>https://anddevmk.cn/about/</loc>
     <lastmod>2023-04-16T20:53:15+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://AndDevMK.github.io/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBarraylist%E6%BA%90%E7%A0%81jdk11/</loc>
+    <loc>https://anddevmk.cn/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBarraylist%E6%BA%90%E7%A0%81jdk11/</loc>
     <lastmod>2023-04-16T14:41:31+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://AndDevMK.github.io/tags/</loc>
+    <loc>https://anddevmk.cn/tags/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
