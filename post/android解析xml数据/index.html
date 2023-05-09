@@ -1,0 +1,1666 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Android解析XML数据 - AndDevMK&#39;s android blog site</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="AndDevMK" /><meta name="description" content="注：本文代码基于Android Sv2 一、概述 XML文件在Android中是一种非常常见的文件格式，例如你的主页面布局文件activity_main.xml、Android清单文件AndroidManifest.xml、XXX.xml的res资源文件等等，然而我们在日常开发中往往会忽略" /><meta name="keywords" content="Android, Java, Kotlin, C&#43;&#43;, C, Flutter, Dart, NDK" />
+
+
+<meta name="baidu-site-verification" content="codeva-wQ7uOo4V09" />
+<meta name="google-site-verification" content="yHzWB9BxTR74LiaUhuL5ncr89fnDYXiplTaPY565zqo" />
+
+
+<meta name="generator" content="Hugo 0.111.3 with theme even" />
+
+
+<link rel="canonical" href="https://anddevmk.cn/post/android%E8%A7%A3%E6%9E%90xml%E6%95%B0%E6%8D%AE/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.c11aaf02bef1025d6b0813ba5e1a8a8551aee15fa8f2bcea906d41b20bdf5c69.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/codecopy.css">
+
+
+<meta property="og:title" content="Android解析XML数据" />
+<meta property="og:description" content="注：本文代码基于Android Sv2 一、概述 XML文件在Android中是一种非常常见的文件格式，例如你的主页面布局文件activity_main.xml、Android清单文件AndroidManifest.xml、XXX.xml的res资源文件等等，然而我们在日常开发中往往会忽略" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://anddevmk.cn/post/android%E8%A7%A3%E6%9E%90xml%E6%95%B0%E6%8D%AE/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2023-05-07T14:41:31+08:00" />
+<meta property="article:modified_time" content="2023-05-07T14:41:31+08:00" />
+<meta itemprop="name" content="Android解析XML数据">
+<meta itemprop="description" content="注：本文代码基于Android Sv2 一、概述 XML文件在Android中是一种非常常见的文件格式，例如你的主页面布局文件activity_main.xml、Android清单文件AndroidManifest.xml、XXX.xml的res资源文件等等，然而我们在日常开发中往往会忽略"><meta itemprop="datePublished" content="2023-05-07T14:41:31+08:00" />
+<meta itemprop="dateModified" content="2023-05-07T14:41:31+08:00" />
+<meta itemprop="wordCount" content="8480">
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Android解析XML数据"/>
+<meta name="twitter:description" content="注：本文代码基于Android Sv2 一、概述 XML文件在Android中是一种非常常见的文件格式，例如你的主页面布局文件activity_main.xml、Android清单文件AndroidManifest.xml、XXX.xml的res资源文件等等，然而我们在日常开发中往往会忽略"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">AndDevMK</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">首页</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">归档</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">关于</li>
+      </a>
+
+    
+    <li class="mobile-menu-item-search">
+      <div id="mobile_open_search" class="mobile_open_search">
+        搜索
+      </div>
+    </li>
+
+    
+    <li class="mobile-menu-item-dark-mode">
+      <div id="mobile_dark_mode_toggle" class="mobile_light_mode">
+       
+      </div>
+    </li>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">AndDevMK</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">首页</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">归档</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">关于</a>
+      </li>
+    
+    <div id="open_search" class="open_search">
+      搜索
+    </div>
+
+    
+    <div id="dark_mode_toggle" class="light_mode">
+
+    </div>
+  
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Android解析XML数据</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2023-05-07 </span>
+        <div class="post-category">
+            <a href="/categories/android/"> Android </a>
+            </div>
+          <span class="more-meta"> 约 8480 字 </span>
+          <span class="more-meta"> 预计阅读 17 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#一概述">一、概述</a></li>
+    <li><a href="#二xml简单介绍">二、<em>XML</em>简单介绍</a>
+      <ul>
+        <li><a href="#21什么是xml">2.1、什么是<em>XML</em>？</a></li>
+        <li><a href="#22xml的基本语法">2.2、<em>XML</em>的基本语法</a>
+          <ul>
+            <li><a href="#221必须有声明语句">2.2.1、必须有声明语句</a></li>
+            <li><a href="#222xml文档有且只有一个根元素">2.2.2、<em>XML</em>文档有且只有一个根元素</a></li>
+            <li><a href="#223xml标签对大小写敏感">2.2.3、<em>XML</em>标签对大小写敏感</a></li>
+            <li><a href="#224属性值必须加引号">2.2.4、属性值必须加引号</a></li>
+            <li><a href="#225所有的标记必须有相应的结束标记">2.2.5、所有的标记必须有相应的结束标记</a></li>
+            <li><a href="#226实体引用">2.2.6、实体引用</a></li>
+            <li><a href="#227命名空间">2.2.7、命名空间</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#三android解析xml数据">三、<em>Android</em>解析<em>XML</em>数据</a>
+      <ul>
+        <li><a href="#31选择xml解释器">3.1、选择<em>XML</em>解释器</a>
+          <ul>
+            <li><a href="#311xmlpullparser接口">3.1.1、<em>XmlPullParser</em>接口</a>
+              <ul>
+                <li><a href="#3111next方法">3.1.1.1、<em>next</em>方法</a></li>
+                <li><a href="#3112nexttag方法">3.1.1.2、<em>nextTag</em>方法</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li><a href="#32分析animal">3.2、分析<em>animal</em></a></li>
+        <li><a href="#33实例化xml解释器">3.3、实例化<em>XML</em>解释器</a></li>
+        <li><a href="#34读取animal">3.4、读取<em>animal</em></a></li>
+        <li><a href="#35解析xml">3.5、解析<em>XML</em></a></li>
+        <li><a href="#36跳过不感兴趣的标签">3.6、跳过不感兴趣的标签</a></li>
+        <li><a href="#37使用xml数据">3.7、使用XML数据</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <blockquote>
+<p><em>注：本文代码基于Android Sv2</em></p>
+</blockquote>
+<h1 id="一概述">一、概述</h1>
+<p><em>XML</em>文件在<em>Android</em>中是一种非常常见的文件格式，例如你的主页面布局文件<em>activity_main.xml</em>、<em>Android</em>清单文件<em>AndroidManifest.xml</em>、<em>XXX.xml</em>的<em>res</em>资源文件等等，然而我们在日常开发中往往会忽略<em>XML</em>文件本身，因为<em>AS</em>太过智能化，根据<em>AS</em>智能提示很容易就能写出想要的<em>XML</em>文件，但是我们真的有了解过<em>XML</em>文件吗？还有为什么要去了解<em>XML</em>文件？阅读本文后，你应该可以找到问题的答案。</p>
+<p>因此，本文会把关注点放到<em>XML</em>文件本身，学习它的基础语法，然后循序渐进地讲解Android中怎么解析<em>XML</em>数据，这对之后在<em>Framework</em>层遇到<em>XML</em>解析流程时非常有帮助，比如<em>Activity</em>的<em>setContentView</em>源码里，它是如何将我们写的<em>layout</em>布局文件解析出来的。</p>
+<h1 id="二xml简单介绍">二、<em>XML</em>简单介绍</h1>
+<h2 id="21什么是xml">2.1、什么是<em>XML</em>？</h2>
+<p><em>XML</em>的全称为<em>Extensible Markup Language</em>，翻译过来是可扩展标记语言，它是标准通用标记语言的子集，可以用来标记数据、定义数据类型，是一种允许用户对自己的标记语言进行定义的源语言。</p>
+<h2 id="22xml的基本语法">2.2、<em>XML</em>的基本语法</h2>
+<h3 id="221必须有声明语句">2.2.1、必须有声明语句</h3>
+<p><em>XML</em>声明是<em>XML</em>文档的第一句，代码如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-xml" data-lang="xml"><span class="line"><span class="cl"><span class="cp">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34; ?&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="222xml文档有且只有一个根元素">2.2.2、<em>XML</em>文档有且只有一个根元素</h3>
+<p>良好格式的<em>XML</em>文档必须有一个根元素，就是紧接着声明后面建立的第一个元素，其他元素都是这个根元素的子元素，根元素完全包括文档中其他所有的元素，根元素的起始标记要放在所有其他元素的起始标记之前；根元素的结束标记要放在所有其他元素的结束标记之后，代码如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-xml" data-lang="xml"><span class="line"><span class="cl"><span class="cp">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34; ?&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="nt">&lt;root&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;element&gt;&lt;/element&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="nt">&lt;/root&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在上面代码中，<em>root</em>称为根元素。</p>
+<h3 id="223xml标签对大小写敏感">2.2.3、<em>XML</em>标签对大小写敏感</h3>
+<p>在<em>XML</em>文档中，大小写是有区别的，例如下面代码中“<em>a</em>”和“<em>A</em>”是不同的标记。注意在写元素时，前后标记的大小写要保持一致。最好养成一种习惯，或者全部大写，或者全部小写，或者大写第一个字母，这样可以减少因为大小写不匹配而产生的文档错误。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-xml" data-lang="xml"><span class="line"><span class="cl"><span class="cp">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34; ?&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="nt">&lt;root&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;a&gt;&lt;/a&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;A&gt;&lt;/A&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="nt">&lt;/root&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="224属性值必须加引号">2.2.4、属性值必须加引号</h3>
+<p><em>XML</em>规定，所有属性值必须加引号（可以是单引号，也可以是双引号，建议使用双引号），否则将被视为错误。</p>
+<p>如下代码为错误演示：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-xml" data-lang="xml"><span class="line"><span class="cl"><span class="cp">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34; ?&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="nt">&lt;root&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="c">&lt;!--IDE报错--&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;element</span> <span class="na">id=</span><span class="s">999</span><span class="nt">&gt;&lt;/element&gt;</span>   
+</span></span><span class="line"><span class="cl"><span class="nt">&lt;/root&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>如下代码为正确演示：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-xml" data-lang="xml"><span class="line"><span class="cl"><span class="cp">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34; ?&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="nt">&lt;root&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;element</span> <span class="na">id=</span><span class="s">&#34;999&#34;</span><span class="nt">&gt;&lt;/element&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="nt">&lt;/root&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="225所有的标记必须有相应的结束标记">2.2.5、所有的标记必须有相应的结束标记</h3>
+<p>在<em>XML</em>中，所有标记必须成对出现，有一个开始标记，就必须有一个结束标记，否则将被视为错误。</p>
+<h3 id="226实体引用">2.2.6、实体引用</h3>
+<p>在<em>XML</em>中，一些字符拥有特殊的意义，如果你把字符&quot;&lt;&ldquo;放在<em>XML</em> 元素中，会发生错误，这是因为解析器会把它当作新元素的开始。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-xml" data-lang="xml"><span class="line"><span class="cl"><span class="cp">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34; ?&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="nt">&lt;root&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="c">&lt;!--IDE报错--&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;count&gt;</span>num <span class="nt">&lt; 1000</span><span class="err">&lt;/count</span><span class="nt">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="nt">&lt;/root&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>为了避免这个错误，需要用实体引用来代替&rdquo;&lt;&ldquo;字符。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-xml" data-lang="xml"><span class="line"><span class="cl"><span class="cp">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34; ?&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="nt">&lt;root&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;count&gt;</span>num <span class="nt">&lt; 1000</span><span class="err">&lt;/count</span><span class="nt">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="nt">&lt;/root&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在<em>XML</em>中，有5个预定义的实体引用。</p>
+<img title="" src="/img/android/XML实体引用.png" alt="" width="535">
+<h3 id="227命名空间">2.2.7、命名空间</h3>
+<p>在<em>XML</em>中，因为元素名称是由开发者定义的，当两个不同的文档使用相同的元素名时，就会发生命名冲突。</p>
+<p>这个<em>XML</em>文档在表格中记载着学生信息。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-xml" data-lang="xml"><span class="line"><span class="cl"><span class="nt">&lt;table&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;tr&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;td&gt;</span>Tony<span class="nt">&lt;/td&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;td&gt;</span>202323<span class="nt">&lt;/td&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;/tr&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;tr&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;td&gt;</span>Jerry<span class="nt">&lt;/td&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;td&gt;</span>202324<span class="nt">&lt;/td&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;/tr&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="nt">&lt;/table&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这个XML文档记载着个人信息。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-xml" data-lang="xml"><span class="line"><span class="cl"><span class="nt">&lt;table&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;name&gt;</span>Tony<span class="nt">&lt;/name&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;weight&gt;</span>65<span class="nt">&lt;/weight&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;height&gt;</span>175<span class="nt">&lt;/height&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="nt">&lt;/table&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>假如这两个<em>XML</em>文档被一起使用，由于两个文档都包含带有不同内容和定义的<em>table</em>元素，就会发生命名冲突，<em>XML</em>解析器无法确定如何处理这类冲突。</p>
+<p>如果以<em>Java</em>的思维来描述，可以认为是在同一个包下，创建了两个类名都为<em>Table</em>的类，那么在使用时就会不知道要用的是哪个了。</p>
+<p>因此，需要用<em>XML</em>命名空间来解决该冲突问题。<em>XML</em>命名空间属性被放置于元素的开始标签之中，其语法为：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">xmlns:namespace-prefix=&#34;namespaceURI&#34;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>当<em>XML</em>命名空间被定义在元素的开始标签中时，所有带有相同前缀的子元素都会与同一个命名空间相关联。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-xml" data-lang="xml"><span class="line"><span class="cl"><span class="nt">&lt;root&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;s:table</span> <span class="na">xmlns:s=</span><span class="s">&#34;https://www.student.com/&#34;</span><span class="nt">&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;s:tr&gt;</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&lt;s:td&gt;</span>Tony<span class="nt">&lt;/s:td&gt;</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&lt;s:td&gt;</span>202323<span class="nt">&lt;/s:td&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;/s:tr&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;s:tr&gt;</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&lt;s:td&gt;</span>Jerry<span class="nt">&lt;/s:td&gt;</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&lt;s:td&gt;</span>202324<span class="nt">&lt;/s:td&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;/s:tr&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;/s:table&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;p:table</span> <span class="na">xmlns:p=</span><span class="s">&#34;https://www.person.com/&#34;</span><span class="nt">&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;p:name&gt;</span>Tony<span class="nt">&lt;/p:name&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;p:weight&gt;</span>65<span class="nt">&lt;/p:weight&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;p:height&gt;</span>175<span class="nt">&lt;/p:height&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;/p:table&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="nt">&lt;/root&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>命名空间也可以在<em>XML</em>根元素中声明。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-xml" data-lang="xml"><span class="line"><span class="cl"><span class="nt">&lt;root</span> <span class="na">xmlns:s=</span><span class="s">&#34;https://www.student.com/&#34;</span> 
+</span></span><span class="line"><span class="cl"><span class="err">  </span><span class="na">xmlns:p=</span><span class="s">&#34;https://www.person.com/&#34;</span><span class="nt">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;s:table&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;s:tr&gt;</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&lt;s:td&gt;</span>Tony<span class="nt">&lt;/s:td&gt;</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&lt;s:td&gt;</span>202323<span class="nt">&lt;/s:td&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;/s:tr&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;s:tr&gt;</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&lt;s:td&gt;</span>Jerry<span class="nt">&lt;/s:td&gt;</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&lt;s:td&gt;</span>202324<span class="nt">&lt;/s:td&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;/s:tr&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;/s:table&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;p:table&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;p:name&gt;</span>Tony<span class="nt">&lt;/p:name&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;p:weight&gt;</span>65<span class="nt">&lt;/p:weight&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;p:height&gt;</span>175<span class="nt">&lt;/p:height&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;/p:table&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="nt">&lt;/root&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>为元素定义默认的命名空间可以让我们省去在所有的子元素中使用前缀的工作，其语法为：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">xmlns=&#34;namespaceURI&#34;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这个<em>XML</em>文档在表格中记载着学生信息。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-xml" data-lang="xml"><span class="line"><span class="cl"><span class="nt">&lt;table</span> <span class="na">xmlns=</span><span class="s">&#34;https://www.student.com/&#34;</span><span class="nt">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;tr&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;td&gt;</span>Tony<span class="nt">&lt;/td&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;td&gt;</span>202323<span class="nt">&lt;/td&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;/tr&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;tr&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;td&gt;</span>Jerry<span class="nt">&lt;/td&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;td&gt;</span>202324<span class="nt">&lt;/td&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;/tr&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="nt">&lt;/table&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这个<em>XML</em>文档记载着个人信息。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-xml" data-lang="xml"><span class="line"><span class="cl"><span class="nt">&lt;table</span> <span class="na">xmlns=</span><span class="s">&#34;https://www.person.com/&#34;</span><span class="nt">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;name&gt;</span>Tony<span class="nt">&lt;/name&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;weight&gt;</span>65<span class="nt">&lt;/weight&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;height&gt;</span>175<span class="nt">&lt;/height&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="nt">&lt;/table&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h1 id="三android解析xml数据">三、<em>Android</em>解析<em>XML</em>数据</h1>
+<h2 id="31选择xml解释器">3.1、选择<em>XML</em>解释器</h2>
+<p><em>Android</em>提供了三种类型的<em>XML</em>解析器，它们是<em>DOM</em>、<em>SAX</em>和<em>XmlPullParser</em>，但是官方建议使用<em>XmlPullParser</em>，这是一种在<em>Android</em>上解析<em>XML</em>的高效且可维护的方式，<em>Android</em>有此接口的两个实现如下：</p>
+<ul>
+<li><em>KXmlParser</em>，使用<em>XmlPullParserFactory.newPullParser()</em></li>
+<li><em>ExpatPullParser</em>，使用<em>Xml.newPullParser()</em></li>
+</ul>
+<p>上面两种任一选择都可以，在本文的示例中使用的是<em>ExpatPullParser</em>和<em>Xml.newPullParser()</em>。</p>
+<h3 id="311xmlpullparser接口">3.1.1、<em>XmlPullParser</em>接口</h3>
+<p>这里仅列举<em>XmlPullParser</em>接口和后面示例有联系的变量和方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span><span class="lnt">85
+</span><span class="lnt">86
+</span><span class="lnt">87
+</span><span class="lnt">88
+</span><span class="lnt">89
+</span><span class="lnt">90
+</span><span class="lnt">91
+</span><span class="lnt">92
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">XmlPullParser</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// ***************next()报告的事件类型***************
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 表明解析器位于文档的最开头，尚未读取任何内容，这种事件类型只能通过在第一次调用next()、nextToken或nextTag()之前调用getEventType()来观察
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">int</span> <span class="n">START_DOCUMENT</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>  
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// xml文档的逻辑结束，当到达输入文档的末尾时，从getEventType()、next()和nextToken()返回
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">int</span> <span class="n">END_DOCUMENT</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span>  
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 读取开始标记时从getEventType()、next()、nextToken()返回。开始标记的名称可从getName()获得，其命名空间和前缀可从getNamespace()和getPrefix()获得（如果命名空间已启用）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">int</span> <span class="n">START_TAG</span> <span class="o">=</span> <span class="mi">2</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 读取结束标记时从getEventType()、next()或nextToken()返回。开始标记的名称可从getName()获得，其命名空间和前缀可从getNamespace()和getPrefix()获得
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">int</span> <span class="n">END_TAG</span> <span class="o">=</span> <span class="mi">3</span><span class="o">;</span>    
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 已读取字符数据并将通过调用getText()获得
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">int</span> <span class="n">TEXT</span> <span class="o">=</span> <span class="mi">4</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 该数组可用于将事件类型整型常量（如START_TAG或TEXT）转换为字符串。例如，TYPES[START_TAG]的值是字符串“START_TAG”。该数组仅用于诊断输出。依赖数组的内容可能是危险的，因为恶意应用程序可能会更改数组，尽管它是最终的，但由于Java语言的限制
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">String</span> <span class="o">[]</span> <span class="n">TYPES</span> <span class="o">=</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="s">&#34;START_DOCUMENT&#34;</span><span class="o">,</span>
+</span></span><span class="line"><span class="cl">            <span class="s">&#34;END_DOCUMENT&#34;</span><span class="o">,</span>
+</span></span><span class="line"><span class="cl">            <span class="s">&#34;START_TAG&#34;</span><span class="o">,</span>
+</span></span><span class="line"><span class="cl">            <span class="s">&#34;END_TAG&#34;</span><span class="o">,</span>
+</span></span><span class="line"><span class="cl">            <span class="s">&#34;TEXT&#34;</span><span class="o">,</span>
+</span></span><span class="line"><span class="cl">            <span class="s">&#34;CDSECT&#34;</span><span class="o">,</span>
+</span></span><span class="line"><span class="cl">            <span class="s">&#34;ENTITY_REF&#34;</span><span class="o">,</span>
+</span></span><span class="line"><span class="cl">            <span class="s">&#34;IGNORABLE_WHITESPACE&#34;</span><span class="o">,</span>
+</span></span><span class="line"><span class="cl">            <span class="s">&#34;PROCESSING_INSTRUCTION&#34;</span><span class="o">,</span>
+</span></span><span class="line"><span class="cl">            <span class="s">&#34;COMMENT&#34;</span><span class="o">,</span>
+</span></span><span class="line"><span class="cl">            <span class="s">&#34;DOCDECL&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// ***************命名空间相关特性***************
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 这个特性决定了解析器是否处理命名空间。对于所有功能，默认值为false
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 注意：该值在解析期间不能更改，必须在解析前设置
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">String</span> <span class="n">FEATURE_PROCESS_NAMESPACES</span> <span class="o">=</span>
+</span></span><span class="line"><span class="cl">        <span class="s">&#34;http://xmlpull.org/v1/doc/features.html#process-namespaces&#34;</span><span class="o">;</span>    
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 使用此调用来更改解析器的一般行为，例如命名空间处理或文档类型声明处理。必须在第一次调用next或nextToken之前调用此方法。否则，将抛出异常
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">void</span> <span class="nf">setFeature</span><span class="o">(</span><span class="n">String</span> <span class="n">name</span><span class="o">,</span>
+</span></span><span class="line"><span class="cl">                           <span class="kt">boolean</span> <span class="n">state</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">XmlPullParserException</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 将解析器的输入源设置为给定的阅读器并重置解析器。事件类型设置为初始值 START_DOCUMENT。将读取器设置为null只会停止解析并重置解析器状态，从而允许解析器释放解析缓冲区等内部资源
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">void</span> <span class="nf">setInput</span><span class="o">(</span><span class="n">Reader</span> <span class="n">in</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">XmlPullParserException</span><span class="o">;</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 设置解析器将要处理的输入流。此调用重置解析器状态并将事件类型设置为初始值START_DOCUMENT
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 注意：如果传递了输入编码字符串，则必须使用它。否则，如果inputEncoding为null，解析器应该尝试确定遵循XML 1.0规范的输入编码（见下文）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">void</span> <span class="nf">setInput</span><span class="o">(</span><span class="n">InputStream</span> <span class="n">inputStream</span><span class="o">,</span> <span class="n">String</span> <span class="n">inputEncoding</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl">        <span class="kd">throws</span> <span class="n">XmlPullParserException</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// ***************TEXT相关方法***************
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 检查当前TEXT事件是否只包含空白字符。对于IGNORABLE_WHITESPACE，这始终为真。对于TEXT和CDSECT，当当前事件文本至少包含一个非空白字符时返回false。对于任何其他事件类型，都会抛出异常
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">boolean</span> <span class="nf">isWhitespace</span><span class="o">()</span> <span class="kd">throws</span> <span class="n">XmlPullParserException</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 以String形式返回当前事件的文本内容。返回值取决于当前事件类型，例如对于TEXT事件，它是元素内容（这是使用next()时的典型情况）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">String</span> <span class="nf">getText</span> <span class="o">();</span>    
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// ***************START_TAG END_TAG共享方法***************
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 对于START_TAG或END_TAG事件，启用命名空间时返回当前元素的（本地）名称。当命名空间处理被禁用时，原始名称被返回。对于ENTITY_REF事件，返回实体名称。如果当前事件不是START_TAG、END_TAG或ENTITY_REF，则返回null
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">String</span> <span class="nf">getName</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// ***************START_TAG属性检索方法***************
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 返回由命名空间URI和命名空间localName标识的属性值。如果命名空间被禁用，命名空间必须为空。如果当前事件类型不是START_TAG，则将抛出IndexOutOfBoundsException
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">String</span> <span class="nf">getAttributeValue</span><span class="o">(</span><span class="n">String</span> <span class="n">namespace</span><span class="o">,</span>
+</span></span><span class="line"><span class="cl">                                    <span class="n">String</span> <span class="n">name</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// ***************实际解析方法***************
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 返回当前事件的类型（START_TAG、END_TAG、TEXT等）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">int</span> <span class="nf">getEventType</span><span class="o">()</span>
+</span></span><span class="line"><span class="cl">        <span class="kd">throws</span> <span class="n">XmlPullParserException</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 获取下一个解析事件 - 元素内容将被合并，并且必须为整个元素内容只返回一个TEXT事件（将忽略注释和处理指令，并且必须扩展实体引用，或者如果实体引用无法扩展则必须抛出异常）。如果元素内容为空（内容为“”），则不会报告TEXT事件
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">int</span> <span class="nf">next</span><span class="o">()</span>
+</span></span><span class="line"><span class="cl">        <span class="kd">throws</span> <span class="n">XmlPullParserException</span><span class="o">,</span> <span class="n">IOException</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// ***************使XML解析更容易的实用方法***************
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 测试当前事件是否属于给定类型以及命名空间和名称是否匹配。null将匹配任何名称空间和任何名称。如果测试未通过，则抛出异常。异常文本表示解析器位置、预期事件和不符合要求的当前事件
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">void</span> <span class="nf">require</span><span class="o">(</span><span class="kt">int</span> <span class="n">type</span><span class="o">,</span> <span class="n">String</span> <span class="n">namespace</span><span class="o">,</span> <span class="n">String</span> <span class="n">name</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl">        <span class="kd">throws</span> <span class="n">XmlPullParserException</span><span class="o">,</span> <span class="n">IOException</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 如果是START_TAG或END_TAG，则调用next()并返回事件，否则抛出异常。如果有的话，它将跳过实际标记之前的空白TEXT
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">int</span> <span class="nf">nextTag</span><span class="o">()</span> <span class="kd">throws</span> <span class="n">XmlPullParserException</span><span class="o">,</span> <span class="n">IOException</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>接下来，只讲解一下重点的方法。</p>
+<h4 id="3111next方法">3.1.1.1、<em>next</em>方法</h4>
+<p>从上面的注释可以知道，<em>next</em>方法用于获取下一个解析事件，但是它有一些现象需要知道下。</p>
+<ul>
+<li>现象一：如果元素内容为空，则不会报告TEXT事件。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-kotlin" data-lang="kotlin"><span class="line"><span class="cl"><span class="c1">// kotlin原始字符串
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">val</span> <span class="py">xml</span> <span class="p">=</span> <span class="s">&#34;&#34;&#34;                                                                                                             
+</span></span></span><span class="line"><span class="cl"><span class="s">    &lt;school&gt;&lt;/school&gt;                                                                                                     
+</span></span></span><span class="line"><span class="cl"><span class="s">&#34;&#34;&#34;</span><span class="p">.</span><span class="n">trimIndent</span><span class="p">()</span>                                                                                                          
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">val</span> <span class="py">parser</span> <span class="p">=</span> <span class="nc">Xml</span><span class="p">.</span><span class="n">newPullParser</span><span class="p">()</span> 
+</span></span><span class="line"><span class="cl"><span class="c1">// 解析器不处理命名空间                                                                                         
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">parser</span><span class="p">.</span><span class="n">setFeature</span><span class="p">(</span><span class="nc">XmlPullParser</span><span class="p">.</span><span class="n">FEATURE_PROCESS_NAMESPACES</span><span class="p">,</span> <span class="k">false</span><span class="p">)</span>                                                        
+</span></span><span class="line"><span class="cl"><span class="n">parser</span><span class="p">.</span><span class="n">setInput</span><span class="p">(</span><span class="n">StringReader</span><span class="p">(</span><span class="n">xml</span><span class="p">))</span>                                                                                        
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">var</span> <span class="py">eventType</span> <span class="p">=</span> <span class="n">parser</span><span class="p">.</span><span class="n">eventType</span>                                                                                          
+</span></span><span class="line"><span class="cl"><span class="k">while</span> <span class="p">(</span><span class="n">eventType</span> <span class="o">!=</span> <span class="nc">XmlPullParser</span><span class="p">.</span><span class="n">END_DOCUMENT</span><span class="p">)</span> <span class="p">{</span>                                                                         
+</span></span><span class="line"><span class="cl">    <span class="nc">Log</span><span class="p">.</span><span class="n">e</span><span class="p">(</span><span class="s2">&#34;MinKin&#34;</span><span class="p">,</span> <span class="s2">&#34;eventType: </span><span class="si">${XmlPullParser.TYPES[eventType]}</span><span class="s2">; name: </span><span class="si">${parser.name}</span><span class="s2">; text: </span><span class="si">${parser.text}</span><span class="s2">&#34;</span><span class="p">)</span>           
+</span></span><span class="line"><span class="cl">    <span class="n">eventType</span> <span class="p">=</span> <span class="n">parser</span><span class="p">.</span><span class="n">next</span><span class="p">()</span>                                                                                             
+</span></span><span class="line"><span class="cl"><span class="p">}</span>                                                                                                                         
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>打印结果如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">E/MinKin: eventType: START_DOCUMENT; name: null; text: null
+</span></span><span class="line"><span class="cl">E/MinKin: eventType: START_TAG; name: school; text: null
+</span></span><span class="line"><span class="cl">E/MinKin: eventType: END_TAG; name: school; text: null
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>从打印结果来看，<em>school</em>元素内容为空时，的确没有触发<em>TEXT</em>事件。</p>
+<p>不知到你们是否留意到，为什么也没有触发<em>END_DOCUMENT</em>事件？</p>
+<p>其实是有触发的，只是不满足条件没法打印出来。因为<em>While</em>循环的判断条件为<em>eventType != XmlPullParser.END_DOCUMENT</em>，当<em>eventType == XmlPullParser.END_DOCUMENT</em>时，此时早已退出循环了，所以没有打印出来。</p>
+<ul>
+<li>特性二：如果实体引用无法扩展则必须抛出异常。</li>
+</ul>
+<p>将上面代码中的<em>xml</em>变量替换为如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">val</span> <span class="n">xml</span> <span class="o">=</span> <span class="s">&#34;&#34;&#34;           
+</span></span></span><span class="line"><span class="cl"><span class="s">    &lt;school&gt; &lt; &lt;/school&gt;
+</span></span></span><span class="line"><span class="cl"><span class="s">&#34;&#34;&#34;</span><span class="o">.</span><span class="na">trimIndent</span><span class="o">()</span>        
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>此时因为<em>school</em>标签之间多了&rdquo;&lt;&quot;，运行时会触发<em>XmlPullParserException</em>这样的一个崩溃。把字符&quot;&lt;&ldquo;放在 <em>XML</em>元素中，会发生错误，这是因为解析器会把它当作新元素的开始，为了避免这个错误，用<em>实体引用</em>来代替&rdquo;&lt;&ldquo;字符，这也是我们之前讲过的。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">val</span> <span class="n">xml</span> <span class="o">=</span> <span class="s">&#34;&#34;&#34;           
+</span></span></span><span class="line"><span class="cl"><span class="s">    &lt;school&gt; &lt; &lt;/school&gt;
+</span></span></span><span class="line"><span class="cl"><span class="s">&#34;&#34;&#34;</span><span class="o">.</span><span class="na">trimIndent</span><span class="o">()</span>  
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>修改为实体引用后，打印结果如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">E/MinKin: eventType: START_DOCUMENT; name: null; text: null
+</span></span><span class="line"><span class="cl">E/MinKin: eventType: START_TAG; name: school; text: null
+</span></span><span class="line"><span class="cl">E/MinKin: eventType: TEXT; name: null; text:  &lt; 
+</span></span><span class="line"><span class="cl">E/MinKin: eventType: END_TAG; name: school; text: null
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>特性三：标签之间不是黏连一起的，比如之间有空格，或者出现了换行，或者存在子标签的情况下，都会报告<em>TEXT</em>事件。</li>
+</ul>
+<p>将上面代码中的<em>xml</em>变量替换为如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// 标签之间有空格
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">val</span> <span class="n">xml</span> <span class="o">=</span> <span class="s">&#34;&#34;&#34;         
+</span></span></span><span class="line"><span class="cl"><span class="s">    &lt;school&gt; &lt;/school&gt;
+</span></span></span><span class="line"><span class="cl"><span class="s">&#34;&#34;&#34;</span><span class="o">.</span><span class="na">trimIndent</span><span class="o">()</span>      
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// 标签之间出现了换行
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">val</span> <span class="n">xml</span> <span class="o">=</span> <span class="s">&#34;&#34;&#34;     
+</span></span></span><span class="line"><span class="cl"><span class="s">    &lt;school&gt;      
+</span></span></span><span class="line"><span class="cl"><span class="s">    &lt;/school&gt;     
+</span></span></span><span class="line"><span class="cl"><span class="s">&#34;&#34;&#34;</span><span class="o">.</span><span class="na">trimIndent</span><span class="o">()</span>  
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>打印结果如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">E/MinKin: eventType: START_DOCUMENT; name: null; text: null
+</span></span><span class="line"><span class="cl">E/MinKin: eventType: START_TAG; name: school; text: null
+</span></span><span class="line"><span class="cl">E/MinKin: eventType: TEXT; name: null; text:  
+</span></span><span class="line"><span class="cl">E/MinKin: eventType: END_TAG; name: school; text: null
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>明显可以看到，这里<em>school</em>标签之间多打印了一次<em>TEXT</em>事件。如果是存在子标签的情况下，代码如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">val</span> <span class="n">xml</span> <span class="o">=</span> <span class="s">&#34;&#34;&#34;               
+</span></span></span><span class="line"><span class="cl"><span class="s">    &lt;school&gt;                
+</span></span></span><span class="line"><span class="cl"><span class="s">        &lt;count&gt;1000&lt;/count&gt; 
+</span></span></span><span class="line"><span class="cl"><span class="s">    &lt;/school&gt;               
+</span></span></span><span class="line"><span class="cl"><span class="s">&#34;&#34;&#34;</span><span class="o">.</span><span class="na">trimIndent</span><span class="o">()</span>            
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>打印结果如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">E/MinKin: eventType: START_DOCUMENT; name: null; text: null
+</span></span><span class="line"><span class="cl">E/MinKin: eventType: START_TAG; name: school; text: null
+</span></span><span class="line"><span class="cl">E/MinKin: eventType: TEXT; name: null; text:  
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">E/MinKin: eventType: START_TAG; name: count; text: null
+</span></span><span class="line"><span class="cl">E/MinKin: eventType: TEXT; name: null; text: 1000
+</span></span><span class="line"><span class="cl">E/MinKin: eventType: END_TAG; name: count; text: null
+</span></span><span class="line"><span class="cl">E/MinKin: eventType: TEXT; name: null; text: 
+</span></span><span class="line"><span class="cl">E/MinKin: eventType: END_TAG; name: school; text: null
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>明显可以看到，这里<em>count</em>标签前后多打印了两次<em>TEXT</em>事件。</p>
+<h4 id="3112nexttag方法">3.1.1.2、<em>nextTag</em>方法</h4>
+<p>如果当前事件不是<em>START_TAG</em>或<em>END_TAG</em>，会抛出<em>XmlPullParserException</em>异常，例如下面代码就会崩溃。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">val</span> <span class="n">xml</span> <span class="o">=</span> <span class="s">&#34;&#34;&#34;                                                               
+</span></span></span><span class="line"><span class="cl"><span class="s">    &lt;school&gt;清华大学&lt;/school&gt;                                                       
+</span></span></span><span class="line"><span class="cl"><span class="s">&#34;&#34;&#34;</span><span class="o">.</span><span class="na">trimIndent</span><span class="o">()</span>                                                            
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">val</span> <span class="n">parser</span> <span class="o">=</span> <span class="n">Xml</span><span class="o">.</span><span class="na">newPullParser</span><span class="o">()</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// 解析器不处理命名空间                                               
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">parser</span><span class="o">.</span><span class="na">setFeature</span><span class="o">(</span><span class="n">XmlPullParser</span><span class="o">.</span><span class="na">FEATURE_PROCESS_NAMESPACES</span><span class="o">,</span> <span class="kc">false</span><span class="o">)</span>          
+</span></span><span class="line"><span class="cl"><span class="n">parser</span><span class="o">.</span><span class="na">setInput</span><span class="o">(</span><span class="n">StringReader</span><span class="o">(</span><span class="n">xml</span><span class="o">))</span>                                          
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">parser</span><span class="o">.</span><span class="na">next</span><span class="o">()</span>                                                               
+</span></span><span class="line"><span class="cl"><span class="n">parser</span><span class="o">.</span><span class="na">nextTag</span><span class="o">()</span>                                                            
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>分析原因：初始时，当前事件为<em>START_DOCUMENT</em>，调用<em>parser</em>的<em>next</em>方法后，事件变为<em>START_TAG</em>，然后再调用<em>parser</em>的<em>nextTag</em>方法时，它的事件状态应该不满足<em>START_TAG</em>或<em>END_TAG</em>，从而抛出了异常。</p>
+<p>为什么不满足？<em>nextTag</em>方法本质源码为：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">eventType</span> <span class="o">=</span> <span class="n">next</span><span class="o">();</span>                                                       
+</span></span><span class="line"><span class="cl"><span class="k">if</span><span class="o">(</span><span class="n">eventType</span> <span class="o">==</span> <span class="n">TEXT</span> <span class="o">&amp;&amp;</span> <span class="n">isWhitespace</span><span class="o">())</span> <span class="o">{</span>   <span class="c1">// skip whitespace       
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="n">eventType</span> <span class="o">=</span> <span class="n">next</span><span class="o">();</span>                                                        
+</span></span><span class="line"><span class="cl"><span class="o">}</span>                                                                             
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="o">(</span><span class="n">eventType</span> <span class="o">!=</span> <span class="n">START_TAG</span> <span class="o">&amp;&amp;</span> <span class="n">eventType</span> <span class="o">!=</span> <span class="n">END_TAG</span><span class="o">)</span> <span class="o">{</span>                
+</span></span><span class="line"><span class="cl">   <span class="k">throw</span> <span class="k">new</span> <span class="n">XmlPullParserException</span><span class="o">(</span><span class="s">&#34;expected start or end tag&#34;</span><span class="o">,</span> <span class="k">this</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span> 
+</span></span><span class="line"><span class="cl"><span class="o">}</span>                                                                             
+</span></span><span class="line"><span class="cl"><span class="k">return</span> <span class="n">eventType</span><span class="o">;</span>                                                             
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以看到，会优先调用<em>next</em>方法，此时当前事件为<em>TEXT</em>，接着会去判断<em>eventType == TEXT &amp;&amp; isWhitespace()</em>，但是<em>isWhitespace</em>方法是不满足的，因为<em>school</em>标签中存在元素内容“清华大学”，所以<em>isWhitespace</em>方法返回<em>false</em>，也就无法进入<em>if</em>条件去进一步调用<em>next</em>，事件停留在<em>TEXT</em>，满足了后面的<em>eventType != START_TAG &amp;&amp; eventType != END_TAG</em>，从而抛出了异常。</p>
+<p><em><strong>注意：next方法和nextTag方法需要在合理的地方使用，使用不当就会抛出异常。</strong></em></p>
+<h2 id="32分析animal">3.2、分析<em>animal</em></h2>
+<p>创建一个<em>animal.xml</em>文件，解析<em>animal</em>的第一步是确定感兴趣的字段，解析器会提取这些字段的数据，并忽略其余字段。本案例会演示如何忽略cat标签，仅提取需要的字段。</p>
+<p>要解析的<em>XML</em>内容如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-xml" data-lang="xml"><span class="line"><span class="cl"><span class="cp">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34; ?&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="nt">&lt;animal</span> <span class="na">xmlns=</span><span class="s">&#34;https://www.baidu.com/&#34;</span><span class="nt">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;dog&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;name&gt;</span>Rufus<span class="nt">&lt;/name&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;breed&gt;</span>labrador<span class="nt">&lt;/breed&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;link</span> <span class="na">href=</span><span class="s">&#34;https://www.baidu.com/s?wd=labrador&#34;</span> <span class="na">rel=</span><span class="s">&#34;alternate&#34;</span><span class="nt">&gt;&lt;/link&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;profile</span> <span class="na">type=</span><span class="s">&#34;html&#34;</span><span class="nt">&gt;</span>
+</span></span><span class="line"><span class="cl">            <span class="cp">&lt;![CDATA[
+</span></span></span><span class="line"><span class="cl"><span class="cp">            &lt;p style=&#34;color: #34495e;&#34;&gt;拉布拉多猎犬（英文名：Labrador retriever）是起源于加拿大的纽芬兰岛，最早被训练在冰冷的海上将渔网收回和担任搬运工作的一种猎犬。&lt;/p&gt;
+</span></span></span><span class="line"><span class="cl"><span class="cp">            ]]&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;/profile&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;/dog&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;dog&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;name&gt;</span>Marty<span class="nt">&lt;/name&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;breed&gt;</span>whippet<span class="nt">&lt;/breed&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;link</span> <span class="na">href=</span><span class="s">&#34;https://www.baidu.com/s?wd=whippet&#34;</span> <span class="na">rel=</span><span class="s">&#34;alternate&#34;</span><span class="nt">&gt;&lt;/link&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;profile</span> <span class="na">type=</span><span class="s">&#34;html&#34;</span><span class="nt">&gt;</span>
+</span></span><span class="line"><span class="cl">            <span class="cp">&lt;![CDATA[
+</span></span></span><span class="line"><span class="cl"><span class="cp">            &lt;p style=&#34;color: #34495e;&#34;&gt;小灵狗是一种赛狗，性温顺。和蔼。&lt;/p&gt;
+</span></span></span><span class="line"><span class="cl"><span class="cp">            ]]&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;/profile&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;/dog&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;cat&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;name&gt;</span>大黄<span class="nt">&lt;/name&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;/cat&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="nt">&lt;/animal&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>习惯性，<em>animal</em>标签包含了命名空间<em>xmlns</em>，<em>profile</em>标签的元素内容标记为<em>HTML</em>，所以要把<em>HTML</em>内容当成整体的纯文本去提取，这里给<em>HTML</em>内容包裹一层<code>&lt;![CDATA[ HTML内容 ]]</code>，否则<em>HTML</em>中的标签会被<em>XML</em>当成元素去解析。</p>
+<h2 id="33实例化xml解释器">3.3、实例化<em>XML</em>解释器</h2>
+<p>解析<em>animal</em>的下一步就是实例化解析器和启动解析的过程，此代码段会初始化一个解析器，使其不处理命名空间并将提供的<em>InputStream</em>用作输入，它通过调用<em>nextTag</em>方法开始解析过程，并调用<em>readAnimal</em>方法，该方法将提取并处理应用感兴趣的数据，代码如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">AnimalXMLParser</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 不使用命名空间
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kd">private</span> <span class="n">val</span> <span class="n">ns</span><span class="o">:</span> <span class="n">String</span><span class="o">?</span> <span class="o">=</span> <span class="kc">null</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nd">@Throws</span><span class="o">(</span><span class="n">XmlPullParserException</span><span class="o">::</span><span class="n">class</span><span class="o">,</span> <span class="n">IOException</span><span class="o">::</span><span class="n">class</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">fun</span> <span class="nf">parse</span><span class="o">(</span><span class="n">inputStream</span><span class="o">:</span> <span class="n">InputStream</span><span class="o">):</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Dog</span><span class="o">&gt;</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">inputStream</span><span class="o">.</span><span class="na">use</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">val</span> <span class="n">parser</span> <span class="o">=</span> <span class="n">Xml</span><span class="o">.</span><span class="na">newPullParser</span><span class="o">()</span>
+</span></span><span class="line"><span class="cl"><span class="err">            </span><span class="c1">// 解析器不处理命名空间   
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="n">parser</span><span class="o">.</span><span class="na">setFeature</span><span class="o">(</span><span class="n">XmlPullParser</span><span class="o">.</span><span class="na">FEATURE_PROCESS_NAMESPACES</span><span class="o">,</span> <span class="kc">false</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">parser</span><span class="o">.</span><span class="na">setInput</span><span class="o">(</span><span class="n">it</span><span class="o">,</span> <span class="kc">null</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">parser</span><span class="o">.</span><span class="na">nextTag</span><span class="o">()</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">readAnimal</span><span class="o">(</span><span class="n">parser</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="34读取animal">3.4、读取<em>animal</em></h2>
+<p><em>readAnimal</em>方法执行处理<em>animal</em>的实际工作，它会查找标记为“<em>dog</em>”的元素作为以递归方式处理<em>animal</em>的起点，如果某个标签不是<em>dog</em>标签，则会跳过它，以递归方式处理完整个<em>animal</em>后，<em>readAnimal</em>方法将返回结果集<em>List<Dog></em>，代码如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="nd">@Throws</span><span class="o">(</span><span class="n">XmlPullParserException</span><span class="o">::</span><span class="n">class</span><span class="o">,</span> <span class="n">IOException</span><span class="o">::</span><span class="n">class</span><span class="o">)</span>    
+</span></span><span class="line"><span class="cl"><span class="kd">private</span> <span class="n">fun</span> <span class="nf">readAnimal</span><span class="o">(</span><span class="n">parser</span><span class="o">:</span> <span class="n">XmlPullParser</span><span class="o">):</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Dog</span><span class="o">&gt;</span> <span class="o">{</span>    
+</span></span><span class="line"><span class="cl">    <span class="n">val</span> <span class="n">dogs</span> <span class="o">=</span> <span class="n">mutableListOf</span><span class="o">&lt;</span><span class="n">Dog</span><span class="o">&gt;()</span> 
+</span></span><span class="line"><span class="cl">    <span class="c1">// 测试当前事件是否属于给定类型以及命名空间和名称是否匹配                          
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">parser</span><span class="o">.</span><span class="na">require</span><span class="o">(</span><span class="n">XmlPullParser</span><span class="o">.</span><span class="na">START_TAG</span><span class="o">,</span> <span class="n">ns</span><span class="o">,</span> <span class="s">&#34;animal&#34;</span><span class="o">)</span>     
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="o">(</span><span class="n">parser</span><span class="o">.</span><span class="na">next</span><span class="o">()</span> <span class="o">!=</span> <span class="n">XmlPullParser</span><span class="o">.</span><span class="na">END_TAG</span><span class="o">)</span> <span class="o">{</span>          
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="o">(</span><span class="n">parser</span><span class="o">.</span><span class="na">eventType</span> <span class="o">!=</span> <span class="n">XmlPullParser</span><span class="o">.</span><span class="na">START_TAG</span><span class="o">)</span> <span class="o">{</span>    
+</span></span><span class="line"><span class="cl">            <span class="k">continue</span>                                          
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>                                                     
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="o">(</span><span class="n">parser</span><span class="o">.</span><span class="na">name</span> <span class="o">==</span> <span class="s">&#34;dog&#34;</span><span class="o">)</span> <span class="o">{</span>                           
+</span></span><span class="line"><span class="cl">            <span class="n">dogs</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">readDog</span><span class="o">(</span><span class="n">parser</span><span class="o">))</span>                         
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>                                                     
+</span></span><span class="line"><span class="cl">        <span class="k">else</span> <span class="o">{</span>                                                
+</span></span><span class="line"><span class="cl">            <span class="n">skip</span><span class="o">(</span><span class="n">parser</span><span class="o">)</span>                                      
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>                                                     
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>                                                         
+</span></span><span class="line"><span class="cl">    <span class="n">parser</span><span class="o">.</span><span class="na">require</span><span class="o">(</span><span class="n">XmlPullParser</span><span class="o">.</span><span class="na">END_TAG</span><span class="o">,</span> <span class="n">ns</span><span class="o">,</span> <span class="s">&#34;animal&#34;</span><span class="o">)</span>       
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">dogs</span>                                               
+</span></span><span class="line"><span class="cl"><span class="o">}</span>                                                             
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>其中<em>Dog</em>类为：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-kotlin" data-lang="kotlin"><span class="line"><span class="cl"><span class="k">data</span> <span class="k">class</span> <span class="nc">Dog</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="k">val</span> <span class="py">name</span><span class="p">:</span> <span class="n">String</span><span class="p">?,</span>
+</span></span><span class="line"><span class="cl">    <span class="k">val</span> <span class="py">breed</span><span class="p">:</span> <span class="n">String</span><span class="p">?,</span>
+</span></span><span class="line"><span class="cl">    <span class="k">val</span> <span class="py">link</span><span class="p">:</span> <span class="n">String</span><span class="p">?,</span>
+</span></span><span class="line"><span class="cl">    <span class="k">val</span> <span class="py">profile</span><span class="p">:</span> <span class="n">String</span><span class="p">?</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="35解析xml">3.5、解析<em>XML</em></h2>
+<p>解析<em>XML animal</em>的步骤如下：</p>
+<ol>
+<li>
+<p>按照分析<em>animal</em>中所述，确定希望包含在应用中的标签。此示例提取了<em>dog</em>标签及其嵌套标签<em>name</em>、<em>breed</em>、<em>link</em>和<em>profile</em>的数据。</p>
+</li>
+<li>
+<p>创建以下方法：</p>
+<ul>
+<li>要包含的每个标签的“<em>read</em>”方法，例如<em>readDog</em>方法。解析器会从输入流中读取标签。当遇到此示例中名为<em>name</em>、<em>breed</em>、<em>link</em>和<em>profile</em>的标签时，它会调用该标签的相应方法。否则，它会跳过该标签。</li>
+<li>为每个不同类型的标签提取数据并推动解析器解析下一个标签的方法。在此示例中，相关方法如下所示：
+<ul>
+<li>对于<em>name</em>、<em>breed</em>和<em>profile</em>标签，解析器会调用 <em>readText</em>方法。此方法通过调用<em>parser</em>的<em>getText</em>方法提取这些标签的数据。</li>
+<li>对于<em>link</em>标签，解析器首先会确定链接是否为其感兴趣的类型，再提取该链接的数据。然后使用<em>parser</em>的<em>getAttributeValue</em>方法提取该链接的值。</li>
+<li>对于<em>dog</em>标签，解析器会调用<em>readDog</em>方法。此方法会解析条目的嵌套标签，并返回包含数据成员<em>name</em>、<em>breed</em>、<em>link</em>和<em>profile</em>的<em>Dog</em>对象。</li>
+</ul>
+</li>
+<li>一种递归的辅助<em>skip</em>方法。</li>
+</ul>
+</li>
+</ol>
+<p>以下代码段展示了解析器如何解析<em>name</em>、<em>breed</em>、<em>link</em>和<em>profile</em>。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-kotlin" data-lang="kotlin"><span class="line"><span class="cl"><span class="nd">@Throws</span><span class="p">(</span><span class="n">XmlPullParserException</span><span class="o">::</span><span class="k">class</span><span class="p">,</span> <span class="n">IOException</span><span class="o">::</span><span class="k">class</span><span class="p">)</span>           
+</span></span><span class="line"><span class="cl"><span class="k">private</span> <span class="k">fun</span> <span class="nf">readDog</span><span class="p">(</span><span class="n">parser</span><span class="p">:</span> <span class="n">XmlPullParser</span><span class="p">):</span> <span class="n">Dog</span> <span class="p">{</span>                    
+</span></span><span class="line"><span class="cl">    <span class="n">parser</span><span class="p">.</span><span class="n">require</span><span class="p">(</span><span class="nc">XmlPullParser</span><span class="p">.</span><span class="n">START_TAG</span><span class="p">,</span> <span class="n">ns</span><span class="p">,</span> <span class="s2">&#34;dog&#34;</span><span class="p">)</span>               
+</span></span><span class="line"><span class="cl">    <span class="k">var</span> <span class="py">name</span><span class="p">:</span> <span class="n">String</span><span class="p">?</span> <span class="p">=</span> <span class="k">null</span>                                         
+</span></span><span class="line"><span class="cl">    <span class="k">var</span> <span class="py">breed</span><span class="p">:</span> <span class="n">String</span><span class="p">?</span> <span class="p">=</span> <span class="k">null</span>                                        
+</span></span><span class="line"><span class="cl">    <span class="k">var</span> <span class="py">link</span><span class="p">:</span> <span class="n">String</span><span class="p">?</span> <span class="p">=</span> <span class="k">null</span>                                         
+</span></span><span class="line"><span class="cl">    <span class="k">var</span> <span class="py">profile</span><span class="p">:</span> <span class="n">String</span><span class="p">?</span> <span class="p">=</span> <span class="k">null</span>                                      
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="n">parser</span><span class="p">.</span><span class="n">next</span><span class="p">()</span> <span class="o">!=</span> <span class="nc">XmlPullParser</span><span class="p">.</span><span class="n">END_TAG</span><span class="p">)</span> <span class="p">{</span>                 
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">parser</span><span class="p">.</span><span class="n">eventType</span> <span class="o">!=</span> <span class="nc">XmlPullParser</span><span class="p">.</span><span class="n">START_TAG</span><span class="p">)</span> <span class="p">{</span>           
+</span></span><span class="line"><span class="cl">            <span class="k">continue</span>                                                 
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>                                                            
+</span></span><span class="line"><span class="cl">        <span class="k">when</span> <span class="p">(</span><span class="n">parser</span><span class="p">.</span><span class="n">name</span><span class="p">)</span> <span class="p">{</span>                                         
+</span></span><span class="line"><span class="cl">            <span class="s2">&#34;name&#34;</span>    <span class="o">-&gt;</span> <span class="n">name</span> <span class="p">=</span> <span class="n">readName</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>                     
+</span></span><span class="line"><span class="cl">            <span class="s2">&#34;breed&#34;</span>   <span class="o">-&gt;</span> <span class="n">breed</span> <span class="p">=</span> <span class="n">readBreed</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>                   
+</span></span><span class="line"><span class="cl">            <span class="s2">&#34;link&#34;</span>    <span class="o">-&gt;</span> <span class="n">link</span> <span class="p">=</span> <span class="n">readLink</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>                     
+</span></span><span class="line"><span class="cl">            <span class="s2">&#34;profile&#34;</span> <span class="o">-&gt;</span> <span class="n">profile</span> <span class="p">=</span> <span class="n">readProfile</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>               
+</span></span><span class="line"><span class="cl">            <span class="k">else</span>      <span class="o">-&gt;</span> <span class="n">skip</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>                                
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>                                                            
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>                                                                
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">Dog</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">breed</span><span class="p">,</span> <span class="n">link</span><span class="p">,</span> <span class="n">profile</span><span class="p">)</span>                           
+</span></span><span class="line"><span class="cl"><span class="p">}</span>                                                                    
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nd">@Throws</span><span class="p">(</span><span class="n">XmlPullParserException</span><span class="o">::</span><span class="k">class</span><span class="p">,</span> <span class="n">IOException</span><span class="o">::</span><span class="k">class</span><span class="p">)</span>           
+</span></span><span class="line"><span class="cl"><span class="k">private</span> <span class="k">fun</span> <span class="nf">readProfile</span><span class="p">(</span><span class="n">parser</span><span class="p">:</span> <span class="n">XmlPullParser</span><span class="p">):</span> <span class="n">String</span> <span class="p">{</span>             
+</span></span><span class="line"><span class="cl">    <span class="n">parser</span><span class="p">.</span><span class="n">require</span><span class="p">(</span><span class="nc">XmlPullParser</span><span class="p">.</span><span class="n">START_TAG</span><span class="p">,</span> <span class="n">ns</span><span class="p">,</span> <span class="s2">&#34;profile&#34;</span><span class="p">)</span>           
+</span></span><span class="line"><span class="cl">    <span class="k">val</span> <span class="py">profile</span> <span class="p">=</span> <span class="n">readText</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>                                   
+</span></span><span class="line"><span class="cl">    <span class="n">parser</span><span class="p">.</span><span class="n">require</span><span class="p">(</span><span class="nc">XmlPullParser</span><span class="p">.</span><span class="n">END_TAG</span><span class="p">,</span> <span class="n">ns</span><span class="p">,</span> <span class="s2">&#34;profile&#34;</span><span class="p">)</span>             
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">profile</span>                                                   
+</span></span><span class="line"><span class="cl"><span class="p">}</span>                                                                    
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nd">@Throws</span><span class="p">(</span><span class="n">XmlPullParserException</span><span class="o">::</span><span class="k">class</span><span class="p">,</span> <span class="n">IOException</span><span class="o">::</span><span class="k">class</span><span class="p">)</span>           
+</span></span><span class="line"><span class="cl"><span class="k">private</span> <span class="k">fun</span> <span class="nf">readLink</span><span class="p">(</span><span class="n">parser</span><span class="p">:</span> <span class="n">XmlPullParser</span><span class="p">):</span> <span class="n">String</span> <span class="p">{</span>                
+</span></span><span class="line"><span class="cl">    <span class="k">var</span> <span class="py">link</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>                                                    
+</span></span><span class="line"><span class="cl">    <span class="n">parser</span><span class="p">.</span><span class="n">require</span><span class="p">(</span><span class="nc">XmlPullParser</span><span class="p">.</span><span class="n">START_TAG</span><span class="p">,</span> <span class="n">ns</span><span class="p">,</span> <span class="s2">&#34;link&#34;</span><span class="p">)</span>              
+</span></span><span class="line"><span class="cl">    <span class="k">val</span> <span class="py">tag</span> <span class="p">=</span> <span class="n">parser</span><span class="p">.</span><span class="n">name</span>                                            
+</span></span><span class="line"><span class="cl">    <span class="k">val</span> <span class="py">relType</span> <span class="p">=</span> <span class="n">parser</span><span class="p">.</span><span class="n">getAttributeValue</span><span class="p">(</span><span class="k">null</span><span class="p">,</span> <span class="s2">&#34;rel&#34;</span><span class="p">)</span>              
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">tag</span> <span class="o">==</span> <span class="s2">&#34;link&#34;</span><span class="p">)</span> <span class="p">{</span>                                             
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">relType</span> <span class="o">==</span> <span class="s2">&#34;alternate&#34;</span><span class="p">)</span> <span class="p">{</span>                                
+</span></span><span class="line"><span class="cl">            <span class="n">link</span> <span class="p">=</span> <span class="n">parser</span><span class="p">.</span><span class="n">getAttributeValue</span><span class="p">(</span><span class="k">null</span><span class="p">,</span> <span class="s2">&#34;href&#34;</span><span class="p">)</span>            
+</span></span><span class="line"><span class="cl">            <span class="n">parser</span><span class="p">.</span><span class="n">nextTag</span><span class="p">()</span>                                         
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>                                                            
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>                                                                
+</span></span><span class="line"><span class="cl">    <span class="n">parser</span><span class="p">.</span><span class="n">require</span><span class="p">(</span><span class="nc">XmlPullParser</span><span class="p">.</span><span class="n">END_TAG</span><span class="p">,</span> <span class="n">ns</span><span class="p">,</span> <span class="s2">&#34;link&#34;</span><span class="p">)</span>                
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">link</span>                                                      
+</span></span><span class="line"><span class="cl"><span class="p">}</span>                                                                    
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nd">@Throws</span><span class="p">(</span><span class="n">XmlPullParserException</span><span class="o">::</span><span class="k">class</span><span class="p">,</span> <span class="n">IOException</span><span class="o">::</span><span class="k">class</span><span class="p">)</span>           
+</span></span><span class="line"><span class="cl"><span class="k">private</span> <span class="k">fun</span> <span class="nf">readBreed</span><span class="p">(</span><span class="n">parser</span><span class="p">:</span> <span class="n">XmlPullParser</span><span class="p">):</span> <span class="n">String</span> <span class="p">{</span>               
+</span></span><span class="line"><span class="cl">    <span class="n">parser</span><span class="p">.</span><span class="n">require</span><span class="p">(</span><span class="nc">XmlPullParser</span><span class="p">.</span><span class="n">START_TAG</span><span class="p">,</span> <span class="n">ns</span><span class="p">,</span> <span class="s2">&#34;breed&#34;</span><span class="p">)</span>             
+</span></span><span class="line"><span class="cl">    <span class="k">val</span> <span class="py">breed</span> <span class="p">=</span> <span class="n">readText</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>                                     
+</span></span><span class="line"><span class="cl">    <span class="n">parser</span><span class="p">.</span><span class="n">require</span><span class="p">(</span><span class="nc">XmlPullParser</span><span class="p">.</span><span class="n">END_TAG</span><span class="p">,</span> <span class="n">ns</span><span class="p">,</span> <span class="s2">&#34;breed&#34;</span><span class="p">)</span>               
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">breed</span>                                                     
+</span></span><span class="line"><span class="cl"><span class="p">}</span>                                                                    
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nd">@Throws</span><span class="p">(</span><span class="n">XmlPullParserException</span><span class="o">::</span><span class="k">class</span><span class="p">,</span> <span class="n">IOException</span><span class="o">::</span><span class="k">class</span><span class="p">)</span>           
+</span></span><span class="line"><span class="cl"><span class="k">private</span> <span class="k">fun</span> <span class="nf">readName</span><span class="p">(</span><span class="n">parser</span><span class="p">:</span> <span class="n">XmlPullParser</span><span class="p">):</span> <span class="n">String</span> <span class="p">{</span>                
+</span></span><span class="line"><span class="cl">    <span class="n">parser</span><span class="p">.</span><span class="n">require</span><span class="p">(</span><span class="nc">XmlPullParser</span><span class="p">.</span><span class="n">START_TAG</span><span class="p">,</span> <span class="n">ns</span><span class="p">,</span> <span class="s2">&#34;name&#34;</span><span class="p">)</span>              
+</span></span><span class="line"><span class="cl">    <span class="k">val</span> <span class="py">name</span> <span class="p">=</span> <span class="n">readText</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>                                      
+</span></span><span class="line"><span class="cl">    <span class="n">parser</span><span class="p">.</span><span class="n">require</span><span class="p">(</span><span class="nc">XmlPullParser</span><span class="p">.</span><span class="n">END_TAG</span><span class="p">,</span> <span class="n">ns</span><span class="p">,</span> <span class="s2">&#34;name&#34;</span><span class="p">)</span>                
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">name</span>                                                      
+</span></span><span class="line"><span class="cl"><span class="p">}</span>                                                                    
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nd">@Throws</span><span class="p">(</span><span class="n">XmlPullParserException</span><span class="o">::</span><span class="k">class</span><span class="p">,</span> <span class="n">IOException</span><span class="o">::</span><span class="k">class</span><span class="p">)</span>           
+</span></span><span class="line"><span class="cl"><span class="k">private</span> <span class="k">fun</span> <span class="nf">readText</span><span class="p">(</span><span class="n">parser</span><span class="p">:</span> <span class="n">XmlPullParser</span><span class="p">):</span> <span class="n">String</span> <span class="p">{</span>                
+</span></span><span class="line"><span class="cl">    <span class="k">var</span> <span class="py">result</span> <span class="p">=</span> <span class="s2">&#34;&#34;</span>                                                  
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">parser</span><span class="p">.</span><span class="n">next</span><span class="p">()</span> <span class="o">==</span> <span class="nc">XmlPullParser</span><span class="p">.</span><span class="n">TEXT</span><span class="p">)</span> <span class="p">{</span>                       
+</span></span><span class="line"><span class="cl">        <span class="n">result</span> <span class="p">=</span> <span class="n">parser</span><span class="p">.</span><span class="n">text</span>                                         
+</span></span><span class="line"><span class="cl">        <span class="n">parser</span><span class="p">.</span><span class="n">nextTag</span><span class="p">()</span>                                             
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>                                                                
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">result</span>                                                    
+</span></span><span class="line"><span class="cl"><span class="p">}</span>                                                                    
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="36跳过不感兴趣的标签">3.6、跳过不感兴趣的标签</h2>
+<p>解析器需要跳过不感兴趣的标签，下面是解析器的<em>skip</em>方法，代码如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-kotlin" data-lang="kotlin"><span class="line"><span class="cl"><span class="nd">@Throws</span><span class="p">(</span><span class="n">XmlPullParserException</span><span class="o">::</span><span class="k">class</span><span class="p">,</span> <span class="n">IOException</span><span class="o">::</span><span class="k">class</span><span class="p">)</span>   
+</span></span><span class="line"><span class="cl"><span class="k">private</span> <span class="k">fun</span> <span class="nf">skip</span><span class="p">(</span><span class="n">parser</span><span class="p">:</span> <span class="n">XmlPullParser</span><span class="p">)</span> <span class="p">{</span>                    
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">parser</span><span class="p">.</span><span class="n">eventType</span> <span class="o">!=</span> <span class="nc">XmlPullParser</span><span class="p">.</span><span class="n">START_TAG</span><span class="p">)</span> <span class="p">{</span>       
+</span></span><span class="line"><span class="cl">        <span class="k">throw</span> <span class="n">IllegalStateException</span><span class="p">()</span>                        
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>                                                        
+</span></span><span class="line"><span class="cl">    <span class="k">var</span> <span class="py">depth</span> <span class="p">=</span> <span class="m">1</span>                                            
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="n">depth</span> <span class="o">!=</span> <span class="m">0</span><span class="p">)</span> <span class="p">{</span>                                     
+</span></span><span class="line"><span class="cl">        <span class="k">when</span> <span class="p">(</span><span class="n">parser</span><span class="p">.</span><span class="n">next</span><span class="p">())</span> <span class="p">{</span>                               
+</span></span><span class="line"><span class="cl">            <span class="nc">XmlPullParser</span><span class="p">.</span><span class="n">END_TAG</span>   <span class="o">-&gt;</span> <span class="n">depth</span><span class="o">--</span>               
+</span></span><span class="line"><span class="cl">            <span class="nc">XmlPullParser</span><span class="p">.</span><span class="n">START_TAG</span> <span class="o">-&gt;</span> <span class="n">depth</span><span class="o">++</span>               
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>                                                    
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>                                                        
+</span></span><span class="line"><span class="cl"><span class="p">}</span>                                                            
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>其工作原理如下：</p>
+<ul>
+<li>如果当前事件不是<em>START_TAG</em>，则会抛出异常。</li>
+<li>它会使用<em>START_TAG</em>以及直到匹配的<em>END_TAG</em>（含）的所有事件。</li>
+<li>为确保其在遇到正确的<em>END_TAG</em>时停止，而非在遇到原始 <em>START_TAG</em>之后的首个标签时停止，它会不断追踪嵌套深度。</li>
+</ul>
+<p>因此，如果当前元素具有嵌套元素，在解析器使用了原始<em>START_TAG</em>及其匹配的<em>END_TAG</em>之间的所有事件之前，<em>depth</em>的值不会为0。例如，看看解析器如何跳过拥有<em>name</em>这个嵌套元素的 <em>cat</em>元素：</p>
+<ul>
+<li>第一次经历<em>while</em>循环时，解析器在&lt;<em>cat</em>&gt;之后遇到的下一个标签是&lt;<em>name</em>&gt;的<em>START_TAG</em>。<em>depth</em>的值递增到2。</li>
+<li>第二次经历<em>while</em>循环时，解析器遇到的下一个标签是 <em>END_TAG</em>，也就是&lt;/<em>name</em>&gt;。<em>depth</em>的值递减为1。</li>
+<li>第三次，也就是最后一次经历while循环时，解析器遇到的下一个标签是<em>END_TAG</em>，也就是</cat>。<em>depth</em>的值递减为0，这表明该方法已成功跳过&lt;<em>cat</em>&gt;元素。</li>
+</ul>
+<h2 id="37使用xml数据">3.7、使用XML数据</h2>
+<p>第一步：把<em>animal.xml</em>文件放到<em>Assets</em>目录下。</p>
+<p>第二步：本文使用<em>Databinding</em>，所以需要在<em>app</em>的<em>build.gradle</em>中添加依赖：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-groovy" data-lang="groovy"><span class="line"><span class="cl"><span class="n">android</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dataBinding</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">enabled</span> <span class="o">=</span> <span class="kc">true</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>第三步：改造<em>activity_main.xml</em>布局，这里只有一个点击按钮，给按钮绑定点击事件，点击按钮时触发<em>XML</em>的解析。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-xml" data-lang="xml"><span class="line"><span class="cl"><span class="cp">&lt;?xml version=&#34;1.0&#34; encoding=&#34;utf-8&#34;?&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="nt">&lt;layout</span> <span class="na">xmlns:android=</span><span class="s">&#34;http://schemas.android.com/apk/res/android&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="na">xmlns:app=</span><span class="s">&#34;http://schemas.android.com/apk/res-auto&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="na">xmlns:tools=</span><span class="s">&#34;http://schemas.android.com/tools&#34;</span><span class="nt">&gt;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;data&gt;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;variable</span>
+</span></span><span class="line"><span class="cl">            <span class="na">name=</span><span class="s">&#34;presenter&#34;</span>
+</span></span><span class="line"><span class="cl">            <span class="na">type=</span><span class="s">&#34;com.pengmj.androidparsexml.Presenter&#34;</span> <span class="nt">/&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;/data&gt;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;androidx.constraintlayout.widget.ConstraintLayout</span>
+</span></span><span class="line"><span class="cl">        <span class="na">android:layout_width=</span><span class="s">&#34;match_parent&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="na">android:layout_height=</span><span class="s">&#34;match_parent&#34;</span>
+</span></span><span class="line"><span class="cl">        <span class="na">tools:context=</span><span class="s">&#34;.MainActivity&#34;</span><span class="nt">&gt;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;Button</span>
+</span></span><span class="line"><span class="cl">            <span class="na">android:layout_width=</span><span class="s">&#34;wrap_content&#34;</span>
+</span></span><span class="line"><span class="cl">            <span class="na">android:layout_height=</span><span class="s">&#34;wrap_content&#34;</span>
+</span></span><span class="line"><span class="cl">            <span class="na">android:onClick=</span><span class="s">&#34;@{(view)-&gt;presenter.onParseXML(view)}&#34;</span>
+</span></span><span class="line"><span class="cl">            <span class="na">android:text=</span><span class="s">&#34;解析XML&#34;</span>
+</span></span><span class="line"><span class="cl">            <span class="na">app:layout_constraintBottom_toBottomOf=</span><span class="s">&#34;parent&#34;</span>
+</span></span><span class="line"><span class="cl">            <span class="na">app:layout_constraintEnd_toEndOf=</span><span class="s">&#34;parent&#34;</span>
+</span></span><span class="line"><span class="cl">            <span class="na">app:layout_constraintStart_toStartOf=</span><span class="s">&#34;parent&#34;</span>
+</span></span><span class="line"><span class="cl">            <span class="na">app:layout_constraintTop_toTopOf=</span><span class="s">&#34;parent&#34;</span> <span class="nt">/&gt;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="nt">&lt;/layout&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>第四步：实现点击事件。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-kotlin" data-lang="kotlin"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Presenter</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">companion</span> <span class="k">object</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">private</span> <span class="k">val</span> <span class="py">tag</span><span class="p">:</span> <span class="n">String</span> <span class="p">=</span> <span class="n">Presenter</span><span class="o">::</span><span class="k">class</span><span class="p">.</span><span class="n">java</span><span class="p">.</span><span class="n">simpleName</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">fun</span> <span class="nf">onParseXML</span><span class="p">(</span><span class="n">view</span><span class="p">:</span> <span class="n">View</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">val</span> <span class="py">inputStream</span> <span class="p">=</span> <span class="n">view</span><span class="p">.</span><span class="n">context</span><span class="p">.</span><span class="n">assets</span><span class="p">.</span><span class="k">open</span><span class="p">(</span><span class="s2">&#34;animal.xml&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">val</span> <span class="py">list</span> <span class="p">=</span> <span class="n">AnimalXMLParser</span><span class="p">().</span><span class="n">parse</span><span class="p">(</span><span class="n">inputStream</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="nc">Log</span><span class="p">.</span><span class="n">e</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">list</span><span class="p">.</span><span class="n">toString</span><span class="p">())</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>第五步：在<em>MainActivity</em>中将<em>Databinding</em>绑定<em>UI</em>层，设置页面点击事件对象。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-kotlin" data-lang="kotlin"><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">MainActivity</span> <span class="p">:</span> <span class="n">AppCompatActivity</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">override</span> <span class="k">fun</span> <span class="nf">onCreate</span><span class="p">(</span><span class="n">savedInstanceState</span><span class="p">:</span> <span class="n">Bundle</span><span class="p">?)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">super</span><span class="p">.</span><span class="n">onCreate</span><span class="p">(</span><span class="n">savedInstanceState</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">val</span> <span class="py">binding</span> <span class="p">=</span>
+</span></span><span class="line"><span class="cl">                <span class="nc">DataBindingUtil</span><span class="p">.</span><span class="n">setContentView</span><span class="p">&lt;</span><span class="n">ActivityMainBinding</span><span class="p">&gt;(</span><span class="k">this</span><span class="p">,</span> <span class="nc">R</span><span class="p">.</span><span class="n">layout</span><span class="p">.</span><span class="n">activity_main</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">binding</span><span class="p">.</span><span class="n">presenter</span> <span class="p">=</span> <span class="n">Presenter</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div>
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">文章作者</span>
+    <span class="item-content">AndDevMK</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">上次更新</span>
+    <span class="item-content">
+        2023-05-07
+        
+    </span>
+  </p>
+  
+  <p class="copyright-item">
+    <span class="item-title">许可协议</span>
+    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a></span>
+  </p>
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">赞赏支持</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat-qr-code.JPG">
+        <span>微信打赏</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay-qr-code.JPG">
+        <span>支付宝打赏</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      
+      <nav class="post-nav">
+        
+        <a class="next" href="/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBarraydeque%E6%BA%90%E7%A0%81jdk11/">
+            <span class="next-text nav-default">Java集合系列：一文解读ArrayDeque源码「JDK11」</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="AndDevMK/blog-utterances"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    
+    <div id="search_mask" class="search_mask">
+    <div class="search_modal">
+        <div id="close_search" class="close_search">关闭</div>
+        <div class="search_divider"></div>
+        <input id="input_search_key" class="input_search_key" placeholder="请输入你要搜索的内容" tabindex="0">
+        <ul id="search_list">
+        </ul>
+    </div>
+</div>
+
+<script src="/js/fuse.js"></script> 
+<script src="/js/fastsearch.js"></script>
+
+    <footer id="footer" class="footer">
+      
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a id="hexo-link" class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    
+    <span id="run-time" class="run-time"></span> 
+    <span class="heart"><i class="iconfont icon-heart"></i></span>
+    &copy; 
+    2023&nbsp;
+    <span>AndDevMK</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js" integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js" integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin="anonymous"></script>
+  <script><!-- NOTE: timeago.js uses the language code format like "zh_CN" (underscore and case sensitive) -->
+    var languageCode = "en".replace(/-/g, '_').replace(/_(.*)/, function ($0, $1) {return $0.replace($1, $1.toUpperCase());});
+    timeago().render(document.querySelectorAll('.timeago'), languageCode);
+    timeago.cancel();  
+  </script>
+
+
+
+<script type="text/javascript" src="/js/main.min.11a4ba15caf2d921d57eaf6568c4ad21eafd5d2c001cbcb31693586c63f93005.js"></script>
+
+<script id="baidu_analytics">
+  var _hmt = _hmt || [];
+  (function() {
+    if (window.location.hostname === 'localhost') return;
+    var hm = document.createElement("script"); hm.async = true;
+    hm.src = "https://hm.baidu.com/hm.js?6db179fb88e600cf326b0515a8aa1de3";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+
+
+
+
+<script src="/js/codecopy.js"></script>
+
+
+
+<link disabled id="dark-mode-theme" rel="stylesheet" href="/css/dark.css"></link>
+<script src="/js/dark.js"></script>
+
+
+<script src="/js/site_runtime.js"></script>
+
+
+
+
+</body>
+</html>
