@@ -36,7 +36,7 @@
 
 
 <link href="/sass/main.min.c11aaf02bef1025d6b0813ba5e1a8a8551aee15fa8f2bcea906d41b20bdf5c69.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+<link href="/lib/fancybox/jquery.fancybox-3.1.20.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/css/codecopy.css">
 
 
@@ -213,7 +213,7 @@
 <p>因此，扩容机制是<em>ArrayList</em>的核心所在，这一点是务必要掌握的；除此之外，本文还会叙述<em>ArrayList</em>的基本操作是怎样实现的，以及其它的细节。</p>
 <h1 id="二arraylist源码解读">二、<em>ArrayList</em>源码解读</h1>
 <h2 id="21继承关系">2.1、继承关系</h2>
-<img src="/img/java/ArrayList继承关系.png" title="" alt="" width="535">
+<img src="/img/java/Java集合系列：一文解读ArrayList源码「JDK11」/ArrayList继承关系.png" title="" alt="" width="535">
 <p>从<em>UML</em>类图中可以看到，<em>ArrayList</em>直接或间接实现了<em>Iterable</em>、<em>Collection</em>、<em>List</em>、<em>RandomAccess</em>、<em>Cloneable</em>、<em>Serializable</em>这6个接口；<em>ArrayList</em>直接或间接继承了<em>AbstractList</em>、<em>AbstractCollection</em>这2个抽象类。</p>
 <p><em><strong>疑问来了：为什么AbstractList实现了List接口，ArrayList还要去再实现一次List接口，是吃饱了撑着吗？</strong></em></p>
 <p>带着疑问，我立马去网上冲浪一波，然后发现了3个对此的解释。</p>
@@ -1433,10 +1433,9 @@
       <i class="iconfont icon-up"></i>
     </div>
   </div>
-  
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="/lib/jquery/jquery-3.2.1.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout-1.0.1.min.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox-3.1.20.min.js"></script>
 
 
 

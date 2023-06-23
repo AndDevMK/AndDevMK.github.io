@@ -7,7 +7,16 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>AndDevMK</copyright>
-    <lastBuildDate>Sun, 07 May 2023 14:41:31 +0800</lastBuildDate><atom:link href="https://anddevmk.cn/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 23 Jun 2023 14:41:31 +0800</lastBuildDate><atom:link href="https://anddevmk.cn/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Android事件分发机制</title>
+      <link>https://anddevmk.cn/post/android%E4%BA%8B%E4%BB%B6%E5%88%86%E5%8F%91%E6%9C%BA%E5%88%B6/</link>
+      <pubDate>Fri, 23 Jun 2023 14:41:31 +0800</pubDate>
+      
+      <guid>https://anddevmk.cn/post/android%E4%BA%8B%E4%BB%B6%E5%88%86%E5%8F%91%E6%9C%BA%E5%88%B6/</guid>
+      <description>注：本文代码基于Android Sv2 一、概述 事件分发机制是View体系中一个非常重要的核心知识点，也是难点，不少Android开发者搞了几年的Android，或许也还没完全弄明白它的原理。 另外，在Android开发过程中难免会碰到滑动冲突的场景，而解决滑动冲突的理论基础就是事件分发机</description>
+    </item>
+    
     <item>
       <title>Android解析XML数据</title>
       <link>https://anddevmk.cn/post/android%E8%A7%A3%E6%9E%90xml%E6%95%B0%E6%8D%AE/</link>

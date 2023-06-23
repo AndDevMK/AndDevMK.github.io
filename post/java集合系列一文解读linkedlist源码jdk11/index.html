@@ -36,7 +36,7 @@
 
 
 <link href="/sass/main.min.c11aaf02bef1025d6b0813ba5e1a8a8551aee15fa8f2bcea906d41b20bdf5c69.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+<link href="/lib/fancybox/jquery.fancybox-3.1.20.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/css/codecopy.css">
 
 
@@ -201,7 +201,7 @@
 <p>接下来，本文会叙述<em>LinkedList</em>是如何维护这样一个双向链表的，基本操作是怎样实现的，以及其它的细节。</p>
 <h1 id="二linkedlist源码解读">二、<em>LinkedList</em>源码解读</h1>
 <h2 id="21继承关系">2.1、继承关系</h2>
-<img title="" src="/img/java/LinkedList继承关系.png" alt="loading-ag-121" width="535">
+<img title="" src="/img/java/Java集合系列：一文解读LinkedList源码「JDK11」/LinkedList继承关系.png" alt="loading-ag-121" width="535">
 <p>从<em>UML</em>类图中可以看到，<em>LinkedList</em>直接或间接实现了<em>Iterable</em>、<em>Collection</em>、<em>List</em>、<em>Deque</em>、<em>Queue</em>、<em>Cloneable</em>、<em>Serializable</em>这7个接口；<em>LinkedList</em>直接或间接继承了<em>AbstractSequentialList</em>、<em>AbstractList</em>、<em>AbstractCollection</em>这3个抽象类。</p>
 <p><em><strong>可能细心的同学会发现，为什么AbstractList实现了List接口，LinkedList还要去再实现一次List接口？</strong></em></p>
 <p>关于这一点，在之前的<a href="https://anddevmk.cn/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBarraylist%E6%BA%90%E7%A0%81jdk11/"><em>Java集合系列：一文解读ArrayList源码「JDK11」</em></a>一文中已有解答，除此之外，<em>LinkedList</em>和<em>ArrayList</em>在继承关系上是比较相似的，所以针对相同继承关系内容的叙述，本文不再次叙述，想去了解的话，可点击上文链接去了解。</p>
@@ -254,7 +254,7 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><em>Queue</em>队列提供了插入、删除和检查操作。这些方法中的每一个都以两种形式存在：一种在操作失败时抛出异常，另一种返回一个特殊值（<em>null</em>或<em>false</em> ，具体取决于操作），如下图所示：</p>
-<img title="" src="/img/java/Queue方法总结.png" alt="" width="535">
+<img title="" src="/img/java/Java集合系列：一文解读LinkedList源码「JDK11」/Queue方法总结.png" alt="" width="535">
 <p><em><strong>注意：Queue队列实现通常不允许插入null元素，尽管某些实现（例如 LinkedList）不禁止插入null。即使在允许它的实现中，也不应将null插入到Queue队列中，因为null也被poll方法用作特殊的返回值，以指示队列不包含任何元素。</strong></em></p>
 <p>实践一下，我们把<em>LinkedList</em>当作<em>Queue</em>队列来使用，如下代码：</p>
 <div class="highlight"><div class="chroma">
@@ -420,11 +420,11 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><em>Deque</em>接口提供了插入、删除和检查的方法，这些方法中的每一个都以两种形式存在：一种在操作失败时抛出异常，另一种返回一个特殊值（ null或false ，具体取决于操作），如下图所示：</p>
-<img title="" src="/img/java/Deque方法总结.png" alt="" width="535">
+<img title="" src="/img/java/Java集合系列：一文解读LinkedList源码「JDK11」/Deque方法总结.png" alt="" width="535">
 <p>当双端队列用作队列时，会产生<em>FIFO</em>（先进先出）行为。元素在双端队列的末尾添加，并从开头删除。从<em>Queue</em>接口继承的方法与<em>Deque</em>接口方法完全等价，如下图所示：</p>
-<img title="" src="/img/java/Queue接口与Deque接口的完全等价方法.png" alt="" width="535">
+<img title="" src="/img/java/Java集合系列：一文解读LinkedList源码「JDK11」/Queue接口与Deque接口的完全等价方法.png" alt="" width="535">
 <p>除此之外，双端队列也可以用作<em>LIFO</em>（后进先出）堆栈。应优先使用此接口而不是使用<em>Stack</em>类。当双端队列用作堆栈时，元素从双端队列的开头被压入和弹出。<em>Stack</em>方法等同于<em>Deque</em>方法，如下图所示：</p>
-<img title="" src="/img/java/Stack与Deque接口的完全等价方法.png" alt="" width="535">
+<img title="" src="/img/java/Java集合系列：一文解读LinkedList源码「JDK11」/Stack与Deque接口的完全等价方法.png" alt="" width="535">
 <p>实践一下，我们把<em>LinkedList</em>当作<em>Deque</em>堆栈来使用，如下代码：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -524,9 +524,9 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>从上面<em>Node</em>节点的构造函数来看，<em>Node</em>节点的结构如下图所示：</p>
-<img title="" src="/img/java/Node节点结构.png" alt="" width="535">
+<img title="" src="/img/java/Java集合系列：一文解读LinkedList源码「JDK11」/Node节点结构.png" alt="" width="535">
 <p><em>LinkedList</em>就是由一个个的<em>Node</em>节点双向连接而成，如下图所示：</p>
-<img title="" src="/img/java/LinkedList结构.png" alt="" width="535">
+<img title="" src="/img/java/Java集合系列：一文解读LinkedList源码「JDK11」/LinkedList结构.png" alt="" width="535">
 <h2 id="23构造方法">2.3、构造方法</h2>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -1607,10 +1607,9 @@
       <i class="iconfont icon-up"></i>
     </div>
   </div>
-  
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="/lib/jquery/jquery-3.2.1.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout-1.0.1.min.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox-3.1.20.min.js"></script>
 
 
 
