@@ -1,0 +1,1856 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>解读Kotlin协程启动源码 - AndDevMK&#39;s android blog site</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="AndDevMK" /><meta name="description" content="注：本文代码基于Kotlin 1.9.0 前言 一般而言，Kotlin的协程实现分为两个层次： 基础设施层：标准库的协程API，主要对协程提供了概念和语义上最基本的支持，API所在包名的前缀为kotlin.coroutines.*。基于此，本文主要内容就是解读Kotlin协程启动源码。 业务框架层" /><meta name="keywords" content="Android, Java, Kotlin, C&#43;&#43;, C, Flutter, Dart, NDK" />
+
+
+<meta name="baidu-site-verification" content="codeva-wQ7uOo4V09" />
+<meta name="google-site-verification" content="yHzWB9BxTR74LiaUhuL5ncr89fnDYXiplTaPY565zqo" />
+
+
+<meta name="generator" content="Hugo 0.111.3 with theme even" />
+
+
+<link rel="canonical" href="https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBkotlin%E5%8D%8F%E7%A8%8B%E5%90%AF%E5%8A%A8%E6%BA%90%E7%A0%81/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.c11aaf02bef1025d6b0813ba5e1a8a8551aee15fa8f2bcea906d41b20bdf5c69.css" rel="stylesheet">
+<link href="/lib/fancybox/jquery.fancybox-3.1.20.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/css/codecopy.css">
+
+
+<meta property="og:title" content="解读Kotlin协程启动源码" />
+<meta property="og:description" content="注：本文代码基于Kotlin 1.9.0 前言 一般而言，Kotlin的协程实现分为两个层次： 基础设施层：标准库的协程API，主要对协程提供了概念和语义上最基本的支持，API所在包名的前缀为kotlin.coroutines.*。基于此，本文主要内容就是解读Kotlin协程启动源码。 业务框架层" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBkotlin%E5%8D%8F%E7%A8%8B%E5%90%AF%E5%8A%A8%E6%BA%90%E7%A0%81/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2023-07-23T14:41:31+08:00" />
+<meta property="article:modified_time" content="2023-07-23T14:41:31+08:00" />
+<meta itemprop="name" content="解读Kotlin协程启动源码">
+<meta itemprop="description" content="注：本文代码基于Kotlin 1.9.0 前言 一般而言，Kotlin的协程实现分为两个层次： 基础设施层：标准库的协程API，主要对协程提供了概念和语义上最基本的支持，API所在包名的前缀为kotlin.coroutines.*。基于此，本文主要内容就是解读Kotlin协程启动源码。 业务框架层"><meta itemprop="datePublished" content="2023-07-23T14:41:31+08:00" />
+<meta itemprop="dateModified" content="2023-07-23T14:41:31+08:00" />
+<meta itemprop="wordCount" content="8816">
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="解读Kotlin协程启动源码"/>
+<meta name="twitter:description" content="注：本文代码基于Kotlin 1.9.0 前言 一般而言，Kotlin的协程实现分为两个层次： 基础设施层：标准库的协程API，主要对协程提供了概念和语义上最基本的支持，API所在包名的前缀为kotlin.coroutines.*。基于此，本文主要内容就是解读Kotlin协程启动源码。 业务框架层"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">AndDevMK</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">首页</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">归档</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">关于</li>
+      </a>
+
+    
+    <li class="mobile-menu-item-search">
+      <div id="mobile_open_search" class="mobile_open_search">
+        搜索
+      </div>
+    </li>
+
+    
+    <li class="mobile-menu-item-dark-mode">
+      <div id="mobile_dark_mode_toggle" class="mobile_light_mode">
+       
+      </div>
+    </li>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">AndDevMK</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">首页</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">归档</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">关于</a>
+      </li>
+    
+    <div id="open_search" class="open_search">
+      搜索
+    </div>
+
+    
+    <div id="dark_mode_toggle" class="light_mode">
+
+    </div>
+  
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">解读Kotlin协程启动源码</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2023-07-23 </span>
+        <div class="post-category">
+            <a href="/categories/kotlin/"> Kotlin </a>
+            </div>
+          <span class="more-meta"> 约 8816 字 </span>
+          <span class="more-meta"> 预计阅读 18 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#前言">前言</a></li>
+    <li><a href="#一协程的创建">一、协程的创建</a></li>
+    <li><a href="#二协程的启动">二、协程的启动</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <blockquote>
+<p><em>注：本文代码基于Kotlin 1.9.0</em></p>
+</blockquote>
+<h1 id="前言">前言</h1>
+<p>一般而言，<em>Kotlin</em>的协程实现分为两个层次：</p>
+<ul>
+<li>
+<p><em>基础设施层</em>：标准库的协程<em>API</em>，主要对协程提供了概念和语义上最基本的支持，<em>API</em>所在包名的前缀为<code>kotlin.coroutines.*</code>。基于此，本文主要内容就是解读<em>Kotlin</em>协程启动源码。</p>
+</li>
+<li>
+<p><em>业务框架层</em>：协程的上层框架支持，<em>API</em>所在包名的前缀为<code>kotlinx.coroutines.*</code>。</p>
+</li>
+</ul>
+<p>整体上，将通过<em>Kotlin</em>协程的基础设施创建的协程称为<em>简单协程</em>，将基于简单协程实现的各种业务层进行封装之后得到的协程称为<em>复合协程</em>。</p>
+<h1 id="一协程的创建">一、协程的创建</h1>
+<p>在<em>Kotlin</em>当中创建一个简单协程不是什么难事，如下代码所示：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-kotlin" data-lang="kotlin"><span class="line"><span class="cl"><span class="k">val</span> <span class="py">continuation</span> <span class="p">=</span> <span class="k">suspend</span> <span class="p">{</span>                      
+</span></span><span class="line"><span class="cl">    <span class="k">val</span> <span class="py">x</span><span class="p">:</span> <span class="n">Int</span> <span class="p">=</span> <span class="m">88</span>                               
+</span></span><span class="line"><span class="cl">    <span class="m">123</span> <span class="p">+</span> <span class="n">x</span>                                        
+</span></span><span class="line"><span class="cl"><span class="p">}.</span><span class="n">createCoroutine</span><span class="p">(</span><span class="k">object</span> <span class="err">: </span><span class="nc">Continuation</span><span class="p">&lt;</span><span class="n">Int</span><span class="p">&gt;</span> <span class="p">{</span>    
+</span></span><span class="line"><span class="cl">    <span class="k">override</span> <span class="k">val</span> <span class="py">context</span><span class="p">:</span> <span class="n">CoroutineContext</span>        
+</span></span><span class="line"><span class="cl">        <span class="k">get</span><span class="p">()</span> <span class="p">=</span> <span class="n">EmptyCoroutineContext</span>             
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">override</span> <span class="k">fun</span> <span class="nf">resumeWith</span><span class="p">(</span><span class="n">result</span><span class="p">:</span> <span class="n">Result</span><span class="p">&lt;</span><span class="n">Int</span><span class="p">&gt;)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">println</span><span class="p">(</span><span class="s2">&#34;</span><span class="si">$result</span><span class="s2">&#34;</span><span class="p">)</span>                        
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>                                             
+</span></span><span class="line"><span class="cl"><span class="p">})</span>                                                                                                                        
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>标准库中提供了一个<em>createCoroutine</em>方法，我们可以通过它来创建协程，不过这个协程并不会立即执行，我们先来看看它的声明:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-kotlin" data-lang="kotlin"><span class="line"><span class="cl"><span class="k">public</span> <span class="k">fun</span> <span class="p">&lt;</span><span class="nc">T</span><span class="p">&gt;</span> <span class="err">(</span><span class="nf">suspend</span> <span class="p">()</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">).</span><span class="n">createCoroutine</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="n">completion</span><span class="p">:</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">):</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">Unit</span><span class="p">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这里解释下上面的声明：</p>
+<p>1、<em>suspend ()-&gt;T</em>是<em>createCoroutine</em>方法的<em>Receiver</em>，<em>Receiver</em>是一个被<em>suspend</em>关键字修饰的挂起函数，这也是协程的执行体，我们不妨称它为<em>协程体</em>。这里补充一条<em>Kotlin</em>基础知识：<em>Kotlin</em>扩展的本质就是定义了一个函数，当程序用对象调用扩展方法时，<em>Kotlin</em>在编译过程中会执行静态解析，将调用扩展函数的调用者作为函数的第一个参数传入，也就是说，<em>suspend ()-&gt;T</em>会作为<em>createCoroutine</em>方法的第一个参数传入，对于本文后面的内容来说，这是一个伏笔，叫它伏笔1吧；</p>
+<p>2、参数<em>completion</em>会在协程执行完成后调用，实际上就是协程的完成回调；</p>
+<p>3、返回值是一个<em>Continuation</em>对象，由于现在协程仅仅被创建出来，因此需要通过这个值在之后触发协程的启动。</p>
+<h1 id="二协程的启动">二、协程的启动</h1>
+<p>调用<em>continuation</em>的<em>resume</em>方法之后，协程体会立即开始执行，如下代码所示：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-kotlin" data-lang="kotlin"><span class="line"><span class="cl"><span class="k">val</span> <span class="py">continuation</span> <span class="p">=</span> <span class="k">suspend</span> <span class="p">{</span>                      
+</span></span><span class="line"><span class="cl">    <span class="k">val</span> <span class="py">x</span><span class="p">:</span> <span class="n">Int</span> <span class="p">=</span> <span class="m">88</span>                               
+</span></span><span class="line"><span class="cl">    <span class="m">123</span> <span class="p">+</span> <span class="n">x</span>                                        
+</span></span><span class="line"><span class="cl"><span class="p">}.</span><span class="n">createCoroutine</span><span class="p">(</span><span class="k">object</span> <span class="err">: </span><span class="nc">Continuation</span><span class="p">&lt;</span><span class="n">Int</span><span class="p">&gt;</span> <span class="p">{</span>    
+</span></span><span class="line"><span class="cl">    <span class="k">override</span> <span class="k">val</span> <span class="py">context</span><span class="p">:</span> <span class="n">CoroutineContext</span>        
+</span></span><span class="line"><span class="cl">        <span class="k">get</span><span class="p">()</span> <span class="p">=</span> <span class="n">EmptyCoroutineContext</span>             
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">override</span> <span class="k">fun</span> <span class="nf">resumeWith</span><span class="p">(</span><span class="n">result</span><span class="p">:</span> <span class="n">Result</span><span class="p">&lt;</span><span class="n">Int</span><span class="p">&gt;)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">println</span><span class="p">(</span><span class="s2">&#34;</span><span class="si">$result</span><span class="s2">&#34;</span><span class="p">)</span>                        
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>                                             
+</span></span><span class="line"><span class="cl"><span class="p">})</span>                                               
+</span></span><span class="line"><span class="cl"><span class="n">continuation</span><span class="p">.</span><span class="n">resume</span><span class="p">(</span><span class="n">Unit</span><span class="p">)</span>                         
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><em><strong>此时要抛出本文要重点解决的问题：为什么调用continuation.resume(Unit)就会触发协程体的执行呢？</strong></em></p>
+<p>如果按一般思路去理解，上面代码返回的变量<em>continuation</em>就是问题的突破口，只要找出<em>continuation</em>变量的真身，就能定位到<em>resume</em>方法的具体实现，从而找出触发协程体执行的所在。</p>
+<p>OK，一步步来，我们先看<em>suspend</em>方法的源码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-kotlin" data-lang="kotlin"><span class="line"><span class="cl"><span class="k">public</span> <span class="k">inline</span> <span class="k">fun</span> <span class="p">&lt;</span><span class="nc">R</span><span class="p">&gt;</span> <span class="nf">suspend</span><span class="p">(</span><span class="k">noinline</span> <span class="n">block</span><span class="p">:</span> <span class="k">suspend</span> <span class="p">()</span> <span class="o">-&gt;</span> <span class="n">R</span><span class="p">):</span> <span class="k">suspend</span> <span class="p">()</span> <span class="o">-&gt;</span> <span class="n">R</span> <span class="p">=</span> <span class="n">block</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><em>suspend</em>方法比较简单，把传入的挂起函数原封不动地返回，但是要注意：<em>suspend</em>方法是一个内联方法，而参数<em>block</em>是非内联的，意味着<em>block</em>在编译后会生成一个函数对象（匿名内部类），这里是埋下伏笔2。</p>
+<p><em>createCoroutine</em>方法的声明我们前面讲过了，现在完整看下<em>createCoroutine</em>方法的源码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-kotlin" data-lang="kotlin"><span class="line"><span class="cl"><span class="k">public</span> <span class="k">fun</span> <span class="p">&lt;</span><span class="nc">T</span><span class="p">&gt;</span> <span class="err">(</span><span class="nf">suspend</span> <span class="p">()</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">).</span><span class="n">createCoroutine</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="n">completion</span><span class="p">:</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">):</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">Unit</span><span class="p">&gt;</span> <span class="p">=</span>
+</span></span><span class="line"><span class="cl">    <span class="n">SafeContinuation</span><span class="p">(</span><span class="n">createCoroutineUnintercepted</span><span class="p">(</span><span class="n">completion</span><span class="p">).</span><span class="n">intercepted</span><span class="p">(),</span> <span class="n">COROUTINE_SUSPENDED</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>由源码可知，这里调用了2个参数的构造方法创建了<em>SafeContinuation</em>对象，其中第1个参数先不管，后面会讲到，第2个参数为<em>COROUTINE_SUSPENDED</em>。知道了<em>continuation</em>变量的实例对象是<em>SafeContinuation</em>，也就是说可以推测下，调用<em>continuation</em>变量的<em>resume</em>方法实际上是调用了<em>SafeContinuation</em>的<em>resume</em>方法，继续跟踪<em>SafeContinuation</em>的源码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-kotlin" data-lang="kotlin"><span class="line"><span class="cl"><span class="k">internal</span> <span class="k">expect</span> <span class="k">class</span> <span class="nc">SafeContinuation</span><span class="p">&lt;</span><span class="k">in</span> <span class="n">T</span><span class="p">&gt;</span> <span class="p">:</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">internal</span> <span class="k">constructor</span><span class="p">(</span><span class="k">delegate</span><span class="p">:</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;,</span> <span class="n">initialResult</span><span class="p">:</span> <span class="n">Any</span><span class="p">?)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nd">@PublishedApi</span>
+</span></span><span class="line"><span class="cl">    <span class="k">internal</span> <span class="k">constructor</span><span class="p">(</span><span class="k">delegate</span><span class="p">:</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nd">@PublishedApi</span>
+</span></span><span class="line"><span class="cl">    <span class="k">internal</span> <span class="k">fun</span> <span class="nf">getOrThrow</span><span class="p">():</span> <span class="n">Any</span><span class="p">?</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">override</span> <span class="k">val</span> <span class="py">context</span><span class="p">:</span> <span class="n">CoroutineContext</span>
+</span></span><span class="line"><span class="cl">    <span class="k">override</span> <span class="k">fun</span> <span class="nf">resumeWith</span><span class="p">(</span><span class="n">result</span><span class="p">:</span> <span class="n">Result</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;):</span> <span class="n">Unit</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">public</span> <span class="k">interface</span> <span class="nc">Continuation</span><span class="p">&lt;</span><span class="k">in</span> <span class="n">T</span><span class="p">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">public</span> <span class="k">val</span> <span class="py">context</span><span class="p">:</span> <span class="n">CoroutineContext</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">public</span> <span class="k">fun</span> <span class="nf">resumeWith</span><span class="p">(</span><span class="n">result</span><span class="p">:</span> <span class="n">Result</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>通过观察<em>SafeContinuation</em>的源码，可以得到3个结论：</p>
+<p>1、<em>SafeContinuation</em>类是<em>expect</em>关键字修饰，意味着它是一个跨平台类，也就是说不同平台该类有不同的实现。这里先说明，后面我们只看<em>Kotlin</em>平台下的具体实现；</p>
+<p>2、<em>SafeContinuation</em>类实现了接口<em>Continuation</em>；</p>
+<p>3、<em>SafeContinuation</em>类中并没有<em>resume</em>方法，然而我们先前推测过，调用<em>continuation</em>的<em>resume</em>方法实际上是调用了<em>SafeContinuation</em>的<em>resume</em>方法，很显然这是错的。</p>
+<p>看到这里或许已经一头雾水了，但是先不要着急哈，继续寻找突破口，先看下<em>continuation</em>变量的<em>resume</em>方法的源码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-kotlin" data-lang="kotlin"><span class="line"><span class="cl"><span class="k">public</span> <span class="k">inline</span> <span class="k">fun</span> <span class="p">&lt;</span><span class="nc">T</span><span class="p">&gt;</span> <span class="nf">Continuation</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;.</span><span class="n">resume</span><span class="p">(</span><span class="k">value</span><span class="p">:</span> <span class="n">T</span><span class="p">):</span> <span class="n">Unit</span> <span class="p">=</span>
+</span></span><span class="line"><span class="cl">    <span class="n">resumeWith</span><span class="p">(</span><span class="nc">Result</span><span class="p">.</span><span class="n">success</span><span class="p">(</span><span class="k">value</span><span class="p">))</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>由源码可知，<em>resume</em>方法是接口<em>Continuation</em>的一个扩展方法，其内部调用了<em>Continuation</em>的<em>resumeWith</em>方法，结合前面说的，<em>SafeContinuation</em>实现了接口<em>Continuation</em>，那么最终调用的就是<em>SafeContinuation</em>的<em>resumeWith</em>方法了。</p>
+<p>但是<em>SafeContinuation</em>是一个跨平台类，要先找到它的具体实现，在<em>Kotlin</em>平台上的具体实现位置为：</p>
+<img title="" src="/img/kotlin/解读Kotlin协程启动源码/SafeContinuation具体实现.png" alt="" width="535">
+<p><em>SafeContinuation</em>具体实现代码如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-kotlin" data-lang="kotlin"><span class="line"><span class="cl"><span class="k">internal</span> <span class="k">actual</span> <span class="k">class</span> <span class="nc">SafeContinuation</span><span class="p">&lt;</span><span class="k">in</span> <span class="n">T</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="k">internal</span> <span class="k">actual</span> <span class="k">constructor</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="k">private</span> <span class="k">val</span> <span class="py">delegate</span><span class="p">:</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">initialResult</span><span class="p">:</span> <span class="n">Any</span><span class="p">?</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span> <span class="p">:</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;,</span> <span class="n">CoroutineStackFrame</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nd">@PublishedApi</span>
+</span></span><span class="line"><span class="cl">    <span class="k">internal</span> <span class="k">actual</span> <span class="k">constructor</span><span class="p">(</span><span class="k">delegate</span><span class="p">:</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;)</span> <span class="p">:</span> <span class="k">this</span><span class="p">(</span><span class="k">delegate</span><span class="p">,</span> <span class="n">UNDECIDED</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">public</span> <span class="k">actual</span> <span class="k">override</span> <span class="k">fun</span> <span class="nf">resumeWith</span><span class="p">(</span><span class="n">result</span><span class="p">:</span> <span class="n">Result</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="p">(</span><span class="k">true</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// lock-free loop
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="k">val</span> <span class="py">cur</span> <span class="p">=</span> <span class="k">this</span><span class="p">.</span><span class="n">result</span> <span class="c1">// atomic read
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="k">when</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">cur</span> <span class="o">===</span> <span class="n">UNDECIDED</span> <span class="o">-&gt;</span> <span class="k">if</span> <span class="p">(</span><span class="nc">RESULT</span><span class="p">.</span><span class="n">compareAndSet</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="n">UNDECIDED</span><span class="p">,</span> <span class="n">result</span><span class="p">.</span><span class="k">value</span><span class="p">))</span> <span class="k">return</span>
+</span></span><span class="line"><span class="cl">                <span class="n">cur</span> <span class="o">===</span> <span class="n">COROUTINE_SUSPENDED</span> <span class="o">-&gt;</span> <span class="k">if</span> <span class="p">(</span><span class="nc">RESULT</span><span class="p">.</span><span class="n">compareAndSet</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="n">COROUTINE_SUSPENDED</span><span class="p">,</span> <span class="n">RESUMED</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">delegate</span><span class="p">.</span><span class="n">resumeWith</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">return</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">                <span class="k">else</span> <span class="o">-&gt;</span> <span class="k">throw</span> <span class="n">IllegalStateException</span><span class="p">(</span><span class="s2">&#34;Already resumed&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>先前讲过，创建<em>SafeContinuation</em>对象时传入的第2个参数为<em>COROUTINE_SUSPENDED</em>，那么可以知道，<em>SafeContinuation</em>的<em>resumeWith</em>方法执行后实际上调用的是<em>delegate</em>变量的<em>resumeWith</em>方法，于是乎，<em><strong>现在可以从找continuation变量的真身转为找delegate变量的真身了，因为SafeContinuation只是个包装马甲，真正做事情的是delegate变量，那么delegate变量又是什么了？</strong></em></p>
+<p><em>SafeContinuation</em>对象被创建是通过调用2个参数的构造方法，其中<em>delegate</em>变量是第1个参数待传入，我们可以回去跟踪下<em>SafeContinuation</em>被创建时的源码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-kotlin" data-lang="kotlin"><span class="line"><span class="cl"><span class="k">public</span> <span class="k">fun</span> <span class="p">&lt;</span><span class="nc">T</span><span class="p">&gt;</span> <span class="err">(</span><span class="nf">suspend</span> <span class="p">()</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">).</span><span class="n">createCoroutine</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="n">completion</span><span class="p">:</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">):</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">Unit</span><span class="p">&gt;</span> <span class="p">=</span>
+</span></span><span class="line"><span class="cl">    <span class="n">SafeContinuation</span><span class="p">(</span><span class="n">createCoroutineUnintercepted</span><span class="p">(</span><span class="n">completion</span><span class="p">).</span><span class="n">intercepted</span><span class="p">(),</span> <span class="n">COROUTINE_SUSPENDED</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">public</span> <span class="k">expect</span> <span class="k">fun</span> <span class="p">&lt;</span><span class="nc">T</span><span class="p">&gt;</span> <span class="err">(</span><span class="nf">suspend</span> <span class="p">()</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">).</span><span class="n">createCoroutineUnintercepted</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="n">completion</span><span class="p">:</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">):</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">Unit</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">public</span> <span class="k">expect</span> <span class="k">fun</span> <span class="p">&lt;</span><span class="nc">T</span><span class="p">&gt;</span> <span class="nf">Continuation</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;.</span><span class="n">intercepted</span><span class="p">():</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>由源码可知，<em>delegate</em>变量就是这么长的一串东西：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-kotlin" data-lang="kotlin"><span class="line"><span class="cl"><span class="n">createCoroutineUnintercepted</span><span class="p">(</span><span class="n">completion</span><span class="p">).</span><span class="n">intercepted</span><span class="p">()</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>而且发现<em>createCoroutineUnintercepted</em>方法和<em>intercepted</em>方法都是跨平台方法，要先找到它们的具体实现，在<em>Kotlin</em>平台上的具体实现位置为：</p>
+<img title="" src="/img/kotlin/解读Kotlin协程启动源码/createCoroutineUnintercepted方法和intercepted方法的具体实现.png" alt="" width="535">
+<p><em>createCoroutineUnintercepted</em>方法和<em>intercepted</em>方法的具体实现代码如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-kotlin" data-lang="kotlin"><span class="line"><span class="cl"><span class="k">public</span> <span class="k">actual</span> <span class="k">fun</span> <span class="p">&lt;</span><span class="nc">T</span><span class="p">&gt;</span> <span class="err">(</span><span class="nf">suspend</span> <span class="p">()</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">).</span><span class="n">createCoroutineUnintercepted</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="n">completion</span><span class="p">:</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">):</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">Unit</span><span class="p">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">val</span> <span class="py">probeCompletion</span> <span class="p">=</span> <span class="n">probeCoroutineCreated</span><span class="p">(</span><span class="n">completion</span><span class="p">)</span>       <span class="c1">// ①
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="k">if</span> <span class="p">(</span><span class="k">this</span> <span class="k">is</span> <span class="n">BaseContinuationImpl</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">create</span><span class="p">(</span><span class="n">probeCompletion</span><span class="p">)</span>                                   <span class="c1">// ②
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">else</span>
+</span></span><span class="line"><span class="cl">        <span class="n">createCoroutineFromSuspendFunction</span><span class="p">(</span><span class="n">probeCompletion</span><span class="p">)</span> <span class="p">{</span>     <span class="c1">// ③
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="p">(</span><span class="k">this</span> <span class="k">as</span> <span class="n">Function1</span><span class="p">&lt;</span><span class="n">Continuation</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;,</span> <span class="n">Any</span><span class="p">?&gt;).</span><span class="n">invoke</span><span class="p">(</span><span class="k">it</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">private</span> <span class="k">inline</span> <span class="k">fun</span> <span class="p">&lt;</span><span class="nc">T</span><span class="p">&gt;</span> <span class="nf">createCoroutineFromSuspendFunction</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="n">completion</span><span class="p">:</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;,</span>
+</span></span><span class="line"><span class="cl">    <span class="k">crossinline</span> <span class="n">block</span><span class="p">:</span> <span class="p">(</span><span class="n">Continuation</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">?</span>
+</span></span><span class="line"><span class="cl"><span class="p">):</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">Unit</span><span class="p">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">val</span> <span class="py">context</span> <span class="p">=</span> <span class="n">completion</span><span class="p">.</span><span class="n">context</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// label == 0 when coroutine is not started yet (initially) or label == 1 when it was
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="k">if</span> <span class="p">(</span><span class="n">context</span> <span class="o">===</span> <span class="n">EmptyCoroutineContext</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">object</span> <span class="err">: </span><span class="nc">RestrictedContinuationImpl</span><span class="p">(</span><span class="n">completion</span> <span class="k">as</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">Any</span><span class="p">?&gt;)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">private</span> <span class="k">var</span> <span class="py">label</span> <span class="p">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="k">override</span> <span class="k">fun</span> <span class="nf">invokeSuspend</span><span class="p">(</span><span class="n">result</span><span class="p">:</span> <span class="n">Result</span><span class="p">&lt;</span><span class="n">Any</span><span class="p">?&gt;):</span> <span class="n">Any</span><span class="p">?</span> <span class="p">=</span>
+</span></span><span class="line"><span class="cl">                <span class="k">when</span> <span class="p">(</span><span class="n">label</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="m">0</span> <span class="o">-&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                        <span class="n">label</span> <span class="p">=</span> <span class="m">1</span>
+</span></span><span class="line"><span class="cl">                        <span class="n">result</span><span class="p">.</span><span class="n">getOrThrow</span><span class="p">()</span> <span class="c1">// Rethrow exception if trying to start with exception (will be caught by BaseContinuationImpl.resumeWith
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                        <span class="n">block</span><span class="p">(</span><span class="k">this</span><span class="p">)</span> <span class="c1">// run the block, may return or suspend
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">                    <span class="m">1</span> <span class="o">-&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                        <span class="n">label</span> <span class="p">=</span> <span class="m">2</span>
+</span></span><span class="line"><span class="cl">                        <span class="n">result</span><span class="p">.</span><span class="n">getOrThrow</span><span class="p">()</span> <span class="c1">// this is the result if the block had suspended
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">else</span> <span class="o">-&gt;</span> <span class="n">error</span><span class="p">(</span><span class="s2">&#34;This coroutine had already completed&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span>
+</span></span><span class="line"><span class="cl">        <span class="k">object</span> <span class="err">: </span><span class="nc">ContinuationImpl</span><span class="p">(</span><span class="n">completion</span> <span class="k">as</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">Any</span><span class="p">?&gt;,</span> <span class="n">context</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">private</span> <span class="k">var</span> <span class="py">label</span> <span class="p">=</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="k">override</span> <span class="k">fun</span> <span class="nf">invokeSuspend</span><span class="p">(</span><span class="n">result</span><span class="p">:</span> <span class="n">Result</span><span class="p">&lt;</span><span class="n">Any</span><span class="p">?&gt;):</span> <span class="n">Any</span><span class="p">?</span> <span class="p">=</span>
+</span></span><span class="line"><span class="cl">                <span class="k">when</span> <span class="p">(</span><span class="n">label</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="m">0</span> <span class="o">-&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                        <span class="n">label</span> <span class="p">=</span> <span class="m">1</span>
+</span></span><span class="line"><span class="cl">                        <span class="n">result</span><span class="p">.</span><span class="n">getOrThrow</span><span class="p">()</span> <span class="c1">// Rethrow exception if trying to start with exception (will be caught by BaseContinuationImpl.resumeWith
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                        <span class="n">block</span><span class="p">(</span><span class="k">this</span><span class="p">)</span> <span class="c1">// run the block, may return or suspend
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">                    <span class="m">1</span> <span class="o">-&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                        <span class="n">label</span> <span class="p">=</span> <span class="m">2</span>
+</span></span><span class="line"><span class="cl">                        <span class="n">result</span><span class="p">.</span><span class="n">getOrThrow</span><span class="p">()</span> <span class="c1">// this is the result if the block had suspended
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">else</span> <span class="o">-&gt;</span> <span class="n">error</span><span class="p">(</span><span class="s2">&#34;This coroutine had already completed&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">public</span> <span class="k">actual</span> <span class="k">fun</span> <span class="p">&lt;</span><span class="nc">T</span><span class="p">&gt;</span> <span class="nf">Continuation</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;.</span><span class="n">intercepted</span><span class="p">():</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">=</span>
+</span></span><span class="line"><span class="cl">    <span class="p">(</span><span class="k">this</span> <span class="k">as</span><span class="p">?</span> <span class="n">ContinuationImpl</span><span class="p">)</span><span class="o">?.</span><span class="n">intercepted</span><span class="p">()</span> <span class="o">?:</span> <span class="k">this</span>           <span class="c1">// ④
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>这里解释下上面的标号地方：</p>
+<p>标号①、<em>probeCoroutineCreated</em>方法如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-kotlin" data-lang="kotlin"><span class="line"><span class="cl"><span class="k">internal</span> <span class="k">fun</span> <span class="p">&lt;</span><span class="nc">T</span><span class="p">&gt;</span> <span class="nf">probeCoroutineCreated</span><span class="p">(</span><span class="n">completion</span><span class="p">:</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;):</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">completion</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>代码很简单，就是把传入的<em>completion</em>原封不动的返回。</p>
+<p>标号②、如果<em>suspend () -&gt; T</em>是<em>BaseContinuationImpl</em>的子类，那么调用<em>BaseContinuationImpl</em>类的<em>create</em>方法，并返回<em>Continuation</em>&lt;<em>Unit</em>&gt;，该方法如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-kotlin" data-lang="kotlin"><span class="line"><span class="cl"><span class="k">internal</span> <span class="k">abstract</span> <span class="k">class</span> <span class="nc">BaseContinuationImpl</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="k">public</span> <span class="k">val</span> <span class="py">completion</span><span class="p">:</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">Any</span><span class="p">?&gt;?</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span> <span class="p">:</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">Any</span><span class="p">?&gt;,</span> <span class="n">CoroutineStackFrame</span><span class="p">,</span> <span class="n">Serializable</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">public</span> <span class="k">open</span> <span class="k">fun</span> <span class="nf">create</span><span class="p">(</span><span class="n">completion</span><span class="p">:</span> <span class="n">Continuation</span><span class="p">&lt;*&gt;):</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">Unit</span><span class="p">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">throw</span> <span class="n">UnsupportedOperationException</span><span class="p">(</span><span class="s2">&#34;create(Continuation) has not been overridden&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>  
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><em>BaseContinuationImpl</em>类的<em>create</em>方法默认没有实现，估计是其子类实现了。</p>
+<p>标号③、如果<em>suspend () -&gt; T</em>不是<em>BaseContinuationImpl</em>的子类，那么调用<em>createCoroutineFromSuspendFunction</em>方法，并返回<em>Continuation</em>&lt;<em>Unit</em>&gt;，其方法闭包中会将<em>suspend () -&gt; T</em>强制转换为<em>Function1</em>接口，并调用<em>Function1</em>接口的<em>invoke</em>方法。</p>
+<p>解释下<em>createCoroutineFromSuspendFunction</em>方法的实现：</p>
+<p><em>createCoroutineFromSuspendFunction</em>方法内部会先判断<em>context</em>变量是否为<em>EmptyCoroutineContext</em>对象，如果是的话则返回<em>RestrictedContinuationImpl</em>对象，否则就返回<em>ContinuationImpl</em>对象。</p>
+<p>标号④、将调用<em>Continuation</em>接口扩展方法<em>intercepted</em>的调用者强制转换为<em>ContinuationImpl</em>对象，如果转换成功，则调用<em>ContinuationImpl</em>的<em>intercepted</em>方法，否则返回调用者本身。</p>
+<p>OK，上面分析那么多，发现有2个名字比较显眼：<em>ContinuationImpl</em>和<em>BaseContinuationImpl</em>，可以认为它们和<em>delegate</em>的构建肯定有关系，到这里就不往下看源码了，因为看不懂了，啊哈哈～。</p>
+<p>既然按一般思路去跟踪源码无法定位到问题，那么只能反编译源码了，去看看编译器是否在编译后添加了“魔法”，回顾下先前协程启动的源码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-kotlin" data-lang="kotlin"><span class="line"><span class="cl"><span class="k">val</span> <span class="py">continuation</span> <span class="p">=</span> <span class="k">suspend</span> <span class="p">{</span>                       
+</span></span><span class="line"><span class="cl">    <span class="k">val</span> <span class="py">x</span><span class="p">:</span> <span class="n">Int</span> <span class="p">=</span> <span class="m">88</span>                                
+</span></span><span class="line"><span class="cl">    <span class="m">123</span> <span class="p">+</span> <span class="n">x</span>                                         
+</span></span><span class="line"><span class="cl"><span class="p">}.</span><span class="n">createCoroutine</span><span class="p">(</span><span class="k">object</span> <span class="err">: </span><span class="nc">Continuation</span><span class="p">&lt;</span><span class="n">Int</span><span class="p">&gt;</span> <span class="p">{</span>     
+</span></span><span class="line"><span class="cl">    <span class="k">override</span> <span class="k">val</span> <span class="py">context</span><span class="p">:</span> <span class="n">CoroutineContext</span>         
+</span></span><span class="line"><span class="cl">        <span class="k">get</span><span class="p">()</span> <span class="p">=</span> <span class="n">EmptyCoroutineContext</span>              
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">override</span> <span class="k">fun</span> <span class="nf">resumeWith</span><span class="p">(</span><span class="n">result</span><span class="p">:</span> <span class="n">Result</span><span class="p">&lt;</span><span class="n">Int</span><span class="p">&gt;)</span> <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">        <span class="n">println</span><span class="p">(</span><span class="s2">&#34;</span><span class="si">$result</span><span class="s2">&#34;</span><span class="p">)</span>                         
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>                                              
+</span></span><span class="line"><span class="cl"><span class="p">})</span>                                                 
+</span></span><span class="line"><span class="cl"><span class="n">continuation</span><span class="p">.</span><span class="n">resume</span><span class="p">(</span><span class="n">Unit</span><span class="p">)</span>                          
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>运行过上面代码后，点击<em>IDEA</em>的<em>Tools</em>-&gt;<em>Kotlin</em>-&gt;<em>Show Kotlin ByteCode</em>来查看字节码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span><span class="lnt">123
+</span><span class="lnt">124
+</span><span class="lnt">125
+</span><span class="lnt">126
+</span><span class="lnt">127
+</span><span class="lnt">128
+</span><span class="lnt">129
+</span><span class="lnt">130
+</span><span class="lnt">131
+</span><span class="lnt">132
+</span><span class="lnt">133
+</span><span class="lnt">134
+</span><span class="lnt">135
+</span><span class="lnt">136
+</span><span class="lnt">137
+</span><span class="lnt">138
+</span><span class="lnt">139
+</span><span class="lnt">140
+</span><span class="lnt">141
+</span><span class="lnt">142
+</span><span class="lnt">143
+</span><span class="lnt">144
+</span><span class="lnt">145
+</span><span class="lnt">146
+</span><span class="lnt">147
+</span><span class="lnt">148
+</span><span class="lnt">149
+</span><span class="lnt">150
+</span><span class="lnt">151
+</span><span class="lnt">152
+</span><span class="lnt">153
+</span><span class="lnt">154
+</span><span class="lnt">155
+</span><span class="lnt">156
+</span><span class="lnt">157
+</span><span class="lnt">158
+</span><span class="lnt">159
+</span><span class="lnt">160
+</span><span class="lnt">161
+</span><span class="lnt">162
+</span><span class="lnt">163
+</span><span class="lnt">164
+</span><span class="lnt">165
+</span><span class="lnt">166
+</span><span class="lnt">167
+</span><span class="lnt">168
+</span><span class="lnt">169
+</span><span class="lnt">170
+</span><span class="lnt">171
+</span><span class="lnt">172
+</span><span class="lnt">173
+</span><span class="lnt">174
+</span><span class="lnt">175
+</span><span class="lnt">176
+</span><span class="lnt">177
+</span><span class="lnt">178
+</span><span class="lnt">179
+</span><span class="lnt">180
+</span><span class="lnt">181
+</span><span class="lnt">182
+</span><span class="lnt">183
+</span><span class="lnt">184
+</span><span class="lnt">185
+</span><span class="lnt">186
+</span><span class="lnt">187
+</span><span class="lnt">188
+</span><span class="lnt">189
+</span><span class="lnt">190
+</span><span class="lnt">191
+</span><span class="lnt">192
+</span><span class="lnt">193
+</span><span class="lnt">194
+</span><span class="lnt">195
+</span><span class="lnt">196
+</span><span class="lnt">197
+</span><span class="lnt">198
+</span><span class="lnt">199
+</span><span class="lnt">200
+</span><span class="lnt">201
+</span><span class="lnt">202
+</span><span class="lnt">203
+</span><span class="lnt">204
+</span><span class="lnt">205
+</span><span class="lnt">206
+</span><span class="lnt">207
+</span><span class="lnt">208
+</span><span class="lnt">209
+</span><span class="lnt">210
+</span><span class="lnt">211
+</span><span class="lnt">212
+</span><span class="lnt">213
+</span><span class="lnt">214
+</span><span class="lnt">215
+</span><span class="lnt">216
+</span><span class="lnt">217
+</span><span class="lnt">218
+</span><span class="lnt">219
+</span><span class="lnt">220
+</span><span class="lnt">221
+</span><span class="lnt">222
+</span><span class="lnt">223
+</span><span class="lnt">224
+</span><span class="lnt">225
+</span><span class="lnt">226
+</span><span class="lnt">227
+</span><span class="lnt">228
+</span><span class="lnt">229
+</span><span class="lnt">230
+</span><span class="lnt">231
+</span><span class="lnt">232
+</span><span class="lnt">233
+</span><span class="lnt">234
+</span><span class="lnt">235
+</span><span class="lnt">236
+</span><span class="lnt">237
+</span><span class="lnt">238
+</span><span class="lnt">239
+</span><span class="lnt">240
+</span><span class="lnt">241
+</span><span class="lnt">242
+</span><span class="lnt">243
+</span><span class="lnt">244
+</span><span class="lnt">245
+</span><span class="lnt">246
+</span><span class="lnt">247
+</span><span class="lnt">248
+</span><span class="lnt">249
+</span><span class="lnt">250
+</span><span class="lnt">251
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-v" data-lang="v"><span class="line"><span class="cl"><span class="c1">// ================com/pengmj/kotlincoroutine/SampleKt.class =================
+</span></span></span><span class="line"><span class="cl"><span class="c1">// class version 52.0 (52)
+</span></span></span><span class="line"><span class="cl"><span class="c1">// access flags 0x31
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nv">public</span> <span class="nv">final</span> <span class="nv">class</span> <span class="nv">com</span><span class="o">/</span><span class="nv">pengmj</span><span class="o">/</span><span class="nv">kotlincoroutine</span><span class="o">/</span><span class="nc">SampleKt</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// access flags 0x19
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nv">public</span> <span class="nv">final</span> <span class="k">static</span> <span class="nf">main</span><span class="p">()</span><span class="nc">V</span>
+</span></span><span class="line"><span class="cl">   <span class="nc">L0</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">LINENUMBER</span> <span class="mi">6</span> <span class="nc">L0</span>
+</span></span><span class="line"><span class="cl">   <span class="nc">L1</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">LINENUMBER</span> <span class="mi">9</span> <span class="nc">L1</span>
+</span></span><span class="line"><span class="cl">   <span class="nc">L2</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">LINENUMBER</span> <span class="mi">6</span> <span class="nc">L2</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">NEW</span> <span class="nv">com</span><span class="o">/</span><span class="nv">pengmj</span><span class="o">/</span><span class="nv">kotlincoroutine</span><span class="o">/</span><span class="nc">SampleKt</span><span class="o">$</span><span class="nv">main</span><span class="o">$</span><span class="nv">continuation</span><span class="o">$</span><span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">DUP</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ACONST_NULL</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">INVOKESPECIAL</span> <span class="nv">com</span><span class="o">/</span><span class="nv">pengmj</span><span class="o">/</span><span class="nv">kotlincoroutine</span><span class="o">/</span><span class="nc">SampleKt</span><span class="o">$</span><span class="nv">main</span><span class="o">$</span><span class="nv">continuation</span><span class="o">$</span><span class="mi">1</span><span class="p">.&lt;</span><span class="nv">init</span><span class="p">&gt;</span> <span class="p">(</span><span class="nc">Lkotlin</span><span class="o">/</span><span class="nv">coroutines</span><span class="o">/</span><span class="nc">Continuation</span><span class="p">;)</span><span class="nc">V</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">CHECKCAST</span> <span class="nv">kotlin</span><span class="o">/</span><span class="nv">jvm</span><span class="o">/</span><span class="nv">functions</span><span class="o">/</span><span class="nc">Function1</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ASTORE</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">   <span class="nc">L3</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ALOAD</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">   <span class="nc">L4</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">LINENUMBER</span> <span class="mi">9</span> <span class="nc">L4</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">NEW</span> <span class="nv">com</span><span class="o">/</span><span class="nv">pengmj</span><span class="o">/</span><span class="nv">kotlincoroutine</span><span class="o">/</span><span class="nc">SampleKt</span><span class="o">$</span><span class="nv">main</span><span class="o">$</span><span class="nv">continuation</span><span class="o">$</span><span class="mi">2</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">DUP</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">INVOKESPECIAL</span> <span class="nv">com</span><span class="o">/</span><span class="nv">pengmj</span><span class="o">/</span><span class="nv">kotlincoroutine</span><span class="o">/</span><span class="nc">SampleKt</span><span class="o">$</span><span class="nv">main</span><span class="o">$</span><span class="nv">continuation</span><span class="o">$</span><span class="mi">2</span><span class="p">.&lt;</span><span class="nv">init</span><span class="p">&gt;</span> <span class="p">()</span><span class="nc">V</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">CHECKCAST</span> <span class="nv">kotlin</span><span class="o">/</span><span class="nv">coroutines</span><span class="o">/</span><span class="nc">Continuation</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">INVOKESTATIC</span> <span class="nv">kotlin</span><span class="o">/</span><span class="nv">coroutines</span><span class="o">/</span><span class="nc">ContinuationKt</span><span class="p">.</span><span class="nv">createCoroutine</span> <span class="p">(</span><span class="nc">Lkotlin</span><span class="o">/</span><span class="nv">jvm</span><span class="o">/</span><span class="nv">functions</span><span class="o">/</span><span class="nc">Function1</span><span class="p">;</span><span class="nc">Lkotlin</span><span class="o">/</span><span class="nv">coroutines</span><span class="o">/</span><span class="nc">Continuation</span><span class="p">;)</span><span class="nc">Lkotlin</span><span class="o">/</span><span class="nv">coroutines</span><span class="o">/</span><span class="nc">Continuation</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="nc">L5</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">LINENUMBER</span> <span class="mi">6</span> <span class="nc">L5</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ASTORE</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">   <span class="nc">L6</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">LINENUMBER</span> <span class="mi">17</span> <span class="nc">L6</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ALOAD</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ASTORE</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">GETSTATIC</span> <span class="nv">kotlin</span><span class="o">/</span><span class="nc">Unit</span><span class="p">.</span><span class="nc">INSTANCE</span> <span class="p">:</span> <span class="nc">Lkotlin</span><span class="o">/</span><span class="nc">Unit</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ASTORE</span> <span class="mi">2</span>
+</span></span><span class="line"><span class="cl">   <span class="nc">L7</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ALOAD</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">GETSTATIC</span> <span class="nv">kotlin</span><span class="o">/</span><span class="nc">Result</span><span class="p">.</span><span class="nc">Companion</span> <span class="p">:</span> <span class="nc">Lkotlin</span><span class="o">/</span><span class="nc">Result</span><span class="o">$</span><span class="nc">Companion</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">POP</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ALOAD</span> <span class="mi">2</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">INVOKESTATIC</span> <span class="nv">kotlin</span><span class="o">/</span><span class="nc">Result</span><span class="p">.</span><span class="nv">constructor</span><span class="o">-</span><span class="nv">impl</span> <span class="p">(</span><span class="nc">Ljava</span><span class="o">/</span><span class="nv">lang</span><span class="o">/</span><span class="nc">Object</span><span class="p">;)</span><span class="nc">Ljava</span><span class="o">/</span><span class="nv">lang</span><span class="o">/</span><span class="nc">Object</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="nc">L8</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">INVOKEINTERFACE</span> <span class="nv">kotlin</span><span class="o">/</span><span class="nv">coroutines</span><span class="o">/</span><span class="nc">Continuation</span><span class="p">.</span><span class="nv">resumeWith</span> <span class="p">(</span><span class="nc">Ljava</span><span class="o">/</span><span class="nv">lang</span><span class="o">/</span><span class="nc">Object</span><span class="p">;)</span><span class="nc">V</span> <span class="p">(</span><span class="nv">itf</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">   <span class="nc">L9</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">LINENUMBER</span> <span class="mi">18</span> <span class="nc">L9</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">RETURN</span>
+</span></span><span class="line"><span class="cl">   <span class="nc">L10</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">LOCALVARIABLE</span> <span class="nv">continuation</span> <span class="nc">Lkotlin</span><span class="o">/</span><span class="nv">coroutines</span><span class="o">/</span><span class="nc">Continuation</span><span class="p">;</span> <span class="nc">L6</span> <span class="nc">L10</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">MAXSTACK</span> <span class="o">=</span> <span class="mi">3</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">MAXLOCALS</span> <span class="o">=</span> <span class="mi">3</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// access flags 0x1009
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nv">public</span> <span class="k">static</span> <span class="nv">synthetic</span> <span class="nf">main</span><span class="p">([</span><span class="nc">Ljava</span><span class="o">/</span><span class="nv">lang</span><span class="o">/</span><span class="nc">String</span><span class="p">;)</span><span class="nc">V</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">INVOKESTATIC</span> <span class="nv">com</span><span class="o">/</span><span class="nv">pengmj</span><span class="o">/</span><span class="nv">kotlincoroutine</span><span class="o">/</span><span class="nc">SampleKt</span><span class="p">.</span><span class="nv">main</span> <span class="p">()</span><span class="nc">V</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">RETURN</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">MAXSTACK</span> <span class="o">=</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">MAXLOCALS</span> <span class="o">=</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="o">@</span><span class="nc">Lkotlin</span><span class="o">/</span><span class="nc">Metadata</span><span class="p">;(</span><span class="nv">mv</span><span class="o">=</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">0</span><span class="p">},</span> <span class="nv">k</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="nv">d1</span><span class="o">=</span><span class="p">{</span><span class="s2">&#34;</span><span class="se">\u0000\u0008\n\u0000\n\u0002\u0010\u0002\n\u0000\u001a\u0006\u0010\u0000\u001a\u0002</span><span class="s2">0</span><span class="se">\u0001\u00a8\u0006\u0002</span><span class="s2">&#34;</span><span class="p">},</span> <span class="nv">d2</span><span class="o">=</span><span class="p">{</span><span class="s2">&#34;main&#34;</span><span class="p">,</span> <span class="s2">&#34;&#34;</span><span class="p">,</span> <span class="s2">&#34;Kotlin&#34;</span><span class="p">})</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// access flags 0x18
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nv">final</span> <span class="k">static</span> <span class="nc">INNERCLASS</span> <span class="nv">com</span><span class="o">/</span><span class="nv">pengmj</span><span class="o">/</span><span class="nv">kotlincoroutine</span><span class="o">/</span><span class="nc">SampleKt</span><span class="o">$</span><span class="nv">main</span><span class="o">$</span><span class="nv">continuation</span><span class="o">$</span><span class="mi">1</span> <span class="nv">null</span> <span class="nv">null</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// access flags 0x19
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nv">public</span> <span class="nv">final</span> <span class="k">static</span> <span class="nc">INNERCLASS</span> <span class="nv">com</span><span class="o">/</span><span class="nv">pengmj</span><span class="o">/</span><span class="nv">kotlincoroutine</span><span class="o">/</span><span class="nc">SampleKt</span><span class="o">$</span><span class="nv">main</span><span class="o">$</span><span class="nv">continuation</span><span class="o">$</span><span class="mi">2</span> <span class="nv">null</span> <span class="nv">null</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// compiled from: sample.kt
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// ================com/pengmj/kotlincoroutine/SampleKt$main$continuation$1.class =================
+</span></span></span><span class="line"><span class="cl"><span class="c1">// class version 52.0 (52)
+</span></span></span><span class="line"><span class="cl"><span class="c1">// access flags 0x30
+</span></span></span><span class="line"><span class="cl"><span class="c1">// signature Lkotlin/coroutines/jvm/internal/SuspendLambda;Lkotlin/jvm/functions/Function1&lt;Lkotlin/coroutines/Continuation&lt;-Ljava/lang/Integer;&gt;;Ljava/lang/Object;&gt;;
+</span></span></span><span class="line"><span class="cl"><span class="c1">// declaration: com/pengmj/kotlincoroutine/SampleKt$main$continuation$1 extends kotlin.coroutines.jvm.internal.SuspendLambda implements kotlin.jvm.functions.Function1&lt;kotlin.coroutines.Continuation&lt;? super java.lang.Integer&gt;, java.lang.Object&gt;
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nv">final</span> <span class="nv">class</span> <span class="nv">com</span><span class="o">/</span><span class="nv">pengmj</span><span class="o">/</span><span class="nv">kotlincoroutine</span><span class="o">/</span><span class="nc">SampleKt</span><span class="o">$</span><span class="nv">main</span><span class="o">$</span><span class="nv">continuation</span><span class="o">$</span><span class="mi">1</span> <span class="nv">extends</span> <span class="nv">kotlin</span><span class="o">/</span><span class="nv">coroutines</span><span class="o">/</span><span class="nv">jvm</span><span class="o">/</span><span class="nv">internal</span><span class="o">/</span><span class="nc">SuspendLambda</span> <span class="nv">implements</span> <span class="nv">kotlin</span><span class="o">/</span><span class="nv">jvm</span><span class="o">/</span><span class="nv">functions</span><span class="o">/</span><span class="nc">Function1</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// access flags 0x11
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nv">public</span> <span class="nv">final</span> <span class="nf">invokeSuspend</span><span class="p">(</span><span class="nc">Ljava</span><span class="o">/</span><span class="nv">lang</span><span class="o">/</span><span class="nc">Object</span><span class="p">;)</span><span class="nc">Ljava</span><span class="o">/</span><span class="nv">lang</span><span class="o">/</span><span class="nc">Object</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="o">@</span><span class="nc">Lorg</span><span class="o">/</span><span class="nv">jetbrains</span><span class="o">/</span><span class="nv">annotations</span><span class="o">/</span><span class="nc">Nullable</span><span class="p">;()</span> <span class="c1">// invisible
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// annotable parameter count: 1 (visible)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// annotable parameter count: 1 (invisible)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="o">@</span><span class="nc">Lorg</span><span class="o">/</span><span class="nv">jetbrains</span><span class="o">/</span><span class="nv">annotations</span><span class="o">/</span><span class="nc">NotNull</span><span class="p">;()</span> <span class="c1">// invisible, parameter 0
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nc">INVOKESTATIC</span> <span class="nv">kotlin</span><span class="o">/</span><span class="nv">coroutines</span><span class="o">/</span><span class="nv">intrinsics</span><span class="o">/</span><span class="nc">IntrinsicsKt</span><span class="p">.</span><span class="nv">getCOROUTINE_SUSPENDED</span> <span class="p">()</span><span class="nc">Ljava</span><span class="o">/</span><span class="nv">lang</span><span class="o">/</span><span class="nc">Object</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="nc">L0</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">LINENUMBER</span> <span class="mi">6</span> <span class="nc">L0</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ASTORE</span> <span class="mi">3</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ALOAD</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">GETFIELD</span> <span class="nv">com</span><span class="o">/</span><span class="nv">pengmj</span><span class="o">/</span><span class="nv">kotlincoroutine</span><span class="o">/</span><span class="nc">SampleKt</span><span class="o">$</span><span class="nv">main</span><span class="o">$</span><span class="nv">continuation</span><span class="o">$</span><span class="mi">1</span><span class="p">.</span><span class="nv">label</span> <span class="p">:</span> <span class="nc">I</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">TABLESWITCH</span>
+</span></span><span class="line"><span class="cl">      <span class="mi">0</span><span class="p">:</span> <span class="nc">L1</span>
+</span></span><span class="line"><span class="cl">      <span class="nv">default</span><span class="p">:</span> <span class="nc">L2</span>
+</span></span><span class="line"><span class="cl">   <span class="nc">L1</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ALOAD</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">INVOKESTATIC</span> <span class="nv">kotlin</span><span class="o">/</span><span class="nc">ResultKt</span><span class="p">.</span><span class="nv">throwOnFailure</span> <span class="p">(</span><span class="nc">Ljava</span><span class="o">/</span><span class="nv">lang</span><span class="o">/</span><span class="nc">Object</span><span class="p">;)</span><span class="nc">V</span>
+</span></span><span class="line"><span class="cl">   <span class="nc">L3</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">LINENUMBER</span> <span class="mi">7</span> <span class="nc">L3</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">BIPUSH</span> <span class="mi">88</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ISTORE</span> <span class="mi">2</span>
+</span></span><span class="line"><span class="cl">   <span class="nc">L4</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">LINENUMBER</span> <span class="mi">8</span> <span class="nc">L4</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">BIPUSH</span> <span class="mi">123</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ILOAD</span> <span class="mi">2</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">IADD</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">INVOKESTATIC</span> <span class="nv">kotlin</span><span class="o">/</span><span class="nv">coroutines</span><span class="o">/</span><span class="nv">jvm</span><span class="o">/</span><span class="nv">internal</span><span class="o">/</span><span class="nc">Boxing</span><span class="p">.</span><span class="nv">boxInt</span> <span class="p">(</span><span class="nc">I</span><span class="p">)</span><span class="nc">Ljava</span><span class="o">/</span><span class="nv">lang</span><span class="o">/</span><span class="nc">Integer</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="nc">L5</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ARETURN</span>
+</span></span><span class="line"><span class="cl">   <span class="nc">L2</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">LINENUMBER</span> <span class="mi">6</span> <span class="nc">L2</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">NEW</span> <span class="nv">java</span><span class="o">/</span><span class="nv">lang</span><span class="o">/</span><span class="nc">IllegalStateException</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">DUP</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">LDC</span> <span class="s2">&#34;call to &#39;resume&#39; before &#39;invoke&#39; with coroutine&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">INVOKESPECIAL</span> <span class="nv">java</span><span class="o">/</span><span class="nv">lang</span><span class="o">/</span><span class="nc">IllegalStateException</span><span class="p">.&lt;</span><span class="nv">init</span><span class="p">&gt;</span> <span class="p">(</span><span class="nc">Ljava</span><span class="o">/</span><span class="nv">lang</span><span class="o">/</span><span class="nc">String</span><span class="p">;)</span><span class="nc">V</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ATHROW</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">LOCALVARIABLE</span> <span class="nv">x</span> <span class="nc">I</span> <span class="nc">L4</span> <span class="nc">L5</span> <span class="mi">2</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">LOCALVARIABLE</span> <span class="nv">this</span> <span class="nc">Lcom</span><span class="o">/</span><span class="nv">pengmj</span><span class="o">/</span><span class="nv">kotlincoroutine</span><span class="o">/</span><span class="nc">SampleKt</span><span class="o">$</span><span class="nv">main</span><span class="o">$</span><span class="nv">continuation</span><span class="o">$</span><span class="mi">1</span><span class="p">;</span> <span class="nc">L3</span> <span class="nc">L2</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">LOCALVARIABLE</span> <span class="o">$</span><span class="nv">result</span> <span class="nc">Ljava</span><span class="o">/</span><span class="nv">lang</span><span class="o">/</span><span class="nc">Object</span><span class="p">;</span> <span class="nc">L3</span> <span class="nc">L2</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">MAXSTACK</span> <span class="o">=</span> <span class="mi">3</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">MAXLOCALS</span> <span class="o">=</span> <span class="mi">4</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="o">@</span><span class="nc">Lkotlin</span><span class="o">/</span><span class="nv">coroutines</span><span class="o">/</span><span class="nv">jvm</span><span class="o">/</span><span class="nv">internal</span><span class="o">/</span><span class="nc">DebugMetadata</span><span class="p">;(</span><span class="nv">f</span><span class="o">=</span><span class="s2">&#34;sample.kt&#34;</span><span class="p">,</span> <span class="nv">l</span><span class="o">=</span><span class="p">{},</span> <span class="nv">i</span><span class="o">=</span><span class="p">{},</span> <span class="nv">s</span><span class="o">=</span><span class="p">{},</span> <span class="nv">n</span><span class="o">=</span><span class="p">{},</span> <span class="nv">m</span><span class="o">=</span><span class="s2">&#34;invokeSuspend&#34;</span><span class="p">,</span> <span class="nv">c</span><span class="o">=</span><span class="s2">&#34;com.pengmj.kotlincoroutine.SampleKt</span><span class="o">$</span><span class="nv">main</span><span class="o">$</span><span class="nv">continuation</span><span class="o">$</span><span class="s2">1&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// access flags 0x0
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">&lt;</span><span class="nv">init</span><span class="p">&gt;(</span><span class="nc">Lkotlin</span><span class="o">/</span><span class="nv">coroutines</span><span class="o">/</span><span class="nc">Continuation</span><span class="p">;)</span><span class="nc">V</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ALOAD</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ICONST_1</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ALOAD</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">INVOKESPECIAL</span> <span class="nv">kotlin</span><span class="o">/</span><span class="nv">coroutines</span><span class="o">/</span><span class="nv">jvm</span><span class="o">/</span><span class="nv">internal</span><span class="o">/</span><span class="nc">SuspendLambda</span><span class="p">.&lt;</span><span class="nv">init</span><span class="p">&gt;</span> <span class="p">(</span><span class="nc">ILkotlin</span><span class="o">/</span><span class="nv">coroutines</span><span class="o">/</span><span class="nc">Continuation</span><span class="p">;)</span><span class="nc">V</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">RETURN</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">MAXSTACK</span> <span class="o">=</span> <span class="mi">3</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">MAXLOCALS</span> <span class="o">=</span> <span class="mi">2</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// access flags 0x0
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nc">I</span> <span class="nv">label</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// access flags 0x11
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// signature (Lkotlin/coroutines/Continuation&lt;*&gt;;)Lkotlin/coroutines/Continuation&lt;Lkotlin/Unit;&gt;;
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// declaration: kotlin.coroutines.Continuation&lt;kotlin.Unit&gt; create(kotlin.coroutines.Continuation&lt;?&gt;)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nv">public</span> <span class="nv">final</span> <span class="nf">create</span><span class="p">(</span><span class="nc">Lkotlin</span><span class="o">/</span><span class="nv">coroutines</span><span class="o">/</span><span class="nc">Continuation</span><span class="p">;)</span><span class="nc">Lkotlin</span><span class="o">/</span><span class="nv">coroutines</span><span class="o">/</span><span class="nc">Continuation</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="o">@</span><span class="nc">Lorg</span><span class="o">/</span><span class="nv">jetbrains</span><span class="o">/</span><span class="nv">annotations</span><span class="o">/</span><span class="nc">NotNull</span><span class="p">;()</span> <span class="c1">// invisible
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// annotable parameter count: 1 (visible)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// annotable parameter count: 1 (invisible)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="o">@</span><span class="nc">Lorg</span><span class="o">/</span><span class="nv">jetbrains</span><span class="o">/</span><span class="nv">annotations</span><span class="o">/</span><span class="nc">NotNull</span><span class="p">;()</span> <span class="c1">// invisible, parameter 0
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="nc">L0</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ALOAD</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">LDC</span> <span class="s2">&#34;completion&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">INVOKESTATIC</span> <span class="nv">kotlin</span><span class="o">/</span><span class="nv">jvm</span><span class="o">/</span><span class="nv">internal</span><span class="o">/</span><span class="nc">Intrinsics</span><span class="p">.</span><span class="nv">checkNotNullParameter</span> <span class="p">(</span><span class="nc">Ljava</span><span class="o">/</span><span class="nv">lang</span><span class="o">/</span><span class="nc">Object</span><span class="p">;</span><span class="nc">Ljava</span><span class="o">/</span><span class="nv">lang</span><span class="o">/</span><span class="nc">String</span><span class="p">;)</span><span class="nc">V</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">NEW</span> <span class="nv">com</span><span class="o">/</span><span class="nv">pengmj</span><span class="o">/</span><span class="nv">kotlincoroutine</span><span class="o">/</span><span class="nc">SampleKt</span><span class="o">$</span><span class="nv">main</span><span class="o">$</span><span class="nv">continuation</span><span class="o">$</span><span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">DUP</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ALOAD</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">INVOKESPECIAL</span> <span class="nv">com</span><span class="o">/</span><span class="nv">pengmj</span><span class="o">/</span><span class="nv">kotlincoroutine</span><span class="o">/</span><span class="nc">SampleKt</span><span class="o">$</span><span class="nv">main</span><span class="o">$</span><span class="nv">continuation</span><span class="o">$</span><span class="mi">1</span><span class="p">.&lt;</span><span class="nv">init</span><span class="p">&gt;</span> <span class="p">(</span><span class="nc">Lkotlin</span><span class="o">/</span><span class="nv">coroutines</span><span class="o">/</span><span class="nc">Continuation</span><span class="p">;)</span><span class="nc">V</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ASTORE</span> <span class="mi">2</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ALOAD</span> <span class="mi">2</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ARETURN</span>
+</span></span><span class="line"><span class="cl">   <span class="nc">L1</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">LOCALVARIABLE</span> <span class="nv">this</span> <span class="nc">Lkotlin</span><span class="o">/</span><span class="nv">coroutines</span><span class="o">/</span><span class="nv">jvm</span><span class="o">/</span><span class="nv">internal</span><span class="o">/</span><span class="nc">BaseContinuationImpl</span><span class="p">;</span> <span class="nc">L0</span> <span class="nc">L1</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">LOCALVARIABLE</span> <span class="nv">completion</span> <span class="nc">Lkotlin</span><span class="o">/</span><span class="nv">coroutines</span><span class="o">/</span><span class="nc">Continuation</span><span class="p">;</span> <span class="nc">L0</span> <span class="nc">L1</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">MAXSTACK</span> <span class="o">=</span> <span class="mi">3</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">MAXLOCALS</span> <span class="o">=</span> <span class="mi">3</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// access flags 0x11
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nv">public</span> <span class="nv">final</span> <span class="nf">invoke</span><span class="p">(</span><span class="nc">Ljava</span><span class="o">/</span><span class="nv">lang</span><span class="o">/</span><span class="nc">Object</span><span class="p">;)</span><span class="nc">Ljava</span><span class="o">/</span><span class="nv">lang</span><span class="o">/</span><span class="nc">Object</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ALOAD</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ALOAD</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">CHECKCAST</span> <span class="nv">kotlin</span><span class="o">/</span><span class="nv">coroutines</span><span class="o">/</span><span class="nc">Continuation</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">INVOKEVIRTUAL</span> <span class="nv">com</span><span class="o">/</span><span class="nv">pengmj</span><span class="o">/</span><span class="nv">kotlincoroutine</span><span class="o">/</span><span class="nc">SampleKt</span><span class="o">$</span><span class="nv">main</span><span class="o">$</span><span class="nv">continuation</span><span class="o">$</span><span class="mi">1</span><span class="p">.</span><span class="nv">create</span> <span class="p">(</span><span class="nc">Lkotlin</span><span class="o">/</span><span class="nv">coroutines</span><span class="o">/</span><span class="nc">Continuation</span><span class="p">;)</span><span class="nc">Lkotlin</span><span class="o">/</span><span class="nv">coroutines</span><span class="o">/</span><span class="nc">Continuation</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">CHECKCAST</span> <span class="nv">com</span><span class="o">/</span><span class="nv">pengmj</span><span class="o">/</span><span class="nv">kotlincoroutine</span><span class="o">/</span><span class="nc">SampleKt</span><span class="o">$</span><span class="nv">main</span><span class="o">$</span><span class="nv">continuation</span><span class="o">$</span><span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">GETSTATIC</span> <span class="nv">kotlin</span><span class="o">/</span><span class="nc">Unit</span><span class="p">.</span><span class="nc">INSTANCE</span> <span class="p">:</span> <span class="nc">Lkotlin</span><span class="o">/</span><span class="nc">Unit</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">INVOKEVIRTUAL</span> <span class="nv">com</span><span class="o">/</span><span class="nv">pengmj</span><span class="o">/</span><span class="nv">kotlincoroutine</span><span class="o">/</span><span class="nc">SampleKt</span><span class="o">$</span><span class="nv">main</span><span class="o">$</span><span class="nv">continuation</span><span class="o">$</span><span class="mi">1</span><span class="p">.</span><span class="nv">invokeSuspend</span> <span class="p">(</span><span class="nc">Ljava</span><span class="o">/</span><span class="nv">lang</span><span class="o">/</span><span class="nc">Object</span><span class="p">;)</span><span class="nc">Ljava</span><span class="o">/</span><span class="nv">lang</span><span class="o">/</span><span class="nc">Object</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ARETURN</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">MAXSTACK</span> <span class="o">=</span> <span class="mi">2</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">MAXLOCALS</span> <span class="o">=</span> <span class="mi">2</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="o">@</span><span class="nc">Lkotlin</span><span class="o">/</span><span class="nc">Metadata</span><span class="p">;(</span><span class="nv">mv</span><span class="o">=</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">0</span><span class="p">},</span> <span class="nv">k</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="nv">d1</span><span class="o">=</span><span class="p">{</span><span class="s2">&#34;</span><span class="se">\u0000\n\n\u0000\n\u0002\u0010\u0008\n\u0002\u0008\u0002\u0010\u0000\u001a\u0002</span><span class="s2">0</span><span class="se">\u0001</span><span class="s2">H</span><span class="se">\u008a</span><span class="s2">@</span><span class="se">\u00a2\u0006\u0004\u0008\u0002\u0010\u0003</span><span class="s2">&#34;</span><span class="p">},</span> <span class="nv">d2</span><span class="o">=</span><span class="p">{</span><span class="s2">&#34;&lt;anonymous&gt;&#34;</span><span class="p">,</span> <span class="s2">&#34;&#34;</span><span class="p">,</span> <span class="s2">&#34;invoke&#34;</span><span class="p">,</span> <span class="s2">&#34;(Ljava/lang/Object;)Ljava/lang/Object;&#34;</span><span class="p">})</span>
+</span></span><span class="line"><span class="cl">  <span class="nc">OUTERCLASS</span> <span class="nv">com</span><span class="o">/</span><span class="nv">pengmj</span><span class="o">/</span><span class="nv">kotlincoroutine</span><span class="o">/</span><span class="nc">SampleKt</span> <span class="nv">main</span> <span class="p">()</span><span class="nc">V</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// access flags 0x18
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nv">final</span> <span class="k">static</span> <span class="nc">INNERCLASS</span> <span class="nv">com</span><span class="o">/</span><span class="nv">pengmj</span><span class="o">/</span><span class="nv">kotlincoroutine</span><span class="o">/</span><span class="nc">SampleKt</span><span class="o">$</span><span class="nv">main</span><span class="o">$</span><span class="nv">continuation</span><span class="o">$</span><span class="mi">1</span> <span class="nv">null</span> <span class="nv">null</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// compiled from: sample.kt
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// ================com/pengmj/kotlincoroutine/SampleKt$main$continuation$2.class =================
+</span></span></span><span class="line"><span class="cl"><span class="c1">// class version 52.0 (52)
+</span></span></span><span class="line"><span class="cl"><span class="c1">// access flags 0x31
+</span></span></span><span class="line"><span class="cl"><span class="c1">// signature Ljava/lang/Object;Lkotlin/coroutines/Continuation&lt;Ljava/lang/Integer;&gt;;
+</span></span></span><span class="line"><span class="cl"><span class="c1">// declaration: com/pengmj/kotlincoroutine/SampleKt$main$continuation$2 implements kotlin.coroutines.Continuation&lt;java.lang.Integer&gt;
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nv">public</span> <span class="nv">final</span> <span class="nv">class</span> <span class="nv">com</span><span class="o">/</span><span class="nv">pengmj</span><span class="o">/</span><span class="nv">kotlincoroutine</span><span class="o">/</span><span class="nc">SampleKt</span><span class="o">$</span><span class="nv">main</span><span class="o">$</span><span class="nv">continuation</span><span class="o">$</span><span class="mi">2</span> <span class="nv">implements</span> <span class="nv">kotlin</span><span class="o">/</span><span class="nv">coroutines</span><span class="o">/</span><span class="nc">Continuation</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nc">OUTERCLASS</span> <span class="nv">com</span><span class="o">/</span><span class="nv">pengmj</span><span class="o">/</span><span class="nv">kotlincoroutine</span><span class="o">/</span><span class="nc">SampleKt</span> <span class="nv">main</span> <span class="p">()</span><span class="nc">V</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// access flags 0x1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nv">public</span> <span class="nf">getContext</span><span class="p">()</span><span class="nc">Lkotlin</span><span class="o">/</span><span class="nv">coroutines</span><span class="o">/</span><span class="nc">CoroutineContext</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="o">@</span><span class="nc">Lorg</span><span class="o">/</span><span class="nv">jetbrains</span><span class="o">/</span><span class="nv">annotations</span><span class="o">/</span><span class="nc">NotNull</span><span class="p">;()</span> <span class="c1">// invisible
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="nc">L0</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">LINENUMBER</span> <span class="mi">11</span> <span class="nc">L0</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">GETSTATIC</span> <span class="nv">kotlin</span><span class="o">/</span><span class="nv">coroutines</span><span class="o">/</span><span class="nc">EmptyCoroutineContext</span><span class="p">.</span><span class="nc">INSTANCE</span> <span class="p">:</span> <span class="nc">Lkotlin</span><span class="o">/</span><span class="nv">coroutines</span><span class="o">/</span><span class="nc">EmptyCoroutineContext</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">CHECKCAST</span> <span class="nv">kotlin</span><span class="o">/</span><span class="nv">coroutines</span><span class="o">/</span><span class="nc">CoroutineContext</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ARETURN</span>
+</span></span><span class="line"><span class="cl">   <span class="nc">L1</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">LOCALVARIABLE</span> <span class="nv">this</span> <span class="nc">Lcom</span><span class="o">/</span><span class="nv">pengmj</span><span class="o">/</span><span class="nv">kotlincoroutine</span><span class="o">/</span><span class="nc">SampleKt</span><span class="o">$</span><span class="nv">main</span><span class="o">$</span><span class="nv">continuation</span><span class="o">$</span><span class="mi">2</span><span class="p">;</span> <span class="nc">L0</span> <span class="nc">L1</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">MAXSTACK</span> <span class="o">=</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">MAXLOCALS</span> <span class="o">=</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// access flags 0x1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nv">public</span> <span class="nf">resumeWith</span><span class="p">(</span><span class="nc">Ljava</span><span class="o">/</span><span class="nv">lang</span><span class="o">/</span><span class="nc">Object</span><span class="p">;)</span><span class="nc">V</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// annotable parameter count: 1 (visible)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// annotable parameter count: 1 (invisible)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="o">@</span><span class="nc">Lorg</span><span class="o">/</span><span class="nv">jetbrains</span><span class="o">/</span><span class="nv">annotations</span><span class="o">/</span><span class="nc">NotNull</span><span class="p">;()</span> <span class="c1">// invisible, parameter 0
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>   <span class="nc">L0</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">LINENUMBER</span> <span class="mi">14</span> <span class="nc">L0</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ALOAD</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">INVOKESTATIC</span> <span class="nv">kotlin</span><span class="o">/</span><span class="nc">Result</span><span class="p">.</span><span class="nv">toString</span><span class="o">-</span><span class="nv">impl</span> <span class="p">(</span><span class="nc">Ljava</span><span class="o">/</span><span class="nv">lang</span><span class="o">/</span><span class="nc">Object</span><span class="p">;)</span><span class="nc">Ljava</span><span class="o">/</span><span class="nv">lang</span><span class="o">/</span><span class="nc">String</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ASTORE</span> <span class="mi">2</span>
+</span></span><span class="line"><span class="cl">   <span class="nc">L1</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">GETSTATIC</span> <span class="nv">java</span><span class="o">/</span><span class="nv">lang</span><span class="o">/</span><span class="nc">System</span><span class="p">.</span><span class="nv">out</span> <span class="p">:</span> <span class="nc">Ljava</span><span class="o">/</span><span class="nv">io</span><span class="o">/</span><span class="nc">PrintStream</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ALOAD</span> <span class="mi">2</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">INVOKEVIRTUAL</span> <span class="nv">java</span><span class="o">/</span><span class="nv">io</span><span class="o">/</span><span class="nc">PrintStream</span><span class="p">.</span><span class="nv">println</span> <span class="p">(</span><span class="nc">Ljava</span><span class="o">/</span><span class="nv">lang</span><span class="o">/</span><span class="nc">Object</span><span class="p">;)</span><span class="nc">V</span>
+</span></span><span class="line"><span class="cl">   <span class="nc">L2</span>
+</span></span><span class="line"><span class="cl">   <span class="nc">L3</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">LINENUMBER</span> <span class="mi">15</span> <span class="nc">L3</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">RETURN</span>
+</span></span><span class="line"><span class="cl">   <span class="nc">L4</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">LOCALVARIABLE</span> <span class="nv">this</span> <span class="nc">Lcom</span><span class="o">/</span><span class="nv">pengmj</span><span class="o">/</span><span class="nv">kotlincoroutine</span><span class="o">/</span><span class="nc">SampleKt</span><span class="o">$</span><span class="nv">main</span><span class="o">$</span><span class="nv">continuation</span><span class="o">$</span><span class="mi">2</span><span class="p">;</span> <span class="nc">L0</span> <span class="nc">L4</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">LOCALVARIABLE</span> <span class="nv">result</span> <span class="nc">Ljava</span><span class="o">/</span><span class="nv">lang</span><span class="o">/</span><span class="nc">Object</span><span class="p">;</span> <span class="nc">L0</span> <span class="nc">L4</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">MAXSTACK</span> <span class="o">=</span> <span class="mi">2</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">MAXLOCALS</span> <span class="o">=</span> <span class="mi">3</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// access flags 0x0
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">&lt;</span><span class="nv">init</span><span class="p">&gt;()</span><span class="nc">V</span>
+</span></span><span class="line"><span class="cl">   <span class="nc">L0</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">LINENUMBER</span> <span class="mi">9</span> <span class="nc">L0</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">ALOAD</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">INVOKESPECIAL</span> <span class="nv">java</span><span class="o">/</span><span class="nv">lang</span><span class="o">/</span><span class="nc">Object</span><span class="p">.&lt;</span><span class="nv">init</span><span class="p">&gt;</span> <span class="p">()</span><span class="nc">V</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">RETURN</span>
+</span></span><span class="line"><span class="cl">   <span class="nc">L1</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">LOCALVARIABLE</span> <span class="nv">this</span> <span class="nc">Lcom</span><span class="o">/</span><span class="nv">pengmj</span><span class="o">/</span><span class="nv">kotlincoroutine</span><span class="o">/</span><span class="nc">SampleKt</span><span class="o">$</span><span class="nv">main</span><span class="o">$</span><span class="nv">continuation</span><span class="o">$</span><span class="mi">2</span><span class="p">;</span> <span class="nc">L0</span> <span class="nc">L1</span> <span class="mi">0</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">MAXSTACK</span> <span class="o">=</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="nc">MAXLOCALS</span> <span class="o">=</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="o">@</span><span class="nc">Lkotlin</span><span class="o">/</span><span class="nc">Metadata</span><span class="p">;(</span><span class="nv">mv</span><span class="o">=</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">0</span><span class="p">},</span> <span class="nv">k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nv">d1</span><span class="o">=</span><span class="p">{</span><span class="s2">&#34;</span><span class="se">\u0000</span><span class="s2">%</span><span class="se">\n\u0000\n\u0002\u0018\u0002\n\u0002\u0010\u0008\n\u0000\n\u0002\u0018\u0002\n\u0002\u0008\u0003\n\u0002\u0010\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\u0008\u0002</span><span class="s2">*</span><span class="se">\u0001\u0000\u0008\n\u0018\u0000</span><span class="s2">2</span><span class="se">\u0008\u0012\u0004\u0012\u0002</span><span class="s2">0</span><span class="se">\u0002</span><span class="s2">0</span><span class="se">\u0001</span><span class="s2">J</span><span class="se">\u001e\u0010\u0007\u001a\u0002</span><span class="s2">0</span><span class="se">\u0008</span><span class="s2">2</span><span class="se">\u000c\u0010\u0009\u001a\u0008\u0012\u0004\u0012\u0002</span><span class="s2">0</span><span class="se">\u0002</span><span class="s2">0</span><span class="se">\n</span><span class="s2">H</span><span class="se">\u0016\u00f8\u0001\u0000\u00a2\u0006\u0002\u0010\u000b</span><span class="s2">R</span><span class="se">\u0014\u0010\u0003\u001a\u0002</span><span class="s2">0</span><span class="se">\u0004</span><span class="s2">8VX</span><span class="se">\u0096\u0004\u00a2\u0006\u0006\u001a\u0004\u0008\u0005\u0010\u0006\u0082\u0002\u0004\n\u0002\u0008\u0019\u00a8\u0006\u000c</span><span class="s2">&#34;</span><span class="p">},</span> <span class="nv">d2</span><span class="o">=</span><span class="p">{</span><span class="s2">&#34;com/pengmj/kotlincoroutine/SampleKt</span><span class="o">$</span><span class="nv">main</span><span class="o">$</span><span class="nv">continuation</span><span class="o">$</span><span class="s2">2&#34;</span><span class="p">,</span> <span class="s2">&#34;Lkotlin/coroutines/Continuation;&#34;</span><span class="p">,</span> <span class="s2">&#34;&#34;</span><span class="p">,</span> <span class="s2">&#34;context&#34;</span><span class="p">,</span> <span class="s2">&#34;Lkotlin/coroutines/CoroutineContext;&#34;</span><span class="p">,</span> <span class="s2">&#34;getContext&#34;</span><span class="p">,</span> <span class="s2">&#34;()Lkotlin/coroutines/CoroutineContext;&#34;</span><span class="p">,</span> <span class="s2">&#34;resumeWith&#34;</span><span class="p">,</span> <span class="s2">&#34;&#34;</span><span class="p">,</span> <span class="s2">&#34;result&#34;</span><span class="p">,</span> <span class="s2">&#34;Lkotlin/Result;&#34;</span><span class="p">,</span> <span class="s2">&#34;(Ljava/lang/Object;)V&#34;</span><span class="p">,</span> <span class="s2">&#34;Kotlin&#34;</span><span class="p">})</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// access flags 0x19
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nv">public</span> <span class="nv">final</span> <span class="k">static</span> <span class="nc">INNERCLASS</span> <span class="nv">com</span><span class="o">/</span><span class="nv">pengmj</span><span class="o">/</span><span class="nv">kotlincoroutine</span><span class="o">/</span><span class="nc">SampleKt</span><span class="o">$</span><span class="nv">main</span><span class="o">$</span><span class="nv">continuation</span><span class="o">$</span><span class="mi">2</span> <span class="nv">null</span> <span class="nv">null</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// compiled from: sample.kt
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// ================META-INF/Kotlin.kotlin_module =================
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="err">         </span>    <span class="err">        </span>
+</span></span><span class="line"><span class="cl"><span class="o">&amp;</span>
+</span></span><span class="line"><span class="cl"><span class="err"></span><span class="nv">com</span><span class="p">.</span><span class="nv">pengmj</span><span class="p">.</span><span class="nv">kotlincoroutine</span><span class="err"></span><span class="nc">SampleKt</span><span class="s2">&#34; * 
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>在上面一大片字节码中，我们着重看这几行：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">NEW com/pengmj/kotlincoroutine/SampleKt$main$continuation$1
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">NEW com/pengmj/kotlincoroutine/SampleKt$main$continuation$2
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">final class com/pengmj/kotlincoroutine/SampleKt$main$continuation$1 extends kotlin/coroutines/jvm/internal/SuspendLambda implements kotlin/jvm/functions/Function1 {
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>由上面字节码可知：</p>
+<p>编译器帮我们创建了2个匿名内部类<code>SampleKt$main$continuation$1</code>和<code>SampleKt$main$continuation$2</code>，它们的类名是<code>&lt;FileName&gt;Kt$&lt;FunctionName&gt;$continuation$1</code>这样的形式，其中&lt;<em>FileName</em>&gt;和&lt;<em>FunctionName</em>&gt;指代的是代码所在的文件名和函数名。</p>
+<p><em><strong>这里会有个疑问：这些匿名内部类是哪来的？</strong></em></p>
+<p>第一个匿名内部类<code>SampleKt$main$continuation$1</code>，它就是我们的<em>协程体</em>，那个用以创建协程的<em>suspend</em>方法传入的<em>Lambda</em>表达式，即<em>suspend ()-&gt;R</em>，也对应了前面说过的埋下伏笔2；</p>
+<p>并且<code>SampleKt$main$continuation$1</code>继承了抽象类<em>SuspendLambda</em>，还实现了<em>Function1</em>接口，继续追踪<em>SuspendLambda</em>时，发现它间接实现了<em>Continuation</em>接口，与先前提到的<em>ContinuationImpl</em>、<em>BaseContinuationImpl</em>存在继承关系，如下图所示：</p>
+<img title="" src="/img/kotlin/解读Kotlin协程启动源码/SampleKt$main$continuation$1继承关系.png" alt="" width="335">
+<p>第二个匿名内部类<code>SampleKt$main$continuation$2</code>，从它的字节码中可以看出它有<em>getContext</em>方法、<em>resumeWith</em>方法以及无参构造方法，可以猜到它就是<em>createCoroutine</em>方法传入的对象表达式，学过<em>Kotlin</em>基础的应该明白，对象表达式其实是增强版的匿名内部类。</p>
+<p>到目前为止还看不出什么，还需要把字节码再转译一下，点击<em>Kotlin ByteCode</em>面板上的<em>Decompile</em>按钮，转译后的源码如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">@Metadata(
+</span></span><span class="line"><span class="cl">   mv = {1, 9, 0},
+</span></span><span class="line"><span class="cl">   k = 2,
+</span></span><span class="line"><span class="cl">   d1 = {&#34;\u0000\b\n\u0000\n\u0002\u0010\u0002\n\u0000\u001a\u0006\u0010\u0000\u001a\u00020\u0001¨\u0006\u0002&#34;},
+</span></span><span class="line"><span class="cl">   d2 = {&#34;main&#34;, &#34;&#34;, &#34;Kotlin&#34;}
+</span></span><span class="line"><span class="cl">)
+</span></span><span class="line"><span class="cl">public final class SampleKt {
+</span></span><span class="line"><span class="cl">   public static final void main() {
+</span></span><span class="line"><span class="cl">      Function1 var1 = (Function1)(new Function1((Continuation)null) {
+</span></span><span class="line"><span class="cl">         int label;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">         @Nullable
+</span></span><span class="line"><span class="cl">         public final Object invokeSuspend(@NotNull Object var1) {
+</span></span><span class="line"><span class="cl">            Object var3 = IntrinsicsKt.getCOROUTINE_SUSPENDED();
+</span></span><span class="line"><span class="cl">            switch (this.label) {
+</span></span><span class="line"><span class="cl">               case 0:
+</span></span><span class="line"><span class="cl">                  ResultKt.throwOnFailure(var1);
+</span></span><span class="line"><span class="cl">                  int x = 88;
+</span></span><span class="line"><span class="cl">                  return Boxing.boxInt(123 + x);
+</span></span><span class="line"><span class="cl">               default:
+</span></span><span class="line"><span class="cl">                  throw new IllegalStateException(&#34;call to &#39;resume&#39; before &#39;invoke&#39; with coroutine&#34;);
+</span></span><span class="line"><span class="cl">            }
+</span></span><span class="line"><span class="cl">         }
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">         @NotNull
+</span></span><span class="line"><span class="cl">         public final Continuation create(@NotNull Continuation completion) {    // ②
+</span></span><span class="line"><span class="cl">            Intrinsics.checkNotNullParameter(completion, &#34;completion&#34;);
+</span></span><span class="line"><span class="cl">            Function1 var2 = new &lt;anonymous constructor&gt;(completion);
+</span></span><span class="line"><span class="cl">            return var2;
+</span></span><span class="line"><span class="cl">         }
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">         public final Object invoke(Object var1) {
+</span></span><span class="line"><span class="cl">            return ((&lt;undefinedtype&gt;)this.create((Continuation)var1)).invokeSuspend(Unit.INSTANCE);
+</span></span><span class="line"><span class="cl">         }
+</span></span><span class="line"><span class="cl">      });
+</span></span><span class="line"><span class="cl">      Continuation continuation = ContinuationKt.createCoroutine(var1, (Continuation)(new Continuation() {     // ①
+</span></span><span class="line"><span class="cl">         @NotNull
+</span></span><span class="line"><span class="cl">         public CoroutineContext getContext() {
+</span></span><span class="line"><span class="cl">            return (CoroutineContext)EmptyCoroutineContext.INSTANCE;
+</span></span><span class="line"><span class="cl">         }
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">         public void resumeWith(@NotNull Object result) {
+</span></span><span class="line"><span class="cl">            String var2 = Result.toString-impl(result);
+</span></span><span class="line"><span class="cl">            System.out.println(var2);
+</span></span><span class="line"><span class="cl">         }
+</span></span><span class="line"><span class="cl">      }));
+</span></span><span class="line"><span class="cl">      Unit var2 = Unit.INSTANCE;
+</span></span><span class="line"><span class="cl">      Result.Companion var10001 = Result.Companion;
+</span></span><span class="line"><span class="cl">      continuation.resumeWith(Result.constructor-impl(var2));
+</span></span><span class="line"><span class="cl">   }
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">   // $FF: synthetic method
+</span></span><span class="line"><span class="cl">   public static void main(String[] var0) {
+</span></span><span class="line"><span class="cl">      main();
+</span></span><span class="line"><span class="cl">   }
+</span></span><span class="line"><span class="cl">}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这里解释下上面的标号地方：</p>
+<p>标号①、调用了<em>ContinuationKt</em>的<em>createCoroutine</em>方法，第一个参数传入<em>var1</em>变量，而<em>var1</em>变量的类型是<em>Function1</em>，对应的<em>Koltin</em>实际代码为：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-kotlin" data-lang="kotlin"><span class="line"><span class="cl"><span class="k">public</span> <span class="k">fun</span> <span class="p">&lt;</span><span class="nc">T</span><span class="p">&gt;</span> <span class="err">(</span><span class="nf">suspend</span> <span class="p">()</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">).</span><span class="n">createCoroutine</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="n">completion</span><span class="p">:</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">):</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">Unit</span><span class="p">&gt;</span> <span class="p">=</span>
+</span></span><span class="line"><span class="cl">    <span class="n">SafeContinuation</span><span class="p">(</span><span class="n">createCoroutineUnintercepted</span><span class="p">(</span><span class="n">completion</span><span class="p">).</span><span class="n">intercepted</span><span class="p">(),</span> <span class="n">COROUTINE_SUSPENDED</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>前面提过埋下伏笔1，<em>suspend ()-&gt;T</em>会作为<em>createCoroutine</em>方法的第一个参数传入，此时可以推断出，这里的<em>var1</em>就是第一个匿名内部类<code>SampleKt$main$continuation$1</code>的实例；<em>createCoroutine</em>方法第二个参数则是<em>completion</em>回调，也是前面说的第二个匿名内部类<code>SampleKt$main$continuation$2</code>。</p>
+<p>标号②、还记得前面说的<em>createCoroutineUnintercepted</em>方法和<em>intercepted</em>方法的具体实现吗？</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-kotlin" data-lang="kotlin"><span class="line"><span class="cl"><span class="k">public</span> <span class="k">actual</span> <span class="k">fun</span> <span class="p">&lt;</span><span class="nc">T</span><span class="p">&gt;</span> <span class="err">(</span><span class="nf">suspend</span> <span class="p">()</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">).</span><span class="n">createCoroutineUnintercepted</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="n">completion</span><span class="p">:</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">):</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">Unit</span><span class="p">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">val</span> <span class="py">probeCompletion</span> <span class="p">=</span> <span class="n">probeCoroutineCreated</span><span class="p">(</span><span class="n">completion</span><span class="p">)</span>       
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="k">if</span> <span class="p">(</span><span class="k">this</span> <span class="k">is</span> <span class="n">BaseContinuationImpl</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">create</span><span class="p">(</span><span class="n">probeCompletion</span><span class="p">)</span>          <span class="c1">// ①                        
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">else</span>
+</span></span><span class="line"><span class="cl">        <span class="n">createCoroutineFromSuspendFunction</span><span class="p">(</span><span class="n">probeCompletion</span><span class="p">)</span> <span class="p">{</span>     
+</span></span><span class="line"><span class="cl">            <span class="p">(</span><span class="k">this</span> <span class="k">as</span> <span class="n">Function1</span><span class="p">&lt;</span><span class="n">Continuation</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;,</span> <span class="n">Any</span><span class="p">?&gt;).</span><span class="n">invoke</span><span class="p">(</span><span class="k">it</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>因为<code>SampleKt$main$continuation$1</code>是<em>BaseContinuationImpl</em>的子类，所以会执行上面①处的<em>create</em>方法，此处调用的是<em>BaseContinuationImpl</em>类的create方法，但是<em>BaseContinuationImpl</em>类中没有具体实现create方法，所以由子类<code>SampleKt$main$continuation$1</code>来实现，如下代码所示：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">public final class SampleKt {
+</span></span><span class="line"><span class="cl">   public static final void main() {
+</span></span><span class="line"><span class="cl">      Function1 var1 = (Function1)(new Function1((Continuation)null) {
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">         @NotNull
+</span></span><span class="line"><span class="cl">         public final Continuation create(@NotNull Continuation completion) {    // ②
+</span></span><span class="line"><span class="cl">            Intrinsics.checkNotNullParameter(completion, &#34;completion&#34;);
+</span></span><span class="line"><span class="cl">            Function1 var2 = new &lt;anonymous constructor&gt;(completion);
+</span></span><span class="line"><span class="cl">            return var2;
+</span></span><span class="line"><span class="cl">         }
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">      });
+</span></span><span class="line"><span class="cl">}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>发现在<em>create</em>方法中又创建了一个匿名内部类对象<em>var2</em>，类型为<em>Function1</em>，那么可以知道<em>createCoroutineUnintercepted</em>方法返回的就是新的<code>SampleKt$main$continuation$1</code>对象。</p>
+<p><em><strong>有一个疑问：var2和外部<code>new Function1</code>创建的匿名内部类对象var1有什么区别和关联呢？</strong></em></p>
+<p>先声明下，从<em>Kotlin</em>代码反编译而来的<em>Java</em>代码可能会出现不符合<em>Java</em>代码执行逻辑的情况。外部创建的匿名内部类对象<em>var1</em>主要是用来帮助启动协程，因此<em>completion</em>传入为<em>null</em>；而<em>create</em>方法中创建的匿名内部类对象<em>var2</em>主要是用来管理协程的状态。</p>
+<p><em><strong>如果你看到本文的后续内容后，可能会回过头来问，为什么var2可以调用var1中的invokeSuspend方法，它们不是两个不同的对象吗？</strong></em></p>
+<p>是的，没错，它们的确是两个不同的对象，但是因为反编译后的源码不一定能准确的表达完整Java代码执行逻辑，这里我再手动转译一下，应该就能看明白了：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">SampleKt</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="kd">final</span> <span class="kd">class</span> <span class="nc">SampleKt$main$continuation$1</span> <span class="kd">extends</span> <span class="n">SuspendLambda</span> <span class="kd">implements</span> <span class="n">Function1</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="nf">SampleKt$main$continuation$1</span><span class="o">(</span><span class="n">Continuation</span> <span class="n">completion</span><span class="o">){</span>
+</span></span><span class="line"><span class="cl">        <span class="kd">super</span><span class="o">(</span><span class="n">completion</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">label</span><span class="o">;</span>                                                                                           
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nd">@Nullable</span>                                                                                            
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">final</span> <span class="n">Object</span> <span class="nf">invokeSuspend</span><span class="o">(</span><span class="nd">@NotNull</span> <span class="n">Object</span> <span class="n">var1</span><span class="o">)</span> <span class="o">{</span>                                            
+</span></span><span class="line"><span class="cl">       <span class="n">Object</span> <span class="n">var3</span> <span class="o">=</span> <span class="n">IntrinsicsKt</span><span class="o">.</span><span class="na">getCOROUTINE_SUSPENDED</span><span class="o">();</span>                                              
+</span></span><span class="line"><span class="cl">       <span class="k">switch</span> <span class="o">(</span><span class="k">this</span><span class="o">.</span><span class="na">label</span><span class="o">)</span> <span class="o">{</span>                                                                             
+</span></span><span class="line"><span class="cl">          <span class="k">case</span> <span class="mi">0</span><span class="o">:</span>                                                                                        
+</span></span><span class="line"><span class="cl">             <span class="n">ResultKt</span><span class="o">.</span><span class="na">throwOnFailure</span><span class="o">(</span><span class="n">var1</span><span class="o">);</span>                                                              
+</span></span><span class="line"><span class="cl">             <span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">88</span><span class="o">;</span>                                                                                 
+</span></span><span class="line"><span class="cl">             <span class="k">return</span> <span class="n">Boxing</span><span class="o">.</span><span class="na">boxInt</span><span class="o">(</span><span class="mi">123</span> <span class="o">+</span> <span class="n">x</span><span class="o">);</span>                                                              
+</span></span><span class="line"><span class="cl">          <span class="k">default</span><span class="o">:</span>                                                                                       
+</span></span><span class="line"><span class="cl">             <span class="k">throw</span> <span class="k">new</span> <span class="n">IllegalStateException</span><span class="o">(</span><span class="s">&#34;call to &#39;resume&#39; before &#39;invoke&#39; with coroutine&#34;</span><span class="o">);</span>         
+</span></span><span class="line"><span class="cl">       <span class="o">}</span>                                                                                                 
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>                                                                                                    
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nd">@NotNull</span>                                                                                             
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">final</span> <span class="n">Continuation</span> <span class="nf">create</span><span class="o">(</span><span class="nd">@NotNull</span> <span class="n">Continuation</span> <span class="n">completion</span><span class="o">)</span> <span class="o">{</span>                                 
+</span></span><span class="line"><span class="cl">       <span class="n">Intrinsics</span><span class="o">.</span><span class="na">checkNotNullParameter</span><span class="o">(</span><span class="n">completion</span><span class="o">,</span> <span class="s">&#34;completion&#34;</span><span class="o">);</span>                                       
+</span></span><span class="line"><span class="cl">       <span class="n">Function1</span> <span class="n">var2</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SampleKt$main$continuation$1</span><span class="o">(</span><span class="n">completion</span><span class="o">);</span>                                         
+</span></span><span class="line"><span class="cl">       <span class="k">return</span> <span class="n">var2</span><span class="o">;</span>                                                                                      
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>                                                                                                    
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">final</span> <span class="n">Object</span> <span class="nf">invoke</span><span class="o">(</span><span class="n">Object</span> <span class="n">var1</span><span class="o">)</span> <span class="o">{</span>                                                            
+</span></span><span class="line"><span class="cl">       <span class="k">return</span> <span class="o">((&lt;</span><span class="n">undefinedtype</span><span class="o">&gt;)</span><span class="k">this</span><span class="o">.</span><span class="na">create</span><span class="o">((</span><span class="n">Continuation</span><span class="o">)</span><span class="n">var1</span><span class="o">)).</span><span class="na">invokeSuspend</span><span class="o">(</span><span class="n">Unit</span><span class="o">.</span><span class="na">INSTANCE</span><span class="o">);</span>           
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>                                                                                                             
+</span></span><span class="line"><span class="cl">  <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">SampleKt$main$continuation$1</span> <span class="n">var1</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SampleKt$main$continuation$1</span><span class="o">(</span><span class="kc">null</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">      <span class="n">Continuation</span> <span class="n">continuation</span> <span class="o">=</span> <span class="n">ContinuationKt</span><span class="o">.</span><span class="na">createCoroutine</span><span class="o">(</span><span class="n">var1</span><span class="o">,</span> <span class="o">(</span><span class="n">Continuation</span><span class="o">)(</span><span class="k">new</span> <span class="n">Continuation</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">         <span class="nd">@NotNull</span>
+</span></span><span class="line"><span class="cl">         <span class="kd">public</span> <span class="n">CoroutineContext</span> <span class="nf">getContext</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="o">(</span><span class="n">CoroutineContext</span><span class="o">)</span><span class="n">EmptyCoroutineContext</span><span class="o">.</span><span class="na">INSTANCE</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">         <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">         <span class="kd">public</span> <span class="kt">void</span> <span class="nf">resumeWith</span><span class="o">(</span><span class="nd">@NotNull</span> <span class="n">Object</span> <span class="n">result</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">String</span> <span class="n">var2</span> <span class="o">=</span> <span class="n">Result</span><span class="o">.</span><span class="na">toString</span><span class="o">-</span><span class="n">impl</span><span class="o">(</span><span class="n">result</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">var2</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">         <span class="o">}</span>
+</span></span><span class="line"><span class="cl">      <span class="o">}));</span>
+</span></span><span class="line"><span class="cl">      <span class="n">Unit</span> <span class="n">var2</span> <span class="o">=</span> <span class="n">Unit</span><span class="o">.</span><span class="na">INSTANCE</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">Result</span><span class="o">.</span><span class="na">Companion</span> <span class="n">var10001</span> <span class="o">=</span> <span class="n">Result</span><span class="o">.</span><span class="na">Companion</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">continuation</span><span class="o">.</span><span class="na">resumeWith</span><span class="o">(</span><span class="n">Result</span><span class="o">.</span><span class="na">constructor</span><span class="o">-</span><span class="n">impl</span><span class="o">(</span><span class="n">var2</span><span class="o">));</span>      
+</span></span><span class="line"><span class="cl">   <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>  
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>还记得我们最初的那个任务吗？就是找到<em>delegate</em>变量的真身，我们已经知道<em>delegate</em>变量就是这么长的一串东西：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-kotlin" data-lang="kotlin"><span class="line"><span class="cl"><span class="n">createCoroutineUnintercepted</span><span class="p">(</span><span class="n">completion</span><span class="p">).</span><span class="n">intercepted</span><span class="p">()</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><em>createCoroutineUnintercepted</em>方法已经分析了，返回的就是新的<code>SampleKt$main$continuation$1</code>对象，那么继续看<em>intercepted</em>方法：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-kotlin" data-lang="kotlin"><span class="line"><span class="cl"><span class="k">public</span> <span class="k">actual</span> <span class="k">fun</span> <span class="p">&lt;</span><span class="nc">T</span><span class="p">&gt;</span> <span class="nf">Continuation</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;.</span><span class="n">intercepted</span><span class="p">():</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">=</span>
+</span></span><span class="line"><span class="cl">    <span class="p">(</span><span class="k">this</span> <span class="k">as</span><span class="p">?</span> <span class="n">ContinuationImpl</span><span class="p">)</span><span class="o">?.</span><span class="n">intercepted</span><span class="p">()</span> <span class="o">?:</span> <span class="k">this</span> 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>很明显，<code>SampleKt$main$continuation$1</code>也是<em>ContinuationImpl</em>的子类，因而这里调用了<em>ContinuationImpl</em>的<em>intercepted</em>方法：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-kotlin" data-lang="kotlin"><span class="line"><span class="cl"><span class="k">internal</span> <span class="k">abstract</span> <span class="k">class</span> <span class="nc">ContinuationImpl</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="n">completion</span><span class="p">:</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">Any</span><span class="p">?&gt;?,</span>
+</span></span><span class="line"><span class="cl">    <span class="k">private</span> <span class="k">val</span> <span class="py">_context</span><span class="p">:</span> <span class="n">CoroutineContext</span><span class="p">?</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span> <span class="p">:</span> <span class="n">BaseContinuationImpl</span><span class="p">(</span><span class="n">completion</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">public</span> <span class="k">fun</span> <span class="nf">intercepted</span><span class="p">():</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">Any</span><span class="p">?&gt;</span> <span class="p">=</span>
+</span></span><span class="line"><span class="cl">        <span class="n">intercepted</span>
+</span></span><span class="line"><span class="cl">            <span class="o">?:</span> <span class="p">(</span><span class="n">context</span><span class="p">[</span><span class="n">ContinuationInterceptor</span><span class="p">]</span><span class="o">?.</span><span class="n">interceptContinuation</span><span class="p">(</span><span class="k">this</span><span class="p">)</span> <span class="o">?:</span> <span class="k">this</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                <span class="p">.</span><span class="n">also</span> <span class="p">{</span> <span class="n">intercepted</span> <span class="p">=</span> <span class="k">it</span> <span class="p">}</span>  
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>上面代码说明如果设置了协程的拦截器，那么就从上下文中去找，如果上下文中也没有，则用自身<code>SampleKt$main$continuation$1</code>，最后赋值。很显然，本例是没有设置协程的拦截器，那么<em>intercepted</em>方法返回的就是<code>SampleKt$main$continuation$1</code>，所以<em>delegate</em>变量的真身就是<code>SampleKt$main$continuation$1</code>。</p>
+<p>接下来看看<em>delegate</em>变量调用了<em>resumeWith</em>方法的流程，因为<code>SampleKt$main$continuation$1</code>中没有<em>resumeWith</em>方法，再根据继承关系，我们看<em>BaseContinuationImpl</em>类的<em>resumeWith</em>方法：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-kotlin" data-lang="kotlin"><span class="line"><span class="cl"><span class="k">internal</span> <span class="k">abstract</span> <span class="k">class</span> <span class="nc">BaseContinuationImpl</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// This is `public val` so that it is private on JVM and cannot be modified by untrusted code, yet
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// it has a public getter (since even untrusted code is allowed to inspect its call stack).
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">public</span> <span class="k">val</span> <span class="py">completion</span><span class="p">:</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">Any</span><span class="p">?&gt;?</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span> <span class="p">:</span> <span class="n">Continuation</span><span class="p">&lt;</span><span class="n">Any</span><span class="p">?&gt;,</span> <span class="n">CoroutineStackFrame</span><span class="p">,</span> <span class="n">Serializable</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">public</span> <span class="k">final</span> <span class="k">override</span> <span class="k">fun</span> <span class="nf">resumeWith</span><span class="p">(</span><span class="n">result</span><span class="p">:</span> <span class="n">Result</span><span class="p">&lt;</span><span class="n">Any</span><span class="p">?&gt;)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// This loop unrolls recursion in current.resumeWith(param) to make saner and shorter stack traces on resume
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">var</span> <span class="py">current</span> <span class="p">=</span> <span class="k">this</span>
+</span></span><span class="line"><span class="cl">        <span class="k">var</span> <span class="py">param</span> <span class="p">=</span> <span class="n">result</span>
+</span></span><span class="line"><span class="cl">        <span class="k">while</span> <span class="p">(</span><span class="k">true</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">// Invoke &#34;resume&#34; debug probe on every resumed continuation, so that a debugging library infrastructure
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="c1">// can precisely track what part of suspended callstack was already resumed
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="n">probeCoroutineResumed</span><span class="p">(</span><span class="n">current</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">with</span><span class="p">(</span><span class="n">current</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">val</span> <span class="py">completion</span> <span class="p">=</span> <span class="n">completion</span><span class="o">!!</span> <span class="c1">// fail fast when trying to resume continuation without completion
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                <span class="k">val</span> <span class="py">outcome</span><span class="p">:</span> <span class="n">Result</span><span class="p">&lt;</span><span class="n">Any</span><span class="p">?&gt;</span> <span class="p">=</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">try</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                        <span class="k">val</span> <span class="py">outcome</span> <span class="p">=</span> <span class="n">invokeSuspend</span><span class="p">(</span><span class="k">param</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                        <span class="k">if</span> <span class="p">(</span><span class="n">outcome</span> <span class="o">===</span> <span class="n">COROUTINE_SUSPENDED</span><span class="p">)</span> <span class="k">return</span>
+</span></span><span class="line"><span class="cl">                        <span class="nc">Result</span><span class="p">.</span><span class="n">success</span><span class="p">(</span><span class="n">outcome</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                    <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">exception</span><span class="p">:</span> <span class="n">Throwable</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                        <span class="nc">Result</span><span class="p">.</span><span class="n">failure</span><span class="p">(</span><span class="n">exception</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">                <span class="n">releaseIntercepted</span><span class="p">()</span> <span class="c1">// this state machine instance is terminating
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                <span class="k">if</span> <span class="p">(</span><span class="n">completion</span> <span class="k">is</span> <span class="n">BaseContinuationImpl</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="c1">// unrolling recursion via loop
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                    <span class="n">current</span> <span class="p">=</span> <span class="n">completion</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">param</span> <span class="p">=</span> <span class="n">outcome</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="c1">// top-level completion reached -- invoke and return
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                    <span class="n">completion</span><span class="p">.</span><span class="n">resumeWith</span><span class="p">(</span><span class="n">outcome</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">return</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">protected</span> <span class="k">abstract</span> <span class="k">fun</span> <span class="nf">invokeSuspend</span><span class="p">(</span><span class="n">result</span><span class="p">:</span> <span class="n">Result</span><span class="p">&lt;</span><span class="n">Any</span><span class="p">?&gt;):</span> <span class="n">Any</span><span class="p">?</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>上面代码的重点是调用了<em>invokeSuspend</em>方法，这是个抽象方法，由子类<code>SampleKt$main$continuation$1</code>实现：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">@Metadata(
+</span></span><span class="line"><span class="cl">   mv = {1, 9, 0},
+</span></span><span class="line"><span class="cl">   k = 2,
+</span></span><span class="line"><span class="cl">   d1 = {&#34;\u0000\b\n\u0000\n\u0002\u0010\u0002\n\u0000\u001a\u0006\u0010\u0000\u001a\u00020\u0001¨\u0006\u0002&#34;},
+</span></span><span class="line"><span class="cl">   d2 = {&#34;main&#34;, &#34;&#34;, &#34;Kotlin&#34;}
+</span></span><span class="line"><span class="cl">)
+</span></span><span class="line"><span class="cl">public final class SampleKt {
+</span></span><span class="line"><span class="cl">   public static final void main() {
+</span></span><span class="line"><span class="cl">      Function1 var1 = (Function1)(new Function1((Continuation)null) {
+</span></span><span class="line"><span class="cl">         int label;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">         @Nullable
+</span></span><span class="line"><span class="cl">         public final Object invokeSuspend(@NotNull Object var1) {
+</span></span><span class="line"><span class="cl">            Object var3 = IntrinsicsKt.getCOROUTINE_SUSPENDED();
+</span></span><span class="line"><span class="cl">            switch (this.label) {
+</span></span><span class="line"><span class="cl">               case 0:
+</span></span><span class="line"><span class="cl">                  ResultKt.throwOnFailure(var1);
+</span></span><span class="line"><span class="cl">                  int x = 88;
+</span></span><span class="line"><span class="cl">                  return Boxing.boxInt(123 + x);
+</span></span><span class="line"><span class="cl">               default:
+</span></span><span class="line"><span class="cl">                  throw new IllegalStateException(&#34;call to &#39;resume&#39; before &#39;invoke&#39; with coroutine&#34;);
+</span></span><span class="line"><span class="cl">         }
+</span></span><span class="line"><span class="cl">      }
+</span></span><span class="line"><span class="cl">   } 
+</span></span><span class="line"><span class="cl">}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这里<em>invokeSuspend</em>方法通过状态机来执行协程体中的逻辑，最终返回处理结果<code>Boxing.boxInt(123 + x)</code>，很显然，<em>invokeSuspend</em>方法其实就是<code>suspend {}</code>闭包中的处理逻辑。</p>
+<p>回到<em>BaseContinuationImpl</em>类的<em>resumeWith</em>方法，看下这2行代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-kotlin" data-lang="kotlin"><span class="line"><span class="cl"><span class="k">val</span> <span class="py">outcome</span> <span class="p">=</span> <span class="n">invokeSuspend</span><span class="p">(</span><span class="k">param</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="n">outcome</span> <span class="o">===</span> <span class="n">COROUTINE_SUSPENDED</span><span class="p">)</span> <span class="k">return</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>如果<em>invokeSuspend</em>方法返回值是挂起状态<em>COROUTINE_SUSPENDED</em>，则<em>resumeWith</em>方法直接退出，否则就通过调用<code>completion.resumeWith(outcome)</code>传递给外部。</p>
+<p>至此，协程启动流程就讲解完成了。</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">文章作者</span>
+    <span class="item-content">AndDevMK</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">上次更新</span>
+    <span class="item-content">
+        2023-07-23
+        
+    </span>
+  </p>
+  
+  <p class="copyright-item">
+    <span class="item-title">许可协议</span>
+    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a></span>
+  </p>
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">赞赏支持</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat-qr-code.JPG">
+        <span>微信打赏</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay-qr-code.JPG">
+        <span>支付宝打赏</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      
+      <nav class="post-nav">
+        
+        <a class="next" href="/post/android%E4%BA%8B%E4%BB%B6%E5%88%86%E5%8F%91%E6%9C%BA%E5%88%B6/">
+            <span class="next-text nav-default">Android事件分发机制</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="AndDevMK/blog-utterances"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    
+    <div id="search_mask" class="search_mask">
+    <div class="search_modal">
+        <div id="close_search" class="close_search">关闭</div>
+        <div class="search_divider"></div>
+        <input id="input_search_key" class="input_search_key" placeholder="请输入你要搜索的内容" tabindex="0">
+        <ul id="search_list">
+        </ul>
+    </div>
+</div>
+
+<script src="/js/fuse.js"></script> 
+<script src="/js/fastsearch.js"></script>
+
+    <footer id="footer" class="footer">
+      
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a id="hexo-link" class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    
+    <span id="run-time" class="run-time"></span> 
+    <span class="heart"><i class="iconfont icon-heart"></i></span>
+    &copy; 
+    2023&nbsp;
+    <span>AndDevMK</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  <script type="text/javascript" src="/lib/jquery/jquery-3.2.1.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout-1.0.1.min.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox-3.1.20.min.js"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.11a4ba15caf2d921d57eaf6568c4ad21eafd5d2c001cbcb31693586c63f93005.js"></script>
+
+<script id="baidu_analytics">
+  var _hmt = _hmt || [];
+  (function() {
+    if (window.location.hostname === 'localhost') return;
+    var hm = document.createElement("script"); hm.async = true;
+    hm.src = "https://hm.baidu.com/hm.js?6db179fb88e600cf326b0515a8aa1de3";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+
+
+
+
+<script src="/js/codecopy.js"></script>
+
+
+
+<link disabled id="dark-mode-theme" rel="stylesheet" href="/css/dark.css"></link>
+<script src="/js/dark.js"></script>
+
+
+<script src="/js/site_runtime.js"></script>
+
+
+
+
+</body>
+</html>

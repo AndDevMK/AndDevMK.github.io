@@ -7,7 +7,16 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>AndDevMK</copyright>
-    <lastBuildDate>Fri, 23 Jun 2023 14:41:31 +0800</lastBuildDate><atom:link href="https://anddevmk.cn/categories/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 23 Jul 2023 14:41:31 +0800</lastBuildDate><atom:link href="https://anddevmk.cn/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Kotlin</title>
+      <link>https://anddevmk.cn/categories/kotlin/</link>
+      <pubDate>Sun, 23 Jul 2023 14:41:31 +0800</pubDate>
+      
+      <guid>https://anddevmk.cn/categories/kotlin/</guid>
+      <description></description>
+    </item>
+    
     <item>
       <title>Android</title>
       <link>https://anddevmk.cn/categories/android/</link>
