@@ -3,27 +3,41 @@
   
   <url>
     <loc>https://anddevmk.cn/</loc>
-    <lastmod>2023-07-23T14:41:31+08:00</lastmod>
+    <lastmod>2023-08-11T22:39:31+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://anddevmk.cn/categories/</loc>
-    <lastmod>2023-07-23T14:41:31+08:00</lastmod>
+    <lastmod>2023-08-11T22:39:31+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://anddevmk.cn/categories/kotlin/</loc>
-    <lastmod>2023-07-23T14:41:31+08:00</lastmod>
+    <loc>https://anddevmk.cn/categories/java/</loc>
+    <lastmod>2023-08-11T22:39:31+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://anddevmk.cn/post/</loc>
+    <lastmod>2023-08-11T22:39:31+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBjdk%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/</loc>
+    <lastmod>2023-08-11T22:39:31+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://anddevmk.cn/categories/kotlin/</loc>
     <lastmod>2023-07-23T14:41:31+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -53,13 +67,6 @@
   <url>
     <loc>https://anddevmk.cn/post/android%E8%A7%A3%E6%9E%90xml%E6%95%B0%E6%8D%AE/</loc>
     <lastmod>2023-05-07T14:41:31+08:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://anddevmk.cn/categories/java/</loc>
-    <lastmod>2023-04-24T14:41:31+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
