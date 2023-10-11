@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>解读Flutter源码之三颗树（上） - AndDevMK&#39;s android blog site</title>
+  <title>Flutter源码之三颗树分类 - AndDevMK&#39;s android blog site</title>
   <meta name="renderer" content="webkit" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
 
@@ -16,7 +16,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
 
 
-<meta name="author" content="AndDevMK" /><meta name="description" content="注：本文代码基于Flutter SDK 3.13.5 一、概述 我们知道，Flutter是通过Widget的一层层嵌套来进行UI构建的（Flutter中万物皆Widget嘛），它所采取的是声明式UI。 关于声明式UI想必大家或多或少都知道一些，在这里可以用一句话简要概括它的特点：它侧重于描述做什么，而不" /><meta name="keywords" content="Android, Java, Kotlin, C&#43;&#43;, C, Flutter, Dart, NDK" />
+<meta name="author" content="AndDevMK" /><meta name="description" content="注：本文代码基于Flutter SDK 3.13.5 一、Widget的分类 作为一个初学者，我们知道在Flutter中万物皆Widget，这恰恰说明了Widget在Flutter中的一个重要性，那么以Android开发者的角度来看，Flutter中的Widget是否等同于Android中的View呢" /><meta name="keywords" content="Android, Java, Kotlin, C&#43;&#43;, C, Flutter, Dart, NDK" />
 
 
 <meta name="baidu-site-verification" content="codeva-wQ7uOo4V09" />
@@ -26,7 +26,7 @@
 <meta name="generator" content="Hugo 0.111.3 with theme even" />
 
 
-<link rel="canonical" href="https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8B%E4%B8%89%E9%A2%97%E6%A0%91%E4%B8%8A/" />
+<link rel="canonical" href="https://anddevmk.cn/post/flutter%E6%BA%90%E7%A0%81%E4%B9%8B%E4%B8%89%E9%A2%97%E6%A0%91%E5%88%86%E7%B1%BB/" />
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -40,19 +40,19 @@
 <link rel="stylesheet" href="/css/codecopy.css">
 
 
-<meta property="og:title" content="解读Flutter源码之三颗树（上）" />
-<meta property="og:description" content="注：本文代码基于Flutter SDK 3.13.5 一、概述 我们知道，Flutter是通过Widget的一层层嵌套来进行UI构建的（Flutter中万物皆Widget嘛），它所采取的是声明式UI。 关于声明式UI想必大家或多或少都知道一些，在这里可以用一句话简要概括它的特点：它侧重于描述做什么，而不" />
+<meta property="og:title" content="Flutter源码之三颗树分类" />
+<meta property="og:description" content="注：本文代码基于Flutter SDK 3.13.5 一、Widget的分类 作为一个初学者，我们知道在Flutter中万物皆Widget，这恰恰说明了Widget在Flutter中的一个重要性，那么以Android开发者的角度来看，Flutter中的Widget是否等同于Android中的View呢" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8B%E4%B8%89%E9%A2%97%E6%A0%91%E4%B8%8A/" /><meta property="article:section" content="post" />
+<meta property="og:url" content="https://anddevmk.cn/post/flutter%E6%BA%90%E7%A0%81%E4%B9%8B%E4%B8%89%E9%A2%97%E6%A0%91%E5%88%86%E7%B1%BB/" /><meta property="article:section" content="post" />
 <meta property="article:published_time" content="2023-10-10T14:47:31+08:00" />
 <meta property="article:modified_time" content="2023-10-10T14:47:31+08:00" />
-<meta itemprop="name" content="解读Flutter源码之三颗树（上）">
-<meta itemprop="description" content="注：本文代码基于Flutter SDK 3.13.5 一、概述 我们知道，Flutter是通过Widget的一层层嵌套来进行UI构建的（Flutter中万物皆Widget嘛），它所采取的是声明式UI。 关于声明式UI想必大家或多或少都知道一些，在这里可以用一句话简要概括它的特点：它侧重于描述做什么，而不"><meta itemprop="datePublished" content="2023-10-10T14:47:31+08:00" />
+<meta itemprop="name" content="Flutter源码之三颗树分类">
+<meta itemprop="description" content="注：本文代码基于Flutter SDK 3.13.5 一、Widget的分类 作为一个初学者，我们知道在Flutter中万物皆Widget，这恰恰说明了Widget在Flutter中的一个重要性，那么以Android开发者的角度来看，Flutter中的Widget是否等同于Android中的View呢"><meta itemprop="datePublished" content="2023-10-10T14:47:31+08:00" />
 <meta itemprop="dateModified" content="2023-10-10T14:47:31+08:00" />
-<meta itemprop="wordCount" content="3818">
+<meta itemprop="wordCount" content="3230">
 <meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="解读Flutter源码之三颗树（上）"/>
-<meta name="twitter:description" content="注：本文代码基于Flutter SDK 3.13.5 一、概述 我们知道，Flutter是通过Widget的一层层嵌套来进行UI构建的（Flutter中万物皆Widget嘛），它所采取的是声明式UI。 关于声明式UI想必大家或多或少都知道一些，在这里可以用一句话简要概括它的特点：它侧重于描述做什么，而不"/>
+<meta name="twitter:title" content="Flutter源码之三颗树分类"/>
+<meta name="twitter:description" content="注：本文代码基于Flutter SDK 3.13.5 一、Widget的分类 作为一个初学者，我们知道在Flutter中万物皆Widget，这恰恰说明了Widget在Flutter中的一个重要性，那么以Android开发者的角度来看，Flutter中的Widget是否等同于Android中的View呢"/>
 
 <!--[if lte IE 9]>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
@@ -150,15 +150,15 @@
           <article class="post">
     
     <header class="post-header">
-      <h1 class="post-title">解读Flutter源码之三颗树（上）</h1>
+      <h1 class="post-title">Flutter源码之三颗树分类</h1>
 
       <div class="post-meta">
         <span class="post-time"> 2023-10-10 </span>
         <div class="post-category">
             <a href="/categories/flutter/"> Flutter </a>
             </div>
-          <span class="more-meta"> 约 3818 字 </span>
-          <span class="more-meta"> 预计阅读 8 分钟 </span>
+          <span class="more-meta"> 约 3230 字 </span>
+          <span class="more-meta"> 预计阅读 7 分钟 </span>
         
       </div>
     </header>
@@ -168,10 +168,9 @@
   <div class="post-toc-content always-active">
     <nav id="TableOfContents">
   <ul>
-    <li><a href="#一概述">一、概述</a></li>
-    <li><a href="#二widget的分类">二、<em>Widget</em>的分类</a></li>
-    <li><a href="#三-element的分类">三、 <em>Element</em>的分类</a></li>
-    <li><a href="#四renderobject的分类">四、<em>RenderObject</em>的分类</a></li>
+    <li><a href="#一widget的分类">一、<em>Widget</em>的分类</a></li>
+    <li><a href="#二-element的分类">二、 <em>Element</em>的分类</a></li>
+    <li><a href="#三renderobject的分类">三、<em>RenderObject</em>的分类</a></li>
   </ul>
 </nav>
   </div>
@@ -180,16 +179,8 @@
       <blockquote>
 <p><em>注：本文代码基于Flutter SDK 3.13.5</em></p>
 </blockquote>
-<h1 id="一概述">一、概述</h1>
-<p>我们知道，<em>Flutter</em>是通过<em>Widget</em>的一层层嵌套来进行<em>UI</em>构建的（<em>Flutter</em>中万物皆<em>Widget</em>嘛），它所采取的是声明式<em>UI</em>。</p>
-<p>关于声明式<em>UI</em>想必大家或多或少都知道一些，在这里可以用一句话简要概括它的特点：<em><strong>它侧重于描述做什么，而不是具体怎么做</strong></em>。</p>
-<p>举个例子，你去奶茶店点杯奶茶，声明式<em>UI</em>就好比你只需要告诉服务员来一杯“温热，少糖，多加芋泥”的厚芋泥波波奶茶，那么服务员就会主动去制作奶茶，用户只需等待奶茶制作完成即可；而传统的命令式<em>UI</em>就好比你点了奶茶后还要亲自告诉服务员制作奶茶的流程，服务员每一个制作步骤都必须按用户的想法去操作。</p>
-<p>与传统的命令式<em>UI</em>不同，在声明式<em>UI</em>中，开发者只需要关注如何描述<em>UI</em>的呈现，而不需要关心<em>UI</em>的具体实现。换句话说，在声明式<em>UI</em>简洁编写风格的背后，隐藏了大量的<em>UI</em>具体实现，它们被转移到了<em>Flutter</em>框架中。</p>
-<p>为此，我们不禁产生疑问，日常工作中所编写的一个个<em>Widget</em>，它们是如何构建出好看的<em>UI</em>呈现在用户面前的？</p>
-<p>因此，这里准备了解读<em>Flutter</em>源码之三颗树的系列文章，用于帮助大家了解<em>Flutter</em>三颗树背后的故事，该系列文章一共分为上、中、下3篇，采用了由浅入深的学习方式去分析<em>Flutter</em>三颗树之间的关系以及它们各自的一个作用，并且通过一些小案例去解读<em>Flutter</em>三颗树源码的执行流程。</p>
-<p>本文作为上篇，先从<em>Flutter</em>三颗树的分类开始讲起，也是为了让读者先留一个印象，后续文章再慢慢深入源码，<em>OK</em>，我们现在就进入学习吧。</p>
-<h1 id="二widget的分类">二、<em>Widget</em>的分类</h1>
-<p>作为一个初学者，我们知道在<em>Flutter</em>中万物皆<em>Widget</em>，这恰恰说明了<em>Widget</em>在<em>Flutter</em>中的一个重要性，那么以<em>Android</em>开发者的角度来看，<em>Flutter</em>中的<em>Widget</em>是否等同于<em>Android</em>中的<em>View</em>呢？或者说<em>Widget</em>能否像<em>Android</em>中的控件一样分为<em>ViewGroup</em>、<em>View</em>两种形式呢？比如说，将需要传入<em>child</em>参数的<em>Widget</em>可认为<em>ViewGroup</em>，如<em>Container</em>、Center等，将不需要传入<em>child</em>参数的<em>Widget</em>可认为<em>View</em>，如<em>Text</em>、<em>Icon</em>等等，如此分类是否合理呢？</p>
+<h1 id="一widget的分类">一、<em>Widget</em>的分类</h1>
+<p>作为一个初学者，我们知道在<em>Flutter</em>中万物皆<em>Widget</em>，这恰恰说明了<em>Widget</em>在<em>Flutter</em>中的一个重要性，那么以<em>Android</em>开发者的角度来看，<em>Flutter</em>中的<em>Widget</em>是否等同于<em>Android</em>中的<em>View</em>呢？或者说<em>Widget</em>能否像<em>Android</em>中的<em>UI</em>控件一样分为<em>ViewGroup</em>、<em>View</em>两种形式呢？比如说，将需要传入<em>child</em>参数的<em>Widget</em>可认为<em>ViewGroup</em>，如<em>Container</em>、Center等，将不需要传入<em>child</em>参数的<em>Widget</em>可认为<em>View</em>，如<em>Text</em>、<em>Icon</em>等等，如此分类是否合理呢？</p>
 <p><em>OK</em>，带着疑问，我们先来看下<em>Widget</em>的部分注释。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -207,8 +198,8 @@
 </span></span></span><span class="line"><span class="cl"><span class="c1">/// inflated into elements, which manage the underlying render tree.
 </span></span></span></code></pre></td></tr></table>
 </div>
-</div><p>翻译：<em>Widget</em>描述一个<em>Element</em>的配置。<em>Widget</em>是<em>Flutter</em>框架中的中心类层次结构。一个<em>widget</em>是用户界面一部分的不可变描述。<em>Widget</em>可以创建出<em>Element</em>，这些<em>Element</em>管理底层渲染树。</p>
-<p>其中“<em>be inflated into</em>”在谷歌翻译中会翻译为“<em>膨胀为</em>”，但是我认为应该翻译为“<em>创建出</em>”比较合理，因为在<em>Widget</em>源码中有一个抽象的<em>createElement</em>方法。</p>
+</div><p><em>翻译：Widget描述一个</em>Element<em>的配置。Widget是Flutter框架中的中心类层次结构。一个widget是用户界面一部分的不可变描述。Widget可以创建出Element，这些Element管理底层渲染树。</em></p>
+<p>其中“<em>be inflated into</em>”在谷歌翻译中会被翻译为“<em>膨胀为</em>”，但是我认为应该翻译为“<em>创建出</em>”比较合理，因为在<em>Widget</em>源码中有一个抽象的<em>createElement</em>方法，就是用来创建并返回<em>Element</em>对象的。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -239,18 +230,18 @@
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p><em>Widget</em>中涉及的这个<em>Element</em>是个什么东西我们暂时不用理会，这个后面会讲到，现在只需要知道<em>Widget</em>在<em>Flutter</em>中扮演着一个<em>UI</em>配置的角色，它是不可变的，<em>Widget</em>本身既非视图，也不会直接绘制任何内容。从这一维度上讲，<em>Widget</em>不完全等同于<em>Android</em>中的<em>View</em>，所以将<em>Widget</em>像<em>Android</em>中的控件一样分为<em>ViewGroup</em>、<em>View</em>两种形式我认为并不合理。</p>
-<p>那么<em>Widget</em>该如何分类呢？我们可以先查看<em>Widget</em>的所有直接子类，对比直接子类之间的区别来进行分类。</p>
-<p>选中<em>Widget</em>-》点击<em>AS</em>菜单栏<em>Navigate</em>中的<em>Type Hierarchy</em>选项，就可以看到<em>Widget</em>的继承关系层次结构（使用快捷键呼出也可以，我这里的默认快捷键是<em>F4</em>）。</p>
-<img title="" src="/img/flutter/解读Flutter源码之三颗树（上）/1.png" alt="" width="235">
-<img title="" src="/img/flutter/解读Flutter源码之三颗树（上）/2.png" alt="" width="335">
-<p>经过仔细对比<em>Widget</em>直接子类之间的区别，将<em>Widget</em>分类后如下图所示。</p>
-<img title="" src="/img/flutter/解读Flutter源码之三颗树（上）/3.png" alt="" width="535">
+</div><p>现在，我们知道了<em>Widget</em>在<em>Flutter</em>中扮演着一个<em>UI</em>配置的角色，它是不可变的，<em>Widget</em>本身既非视图，也不会直接绘制任何内容。从这一维度上讲，<em>Widget</em>不完全等同于<em>Android</em>中的<em>View</em>，所以将<em>Widget</em>像<em>Android</em>中的<em>UI</em>控件一样分为<em>ViewGroup</em>、<em>View</em>两种形式我认为并不合理。</p>
+<p>那么<em>Widget</em>该如何分类呢？我们可以先查看<em>Widget</em>的所有直接子类，比对直接子类之间的区别来进行分类。</p>
+<p>选中<em>Widget</em>-》点击<em>AS</em>菜单栏<em>Navigate</em>中的<em>Type Hierarchy</em>选项，就可以输出<em>Widget</em>的继承关系层次结构（使用快捷键呼出也可以，我这里的默认快捷键是<em>F4</em>）。</p>
+<img title="" src="/img/flutter/Flutter源码之三颗树分类/1.png" alt="" width="235">
+<img title="" src="/img/flutter/Flutter源码之三颗树分类/2.png" alt="" width="335">
+<p>经过仔细比对<em>Widget</em>直接子类之间的区别，将<em>Widget</em>分类后如下图所示。</p>
+<img title="" src="/img/flutter/Flutter源码之三颗树分类/3.png" alt="" width="535">
 <p>如上图所示，根据有无<em>RenderObject</em>大致可以将<em>Widget</em>分为<em>RenderObjectWidget</em>一类和非<em>RenderObjectWidget</em>另一类。</p>
 <ul>
 <li><em>RenderObjectWidget</em>一类</li>
 </ul>
-<p>那么<em>RenderObjectWidget</em>有什么用？来看下它的部分注释说明。</p>
+<p>那么<em>RenderObjectWidget</em>是什么？看下它的部分注释说明。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -263,12 +254,12 @@
 </span></span></span><span class="line"><span class="cl"><span class="c1">/// application.
 </span></span></span></code></pre></td></tr></table>
 </div>
-</div><p>翻译：<em>RenderObjectWidget</em>为<em>RenderObjectElement</em>提供配置，<em>RenderObjectElement</em>包装了<em>RenderObject</em>，<em>RenderObject</em>提供应用程序的实际渲染。</p>
-<p>到这里，相信你已经初步知道这三颗树在<em>Flutter</em>中的作用了，<em><strong>Widget为Element提供配置，Element管理着RenderObject，实际渲染的是RenderObject</strong></em>。</p>
+</div><p><em>翻译：RenderObjectWidget为RenderObjectElement提供配置，RenderObjectElement包装了RenderObject，RenderObject提供应用程序的实际渲染。</em></p>
+<p>到这里已经初步知道这三颗树在<em>Flutter</em>中的作用了，<em>Widget</em>为<em>Element</em>提供配置，<em>Element</em>管理着<em>RenderObject</em>，实际渲染的是<em>RenderObject</em>。</p>
 <p>再来看下<em>RenderObjectWidget</em>源码。</p>
-<img title="" src="/img/flutter/解读Flutter源码之三颗树（上）/4.png" alt="" width="535">
-<p>可以看到，<em>RenderObjectWidget</em>抽象类主要包含4个方法：<em>createElement</em>、<em>createRenderObject</em>、<em>updateRenderObject</em>、<em>didUnmountRenderObject</em>，其中<em>createElement</em>和<em>createRenderObject</em>为抽象方法，需要子类去实现，也就是说，
-<em><strong>RenderObjectWidget不仅要创建Element，也要创建RenderObject</strong></em>。</p>
+<img title="" src="/img/flutter/Flutter源码之三颗树分类/4.png" alt="" width="535">
+<p>由上图可知，<em>RenderObjectWidget</em>抽象类主要包含4个方法：<em>createElement</em>、<em>createRenderObject</em>、<em>updateRenderObject</em>、<em>didUnmountRenderObject</em>，其中<em>createElement</em>和<em>createRenderObject</em>为抽象方法，需要子类去实现，也就是说，
+<em>RenderObjectWidget</em>不仅要创建<em>Element</em>，也要创建<em>RenderObject</em>。</p>
 <p>下面以同样的方式查看<em>RenderObjectWidget</em>继承关系层次结构，又可以将<em>RenderObjectWidget</em>一类分为以下几类。</p>
 <table>
 <thead>
@@ -309,9 +300,9 @@
 <pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="c1">/// A widget that has mutable state.
 </span></span></span></code></pre></td></tr></table>
 </div>
-</div><p>翻译：<em>Widget</em>具有可变状态。</p>
-<p>在<em>StatefulWidget</em>中主要有<em>createElement</em>和<em>createState</em>方法，其中<em>createElement</em>返回了一个<em>StatefulElement</em>，<em>createState</em>则为一个抽象方法，就是我们经常实现的一个方法。</p>
-<img title="" src="/img/flutter/解读Flutter源码之三颗树（上）/5.png" alt="" width="535">
+</div><p><em>翻译：Widget具有可变状态。</em></p>
+<p>在<em>StatefulWidget</em>中主要有<em>createElement</em>和<em>createState</em>方法，其中<em>createElement</em>方法返回了一个<em>StatefulElement</em>，而<em>createState</em>方法则为一个抽象方法，就是我们经常实现的一个方法。</p>
+<img title="" src="/img/flutter/Flutter源码之三颗树分类/5.png" alt="" width="535">
 <p>为什么说<em>StatefulWidget</em>是可变的？这是因为<em>State</em>信息在<em>Widget</em>的生命周期中可能会发生变化。<em>Widget</em>实现者可以确保在状态更改时使用<em>State.setState</em>及时通知<em>State</em>。</p>
 <p>至于<em>StatelessWidget</em>，看下它的部分注释。</p>
 <div class="highlight"><div class="chroma">
@@ -322,11 +313,11 @@
 <pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="c1">/// A widget that does not require mutable state.
 </span></span></span></code></pre></td></tr></table>
 </div>
-</div><p>翻译：不需要可变状态的<em>Widget</em>。</p>
-<p><em>StatelessWidget</em>主要有<em>createElement</em>和<em>build</em>方法，其中<em>createElement</em>返回了一个<em>StatelessElement</em>，<em>build</em>则为一个抽象方法，就是我们经常实现的一个方法。</p>
-<img title="" src="/img/flutter/解读Flutter源码之三颗树（上）/6.png" alt="" width="535">
-<h1 id="三-element的分类">三、 <em>Element</em>的分类</h1>
-<p>通过上面对<em>Widget</em>的了解，我们可以看出它主要就是为了给<em>Element</em>提供配置和创建<em>Element</em>而生的。并且可以发现，对于上述提到的<em>XXXWidget</em>基本上都有对应的<em>XXXElement</em>，如下：</p>
+</div><p><em>翻译：不需要可变状态的Widget。</em></p>
+<p><em>StatelessWidget</em>主要有<em>createElement</em>和<em>build</em>方法，其中<em>createElement</em>方法返回了一个<em>StatelessElement</em>，而<em>build</em>方法则为一个抽象方法，就是我们经常实现的一个方法。</p>
+<img title="" src="/img/flutter/Flutter源码之三颗树分类/6.png" alt="" width="535">
+<h1 id="二-element的分类">二、 <em>Element</em>的分类</h1>
+<p>通过对上面<em>Widget</em>分类的了解，我们可以看出它主要是为了给<em>Element</em>提供配置和创建<em>Element</em>而生的。并且细心点就可以发现，对于上述提到的<em>XXXWidget</em>基本上都有对应的<em>XXXElement</em>，如下：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -356,8 +347,8 @@
 <pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="c1">/// An instantiation of a [Widget] at a particular location in the tree.
 </span></span></span></code></pre></td></tr></table>
 </div>
-</div><p>翻译：树中特定位置的<em>Widget</em>实例。</p>
-<p>通过查看<em>Element</em>抽象类的部分源码我们可以发现，<em>Element</em>中持有了<em>Widget</em>、<em>RenderObject</em>。</p>
+</div><p><em>翻译：树中特定位置的Widget实例。</em></p>
+<p>通过查看<em>Element</em>的部分源码我们可以发现，<em>Element</em>中不仅持有了<em>Widget</em>、还持有了<em>RenderObject</em>，从这一角度来讲，<em>Element</em>是<em>Widget</em>与<em>RenderObject</em>之间沟通的桥梁。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -416,9 +407,9 @@
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p>下面以同样的方式查看<em>Element</em>继承关系层次结构，可以发现每个<em>XXXElement</em>最终都会通过继承<em>ComponentElement</em>或<em>RenderObjectElement</em>来间接继承<em>Element</em>抽象类。</p>
-<img title="" src="/img/flutter/解读Flutter源码之三颗树（上）/7.png" alt="" width="535">
-<h1 id="四renderobject的分类">四、<em>RenderObject</em>的分类</h1>
+</div><p>下面以同样的方式查看<em>Element</em>继承关系层次结构，可以发现每个<em>XXXElement</em>基本上是通过继承<em>ComponentElement</em>或<em>RenderObjectElement</em>来间接继承<em>Element</em>，<em>Element</em>分类如下图所示。</p>
+<img title="" src="/img/flutter/Flutter源码之三颗树分类/7.png" alt="" width="535">
+<h1 id="三renderobject的分类">三、<em>RenderObject</em>的分类</h1>
 <p>通过前面的了解，我们知道<em>RenderObject</em>用来渲染的，那么<em>RenderObject</em>是什么呢？看下它的部分注释。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -434,7 +425,7 @@
 </span></span></span><span class="line"><span class="cl"><span class="c1">/// library&#39;s reason for being.
 </span></span></span></code></pre></td></tr></table>
 </div>
-</div><p>翻译：渲染树中的对象。<em>RenderObject</em>类层次结构是渲染库存在的核心。</p>
+</div><p><em>翻译：渲染树中的对象。RenderObject类层次结构是渲染库存在的核心。</em></p>
 <p>下面以同样的方式查看<em>RenderObject</em>继承关系层次结构，又可以将<em>RenderObject</em>分为以下几类。</p>
 <table>
 <thead>
