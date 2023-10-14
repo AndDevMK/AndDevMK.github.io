@@ -49,7 +49,7 @@
 <meta itemprop="name" content="Android事件分发机制">
 <meta itemprop="description" content="注：本文代码基于Android Sv2 一、概述 事件分发机制是View体系中一个非常重要的核心知识点，也是难点，不少Android开发者搞了几年的Android，或许也还没完全弄明白它的原理。 另外，在Android开发过程中难免会碰到滑动冲突的场景，而解决滑动冲突的理论基础就是事件分发机"><meta itemprop="datePublished" content="2023-06-23T14:41:31+08:00" />
 <meta itemprop="dateModified" content="2023-06-23T14:41:31+08:00" />
-<meta itemprop="wordCount" content="25422">
+<meta itemprop="wordCount" content="25430">
 <meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Android事件分发机制"/>
 <meta name="twitter:description" content="注：本文代码基于Android Sv2 一、概述 事件分发机制是View体系中一个非常重要的核心知识点，也是难点，不少Android开发者搞了几年的Android，或许也还没完全弄明白它的原理。 另外，在Android开发过程中难免会碰到滑动冲突的场景，而解决滑动冲突的理论基础就是事件分发机"/>
@@ -157,7 +157,7 @@
         <div class="post-category">
             <a href="/categories/android/"> Android </a>
             </div>
-          <span class="more-meta"> 约 25422 字 </span>
+          <span class="more-meta"> 约 25430 字 </span>
           <span class="more-meta"> 预计阅读 51 分钟 </span>
         
       </div>
@@ -3843,6 +3843,9 @@
 </div>
 </div><p>因为在<em>ACTION_MOVE</em>消息到来时，<em>EditText</em>需要自己处理消息，所以这里并没有内部拦截法中判断是否需要该事件的if（自己需要这类点击事件）代码。</p>
 <p>将自定义的<em>MyEditText</em>替换布局文件里的<em>EditText</em>即可，运行后效果同用外部拦截法解决滑动冲突。</p>
+<blockquote>
+<p>本文源码地址： <a href="https://github.com/AndDevMK/AndroidEventDispatch"><em>AndroidEventDispatch</em></a></p>
+</blockquote>
 
     </div>
 
