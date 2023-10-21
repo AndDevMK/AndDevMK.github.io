@@ -3,28 +3,35 @@
   
   <url>
     <loc>https://anddevmk.cn/</loc>
-    <lastmod>2023-10-18T11:28:31+08:00</lastmod>
+    <lastmod>2023-10-21T11:28:31+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://anddevmk.cn/categories/</loc>
-    <lastmod>2023-10-18T11:28:31+08:00</lastmod>
+    <lastmod>2023-10-21T11:28:31+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://anddevmk.cn/categories/flutter/</loc>
-    <lastmod>2023-10-18T11:28:31+08:00</lastmod>
+    <lastmod>2023-10-21T11:28:31+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://anddevmk.cn/post/</loc>
-    <lastmod>2023-10-18T11:28:31+08:00</lastmod>
+    <lastmod>2023-10-21T11:28:31+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bsetstate/</loc>
+    <lastmod>2023-10-21T11:28:31+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>

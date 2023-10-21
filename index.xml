@@ -7,7 +7,16 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>AndDevMK</copyright>
-    <lastBuildDate>Wed, 18 Oct 2023 11:28:31 +0800</lastBuildDate><atom:link href="https://anddevmk.cn/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 21 Oct 2023 11:28:31 +0800</lastBuildDate><atom:link href="https://anddevmk.cn/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>解读Flutter源码之setState</title>
+      <link>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bsetstate/</link>
+      <pubDate>Sat, 21 Oct 2023 11:28:31 +0800</pubDate>
+      
+      <guid>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bsetstate/</guid>
+      <description>注：本文代码基于Flutter SDK 3.13.5 一、前言 在上一文解读Flutter源码之StatefulWidget&amp;amp;State的生命周期中，笔者分析了State生命周期的相关方法，但碍于篇幅有限，对于setState方法只是进行了简单描述，还未进行深入分析。 因此，本文将会深入分析se</description>
+    </item>
+    
     <item>
       <title>解读Flutter源码之StatefulWidget&amp;State的生命周期</title>
       <link>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bstatefulwidgetstate%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/</link>
