@@ -7,7 +7,16 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>AndDevMK</copyright>
-    <lastBuildDate>Tue, 31 Oct 2023 11:28:31 +0800</lastBuildDate><atom:link href="https://anddevmk.cn/categories/flutter/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 04 Nov 2023 11:28:31 +0800</lastBuildDate><atom:link href="https://anddevmk.cn/categories/flutter/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>解读Flutter源码之Animation</title>
+      <link>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Banimation/</link>
+      <pubDate>Sat, 04 Nov 2023 11:28:31 +0800</pubDate>
+      
+      <guid>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Banimation/</guid>
+      <description>注：本文代码基于Flutter SDK 3.13.5 一、前言 如果你开发的App失去了交互动画，那么这将是一件很难想象的事情，此时它的体验必然一言难尽，用户会为它贴上“傻快”、“生硬”、“粗糙”等标签，从而你将不得不丢失一部分用户。 因此，精心设计的动画会使UI更生动，它有助于提升App更精巧的外观和</description>
+    </item>
+    
     <item>
       <title>解读Flutter源码之InheritedWidget</title>
       <link>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Binheritedwidget/</link>
