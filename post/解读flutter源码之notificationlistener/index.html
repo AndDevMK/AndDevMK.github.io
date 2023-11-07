@@ -1,0 +1,1897 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>解读Flutter源码之NotificationListener - AndDevMK&#39;s android blog site</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="AndDevMK" /><meta name="description" content="注：本文代码基于Flutter SDK 3.13.5 一、前言 在之前解读Flutter源码之InheritedWidget一文中，我们已知晓，在Widget多层嵌套的情况下，将数据从父级Widget传递给子级Widget时，采用InheritedWidget的方式非常好用。 但是，如果传递方向是反过来" /><meta name="keywords" content="Android, Java, Kotlin, C&#43;&#43;, C, Flutter, Dart, NDK" />
+
+
+<meta name="baidu-site-verification" content="codeva-wQ7uOo4V09" />
+<meta name="google-site-verification" content="yHzWB9BxTR74LiaUhuL5ncr89fnDYXiplTaPY565zqo" />
+
+
+<meta name="generator" content="Hugo 0.111.3 with theme even" />
+
+
+<link rel="canonical" href="https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bnotificationlistener/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.c11aaf02bef1025d6b0813ba5e1a8a8551aee15fa8f2bcea906d41b20bdf5c69.css" rel="stylesheet">
+<link href="/lib/fancybox/jquery.fancybox-3.1.20.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/css/codecopy.css">
+
+
+<meta property="og:title" content="解读Flutter源码之NotificationListener" />
+<meta property="og:description" content="注：本文代码基于Flutter SDK 3.13.5 一、前言 在之前解读Flutter源码之InheritedWidget一文中，我们已知晓，在Widget多层嵌套的情况下，将数据从父级Widget传递给子级Widget时，采用InheritedWidget的方式非常好用。 但是，如果传递方向是反过来" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bnotificationlistener/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2023-11-07T11:28:31+08:00" />
+<meta property="article:modified_time" content="2023-11-07T11:28:31+08:00" />
+<meta itemprop="name" content="解读Flutter源码之NotificationListener">
+<meta itemprop="description" content="注：本文代码基于Flutter SDK 3.13.5 一、前言 在之前解读Flutter源码之InheritedWidget一文中，我们已知晓，在Widget多层嵌套的情况下，将数据从父级Widget传递给子级Widget时，采用InheritedWidget的方式非常好用。 但是，如果传递方向是反过来"><meta itemprop="datePublished" content="2023-11-07T11:28:31+08:00" />
+<meta itemprop="dateModified" content="2023-11-07T11:28:31+08:00" />
+<meta itemprop="wordCount" content="8194">
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="解读Flutter源码之NotificationListener"/>
+<meta name="twitter:description" content="注：本文代码基于Flutter SDK 3.13.5 一、前言 在之前解读Flutter源码之InheritedWidget一文中，我们已知晓，在Widget多层嵌套的情况下，将数据从父级Widget传递给子级Widget时，采用InheritedWidget的方式非常好用。 但是，如果传递方向是反过来"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">AndDevMK</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">首页</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">归档</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">关于</li>
+      </a>
+
+    
+    <li class="mobile-menu-item-search">
+      <div id="mobile_open_search" class="mobile_open_search">
+        搜索
+      </div>
+    </li>
+
+    
+    <li class="mobile-menu-item-dark-mode">
+      <div id="mobile_dark_mode_toggle" class="mobile_light_mode">
+       
+      </div>
+    </li>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">AndDevMK</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">首页</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">归档</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">关于</a>
+      </li>
+    
+    <div id="open_search" class="open_search">
+      搜索
+    </div>
+
+    
+    <div id="dark_mode_toggle" class="light_mode">
+
+    </div>
+  
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">解读Flutter源码之NotificationListener</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2023-11-07 </span>
+        <div class="post-category">
+            <a href="/categories/flutter/"> Flutter </a>
+            </div>
+          <span class="more-meta"> 约 8194 字 </span>
+          <span class="more-meta"> 预计阅读 17 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#一前言">一、前言</a></li>
+    <li><a href="#二什么是通知监听">二、什么是通知监听？</a></li>
+    <li><a href="#三通知监听示例">三、通知监听示例</a></li>
+    <li><a href="#四分析通知源码">四、分析通知源码</a>
+      <ul>
+        <li><a href="#41通知节点树的形成">4.1、通知节点树的形成</a></li>
+        <li><a href="#42触发通知分发的过程">4.2、触发通知分发的过程</a></li>
+        <li><a href="#42通知分发">4.2、通知分发</a></li>
+      </ul>
+    </li>
+    <li><a href="#五自定义通知">五、自定义通知</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <blockquote>
+<p><em>注：本文代码基于Flutter SDK 3.13.5</em></p>
+</blockquote>
+<h1 id="一前言">一、前言</h1>
+<p>在之前<a href="https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Binheritedwidget/"><em>解读Flutter源码之InheritedWidget</em></a>一文中，我们已知晓，在<em>Widget</em>多层嵌套的情况下，将数据从父级<em>Widget</em>传递给子级<em>Widget</em>时，采用<em>InheritedWidget</em>的方式非常好用。</p>
+<p>但是，如果传递方向是反过来的情况下，也就是变为从子级<em>Widget</em>向父级<em>Widget</em>传递数据，那么依然可以选择从<em>InheritedWidget</em>传入<em>Listener</em>的方式来实现。</p>
+<p>例如，还是之前的计数器示例，只不过添加多一个“Post”按钮来触发子级<em>Widget</em>向父级<em>Widget</em>传递数据。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">runApp</span><span class="p">(</span><span class="kd">const</span> <span class="n">MyApp</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">MyApp</span> <span class="kd">extends</span> <span class="n">StatelessWidget</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">const</span> <span class="n">MyApp</span><span class="p">({</span><span class="k">super</span><span class="p">.</span><span class="n">key</span><span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Widget</span> <span class="n">build</span><span class="p">(</span><span class="n">BuildContext</span> <span class="n">context</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">MaterialApp</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">title:</span> <span class="s1">&#39;Flutter Demo&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">theme:</span> <span class="n">ThemeData</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">colorScheme:</span> <span class="n">ColorScheme</span><span class="p">.</span><span class="n">fromSeed</span><span class="p">(</span><span class="nl">seedColor:</span> <span class="n">Colors</span><span class="p">.</span><span class="n">deepPurple</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">useMaterial3:</span> <span class="kc">true</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="p">),</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">home:</span> <span class="kd">const</span> <span class="n">MyPage</span><span class="p">(</span><span class="nl">title:</span> <span class="s1">&#39;计数器&#39;</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">    <span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">MyPage</span> <span class="kd">extends</span> <span class="n">StatefulWidget</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">const</span> <span class="n">MyPage</span><span class="p">({</span><span class="k">super</span><span class="p">.</span><span class="n">key</span><span class="p">,</span> <span class="kd">required</span> <span class="k">this</span><span class="p">.</span><span class="n">title</span><span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="kd">final</span> <span class="kt">String</span> <span class="n">title</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="n">State</span><span class="o">&lt;</span><span class="n">MyPage</span><span class="o">&gt;</span> <span class="n">createState</span><span class="p">()</span> <span class="o">=&gt;</span> <span class="n">_MyPageState</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">_MyPageState</span> <span class="kd">extends</span> <span class="n">State</span><span class="o">&lt;</span><span class="n">MyPage</span><span class="o">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">_counter</span> <span class="o">=</span> <span class="m">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="kt">void</span> <span class="n">_increment</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">setState</span><span class="p">(()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">_counter</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">});</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Widget</span> <span class="n">build</span><span class="p">(</span><span class="n">BuildContext</span> <span class="n">context</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">Scaffold</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">appBar:</span> <span class="n">AppBar</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">backgroundColor:</span> <span class="n">Theme</span><span class="p">.</span><span class="n">of</span><span class="p">(</span><span class="n">context</span><span class="p">).</span><span class="n">colorScheme</span><span class="p">.</span><span class="n">inversePrimary</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">title:</span> <span class="n">Text</span><span class="p">(</span><span class="n">widget</span><span class="p">.</span><span class="n">title</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">      <span class="p">),</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">body:</span> <span class="n">MyParent</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">counter:</span> <span class="n">_counter</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">listener:</span> <span class="p">(</span><span class="kt">String</span> <span class="n">result</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="n">ScaffoldMessenger</span><span class="p">.</span><span class="n">of</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">          <span class="p">..</span><span class="n">removeCurrentSnackBar</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">          <span class="p">..</span><span class="n">showSnackBar</span><span class="p">(</span><span class="n">SnackBar</span><span class="p">(</span><span class="nl">content:</span> <span class="n">Text</span><span class="p">(</span><span class="n">result</span><span class="p">))),</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">child:</span> <span class="kd">const</span> <span class="n">MyChild</span><span class="p">(),</span>
+</span></span><span class="line"><span class="cl">      <span class="p">),</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">floatingActionButton:</span> <span class="n">FloatingActionButton</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">onPressed:</span> <span class="n">_increment</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">tooltip:</span> <span class="s1">&#39;increment&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">child:</span> <span class="kd">const</span> <span class="n">Icon</span><span class="p">(</span><span class="n">Icons</span><span class="p">.</span><span class="n">add</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">      <span class="p">),</span>
+</span></span><span class="line"><span class="cl">    <span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">MyParent</span> <span class="kd">extends</span> <span class="n">InheritedWidget</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">final</span> <span class="kt">int</span> <span class="n">counter</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">final</span> <span class="n">ValueChanged</span><span class="o">&lt;</span><span class="kt">String</span><span class="o">&gt;</span> <span class="n">listener</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="kd">const</span> <span class="n">MyParent</span><span class="p">({</span>
+</span></span><span class="line"><span class="cl">    <span class="k">super</span><span class="p">.</span><span class="n">key</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">required</span> <span class="k">this</span><span class="p">.</span><span class="n">counter</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">required</span> <span class="k">this</span><span class="p">.</span><span class="n">listener</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">required</span> <span class="k">super</span><span class="p">.</span><span class="n">child</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="kd">static</span> <span class="n">MyParent</span><span class="o">?</span> <span class="n">maybeOf</span><span class="p">(</span><span class="n">BuildContext</span> <span class="n">context</span><span class="p">)</span> <span class="o">=&gt;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">context</span><span class="p">.</span><span class="n">dependOnInheritedWidgetOfExactType</span><span class="o">&lt;</span><span class="n">MyParent</span><span class="o">&gt;</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="kd">static</span> <span class="n">MyParent</span> <span class="n">of</span><span class="p">(</span><span class="n">BuildContext</span> <span class="n">context</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">final</span> <span class="n">MyParent</span><span class="o">?</span> <span class="n">result</span> <span class="o">=</span> <span class="n">maybeOf</span><span class="p">(</span><span class="n">context</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">assert</span><span class="p">(</span><span class="n">result</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">,</span> <span class="s1">&#39;No MyParent found in context&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">result</span><span class="o">!</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">bool</span> <span class="n">updateShouldNotify</span><span class="p">(</span><span class="n">covariant</span> <span class="n">MyParent</span> <span class="n">oldWidget</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="n">counter</span> <span class="o">!=</span> <span class="n">oldWidget</span><span class="p">.</span><span class="n">counter</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">MyChild</span> <span class="kd">extends</span> <span class="n">StatefulWidget</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">const</span> <span class="n">MyChild</span><span class="p">({</span><span class="k">super</span><span class="p">.</span><span class="n">key</span><span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="n">State</span><span class="o">&lt;</span><span class="n">MyChild</span><span class="o">&gt;</span> <span class="n">createState</span><span class="p">()</span> <span class="o">=&gt;</span> <span class="n">_MyChildState</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">_MyChildState</span> <span class="kd">extends</span> <span class="n">State</span><span class="o">&lt;</span><span class="n">MyChild</span><span class="o">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">void</span> <span class="n">didChangeDependencies</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">super</span><span class="p">.</span><span class="n">didChangeDependencies</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">debugPrint</span><span class="p">(</span><span class="s1">&#39;didChangeDependencies&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Widget</span> <span class="n">build</span><span class="p">(</span><span class="n">BuildContext</span> <span class="n">context</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">debugPrint</span><span class="p">(</span><span class="s1">&#39;build&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">Center</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">child:</span> <span class="n">Column</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">mainAxisSize:</span> <span class="n">MainAxisSize</span><span class="p">.</span><span class="n">min</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">children:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">          <span class="n">Text</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="s1">&#39;</span><span class="si">${</span><span class="n">MyParent</span><span class="p">.</span><span class="n">of</span><span class="p">(</span><span class="n">context</span><span class="p">).</span><span class="n">counter</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nl">style:</span> <span class="kd">const</span> <span class="n">TextStyle</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">              <span class="nl">fontSize:</span> <span class="m">100</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">              <span class="nl">color:</span> <span class="n">Colors</span><span class="p">.</span><span class="n">black</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="p">),</span>
+</span></span><span class="line"><span class="cl">          <span class="p">),</span>
+</span></span><span class="line"><span class="cl">          <span class="n">ElevatedButton</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="nl">onPressed:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="n">MyParent</span><span class="p">.</span><span class="n">of</span><span class="p">(</span><span class="n">context</span><span class="p">).</span><span class="n">listener</span><span class="p">(</span><span class="s1">&#39;Hello World!&#39;</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">            <span class="nl">child:</span> <span class="kd">const</span> <span class="n">Text</span><span class="p">(</span><span class="s1">&#39;Post&#39;</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">          <span class="p">),</span>
+</span></span><span class="line"><span class="cl">        <span class="p">],</span>
+</span></span><span class="line"><span class="cl">      <span class="p">),</span>
+</span></span><span class="line"><span class="cl">    <span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>程序运行起来后，效果如下：</p>
+<img title="" src="/img/flutter/解读Flutter源码之NotificationListener/1.gif" alt="" width="235">
+<p>另外，<em>Flutter</em>的<em>NotificationListener</em>（通知监听）为我们提供了一个更优雅的方式去实现上面的效果，并且功能更强大，可以传递给多个父级<em>Widget</em>处理。</p>
+<h1 id="二什么是通知监听">二、什么是通知监听？</h1>
+<p>关于<em>NotificationListener</em>（通知监听），在<em>Flutter</em>官网中是找不到它的详细介绍的，而且<em>NotificationListener</em>的代码注释也非常少，先来看下它的声明。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="c1">/// 一个监听在树上冒泡的Notification的widget
+</span></span></span><span class="line"><span class="cl"><span class="c1">/// A widget that listens for [Notification]s bubbling up the tree.
+</span></span></span><span class="line"><span class="cl"><span class="c1">///
+</span></span></span><span class="line"><span class="cl"><span class="c1">/// 仅当Notifications的runtimeType是T的子类型时，才会触发onNotification回调。
+</span></span></span><span class="line"><span class="cl"><span class="c1">/// Notifications will trigger the [onNotification] callback only if their
+</span></span></span><span class="line"><span class="cl"><span class="c1">/// [runtimeType] is a subtype of `T`.
+</span></span></span><span class="line"><span class="cl"><span class="c1">///
+</span></span></span><span class="line"><span class="cl"><span class="c1">/// 要发送通知，请使用Notification.dispatch方法。
+</span></span></span><span class="line"><span class="cl"><span class="c1">/// To dispatch notifications, use the [Notification.dispatch] method.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">class</span> <span class="nc">NotificationListener</span><span class="o">&lt;</span><span class="n">T</span> <span class="kd">extends</span> <span class="n">Notification</span><span class="o">&gt;</span> <span class="kd">extends</span> <span class="n">ProxyWidget</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="kd">const</span> <span class="n">NotificationListener</span><span class="p">({</span>
+</span></span><span class="line"><span class="cl">    <span class="k">super</span><span class="p">.</span><span class="n">key</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">required</span> <span class="k">super</span><span class="p">.</span><span class="n">child</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="k">this</span><span class="p">.</span><span class="n">onNotification</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">/// 当适当类型的通知到达树中的此位置时调用。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">/// Called when a notification of the appropriate type arrives at this
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">/// location in the tree.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">///
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">/// 返回 true 取消通知冒泡。返回 false 以允许通知继续分派给更远的祖先
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">/// Return true to cancel the notification bubbling. Return false to
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">/// allow the notification to continue to be dispatched to further ancestors.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">///
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">/// 通知的发送时间有所不同。主要有两种可能性：帧之间的分发和布局期间的分发
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">/// Notifications vary in terms of when they are dispatched. There are two
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">/// main possibilities: dispatch between frames, and dispatch during layout.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">///
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">/// 对于在布局期间分派的通知（例如从LayoutChangedNotification继承的通知），调用State.setState来响应通知为时已晚（根据定义，布局当前发生在后代中，因为通知会在树中冒泡）。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">/// 对于依赖于布局的小部件，请考虑使用LayoutBuilder 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">/// For notifications that dispatch during layout, such as those that inherit
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">/// from [LayoutChangedNotification], it is too late to call [State.setState]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">/// in response to the notification (as layout is currently happening in a
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">/// descendant, by definition, since notifications bubble up the tree). For
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">/// widgets that depend on layout, consider a [LayoutBuilder] instead.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="kd">final</span> <span class="n">NotificationListenerCallback</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;?</span> <span class="n">onNotification</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Element</span> <span class="n">createElement</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">_NotificationElement</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以发现，上面<em>NotificationListener</em>的注释是描述得不够详细的，下面结合它的注释&amp;笔者的观点总结一下它的特性。</p>
+<p>1、与<em>InheritedWidget</em>一样，<em>NotificationListener</em>同样继承自<em>ProxyWidget</em>，<em>ProxyWidget</em>用来提供了一个子<em>Widget</em>，而不是构建一个新的<em>Widget</em>。</p>
+<p>2、<em>NotificationListener</em>可以指定一个泛型T，该泛型T必须是<em>Notification</em>的子类。注意：当显式指定泛型T时，如<em>ScrollUpdateNotification</em>，<em>NotificationListener</em>便只会接收<em>ScrollUpdateNotification</em>类型的通知。</p>
+<p>3、<em>NotificationListener</em>需要传入一个<em>onNotification</em>参数，它的类型是<em>NotificationListenerCallback</em>，如果返回<em>true</em>时就会取消通知冒泡，否则允许通知继续分派给更远的祖先。</p>
+<p>4、通知是<em>Flutter</em>中一个重要的机制，在<em>Widget</em>树中，每一个节点都可以分发通知，通知会沿着当前节点向上传递，所有父级<em>Widget</em>都可以通过<em>NotificationListener</em>来监听通知。因此，<em>Flutter</em>中将这种由子级<em>Widget</em>向父级<em>Widget</em>的传递通知的机制称为通知冒泡（<em>Notification Bubbling</em>）。</p>
+<p>5、通知冒泡和用户触摸事件（<em>Listener</em>）是相似的，但有一点不同：通知冒泡可以中止，但用户触摸事件不行。</p>
+<p>6、<em>Flutter</em>中很多地方使用了通知，如下面将要介绍的<em>PageView</em>示例，它所创建的 <em>_PageViewState</em> 的<em>build</em>方法中就使用了<em>NotificationListener</em>监听滚动通知来实现<em>onPageChanged</em>功能，看下<em>build</em>方法源码。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl"><span class="n">Widget</span> <span class="n">build</span><span class="p">(</span><span class="n">BuildContext</span> <span class="n">context</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">final</span> <span class="n">AxisDirection</span> <span class="n">axisDirection</span> <span class="o">=</span> <span class="n">_getDirection</span><span class="p">(</span><span class="n">context</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">final</span> <span class="n">ScrollPhysics</span> <span class="n">physics</span> <span class="o">=</span> <span class="n">_ForceImplicitScrollPhysics</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="nl">allowImplicitScrolling:</span> <span class="n">widget</span><span class="p">.</span><span class="n">allowImplicitScrolling</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="p">).</span><span class="n">applyTo</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="n">widget</span><span class="p">.</span><span class="n">pageSnapping</span>
+</span></span><span class="line"><span class="cl">      <span class="o">?</span> <span class="n">_kPagePhysics</span><span class="p">.</span><span class="n">applyTo</span><span class="p">(</span><span class="n">widget</span><span class="p">.</span><span class="n">physics</span> <span class="o">??</span> <span class="n">widget</span><span class="p">.</span><span class="n">scrollBehavior</span><span class="o">?</span><span class="p">.</span><span class="n">getScrollPhysics</span><span class="p">(</span><span class="n">context</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">      <span class="o">:</span> <span class="n">widget</span><span class="p">.</span><span class="n">physics</span> <span class="o">??</span> <span class="n">widget</span><span class="p">.</span><span class="n">scrollBehavior</span><span class="o">?</span><span class="p">.</span><span class="n">getScrollPhysics</span><span class="p">(</span><span class="n">context</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">  <span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">NotificationListener</span><span class="o">&lt;</span><span class="n">ScrollNotification</span><span class="o">&gt;</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="nl">onNotification:</span> <span class="p">(</span><span class="n">ScrollNotification</span> <span class="n">notification</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// 监听滚动通知
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="k">if</span> <span class="p">(</span><span class="n">notification</span><span class="p">.</span><span class="n">depth</span> <span class="o">==</span> <span class="m">0</span> <span class="o">&amp;&amp;</span> <span class="n">widget</span><span class="p">.</span><span class="n">onPageChanged</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">notification</span> <span class="k">is</span> <span class="n">ScrollUpdateNotification</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kd">final</span> <span class="n">PageMetrics</span> <span class="n">metrics</span> <span class="o">=</span> <span class="n">notification</span><span class="p">.</span><span class="n">metrics</span> <span class="o">as</span> <span class="n">PageMetrics</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 获取当前页码
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="kd">final</span> <span class="kt">int</span> <span class="n">currentPage</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">.</span><span class="n">page</span><span class="o">!</span><span class="p">.</span><span class="n">round</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">currentPage</span> <span class="o">!=</span> <span class="n">_lastReportedPage</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">          <span class="n">_lastReportedPage</span> <span class="o">=</span> <span class="n">currentPage</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">          <span class="c1">// 实现onPageChanged回调
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>          <span class="n">widget</span><span class="p">.</span><span class="n">onPageChanged</span><span class="o">!</span><span class="p">(</span><span class="n">currentPage</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">},</span>
+</span></span><span class="line"><span class="cl">    <span class="nl">child:</span> <span class="n">Scrollable</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">dragStartBehavior:</span> <span class="n">widget</span><span class="p">.</span><span class="n">dragStartBehavior</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">axisDirection:</span> <span class="n">axisDirection</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">controller:</span> <span class="n">widget</span><span class="p">.</span><span class="n">controller</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">physics:</span> <span class="n">physics</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">restorationId:</span> <span class="n">widget</span><span class="p">.</span><span class="n">restorationId</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">scrollBehavior:</span> <span class="n">widget</span><span class="p">.</span><span class="n">scrollBehavior</span> <span class="o">??</span> <span class="n">ScrollConfiguration</span><span class="p">.</span><span class="n">of</span><span class="p">(</span><span class="n">context</span><span class="p">).</span><span class="n">copyWith</span><span class="p">(</span><span class="nl">scrollbars:</span> <span class="kc">false</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">viewportBuilder:</span> <span class="p">(</span><span class="n">BuildContext</span> <span class="n">context</span><span class="p">,</span> <span class="n">ViewportOffset</span> <span class="n">position</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">Viewport</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">          <span class="c1">// TODO(dnfield): we should provide a way to set cacheExtent
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>          <span class="c1">// independent of implicit scrolling:
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>          <span class="c1">// https://github.com/flutter/flutter/issues/45632
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>          <span class="nl">cacheExtent:</span> <span class="n">widget</span><span class="p">.</span><span class="n">allowImplicitScrolling</span> <span class="o">?</span> <span class="m">1.0</span> <span class="o">:</span> <span class="m">0.0</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="nl">cacheExtentStyle:</span> <span class="n">CacheExtentStyle</span><span class="p">.</span><span class="n">viewport</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="nl">axisDirection:</span> <span class="n">axisDirection</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="nl">offset:</span> <span class="n">position</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="nl">clipBehavior:</span> <span class="n">widget</span><span class="p">.</span><span class="n">clipBehavior</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="nl">slivers:</span> <span class="o">&lt;</span><span class="n">Widget</span><span class="o">&gt;</span><span class="p">[</span>
+</span></span><span class="line"><span class="cl">            <span class="n">SliverFillViewport</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">              <span class="nl">viewportFraction:</span> <span class="n">widget</span><span class="p">.</span><span class="n">controller</span><span class="p">.</span><span class="n">viewportFraction</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">              <span class="nl">delegate:</span> <span class="n">widget</span><span class="p">.</span><span class="n">childrenDelegate</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">              <span class="nl">padEnds:</span> <span class="n">widget</span><span class="p">.</span><span class="n">padEnds</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="p">),</span>
+</span></span><span class="line"><span class="cl">          <span class="p">],</span>
+</span></span><span class="line"><span class="cl">        <span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="p">},</span>
+</span></span><span class="line"><span class="cl">    <span class="p">),</span>
+</span></span><span class="line"><span class="cl">  <span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这里给出了<em>NotificationListener</em>的部分特性，主要是想让大家对<em>NotificationListener</em>有一个初级认知。</p>
+<h1 id="三通知监听示例">三、通知监听示例</h1>
+<p>在下面示例中，将通过<em>NotificationListener</em>来监听<em>PageView</em>的滚动通知的。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">runApp</span><span class="p">(</span><span class="kd">const</span> <span class="n">MyApp</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">MyApp</span> <span class="kd">extends</span> <span class="n">StatelessWidget</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">const</span> <span class="n">MyApp</span><span class="p">({</span><span class="k">super</span><span class="p">.</span><span class="n">key</span><span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Widget</span> <span class="n">build</span><span class="p">(</span><span class="n">BuildContext</span> <span class="n">context</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">MaterialApp</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">title:</span> <span class="s1">&#39;Flutter Demo&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">theme:</span> <span class="n">ThemeData</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">colorScheme:</span> <span class="n">ColorScheme</span><span class="p">.</span><span class="n">fromSeed</span><span class="p">(</span><span class="nl">seedColor:</span> <span class="n">Colors</span><span class="p">.</span><span class="n">deepPurple</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">useMaterial3:</span> <span class="kc">true</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="p">),</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">home:</span> <span class="kd">const</span> <span class="n">MyPage</span><span class="p">(</span><span class="nl">title:</span> <span class="s1">&#39;PageView滚动通知监听&#39;</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">    <span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">MyPage</span> <span class="kd">extends</span> <span class="n">StatefulWidget</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">const</span> <span class="n">MyPage</span><span class="p">({</span><span class="k">super</span><span class="p">.</span><span class="n">key</span><span class="p">,</span> <span class="kd">required</span> <span class="k">this</span><span class="p">.</span><span class="n">title</span><span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="kd">final</span> <span class="kt">String</span> <span class="n">title</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="n">State</span><span class="o">&lt;</span><span class="n">MyPage</span><span class="o">&gt;</span> <span class="n">createState</span><span class="p">()</span> <span class="o">=&gt;</span> <span class="n">_MyPageState</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">_MyPageState</span> <span class="kd">extends</span> <span class="n">State</span><span class="o">&lt;</span><span class="n">MyPage</span><span class="o">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Widget</span><span class="o">&gt;</span> <span class="n">_widgets</span> <span class="o">=</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">const</span> <span class="n">ColoredBox</span><span class="p">(</span><span class="nl">color:</span> <span class="n">Colors</span><span class="p">.</span><span class="n">redAccent</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">const</span> <span class="n">ColoredBox</span><span class="p">(</span><span class="nl">color:</span> <span class="n">Colors</span><span class="p">.</span><span class="n">greenAccent</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">const</span> <span class="n">ColoredBox</span><span class="p">(</span><span class="nl">color:</span> <span class="n">Colors</span><span class="p">.</span><span class="n">blueAccent</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">  <span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Widget</span> <span class="n">build</span><span class="p">(</span><span class="n">BuildContext</span> <span class="n">context</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">Scaffold</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">appBar:</span> <span class="n">AppBar</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">backgroundColor:</span> <span class="n">Theme</span><span class="p">.</span><span class="n">of</span><span class="p">(</span><span class="n">context</span><span class="p">).</span><span class="n">colorScheme</span><span class="p">.</span><span class="n">inversePrimary</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">title:</span> <span class="n">Text</span><span class="p">(</span><span class="n">widget</span><span class="p">.</span><span class="n">title</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">      <span class="p">),</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">body:</span> <span class="n">NotificationListener</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">onNotification:</span> <span class="p">(</span><span class="n">notification</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">          <span class="k">switch</span> <span class="p">(</span><span class="n">notification</span><span class="p">.</span><span class="n">runtimeType</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">case</span> <span class="nl">ScrollStartNotification:</span>
+</span></span><span class="line"><span class="cl">              <span class="n">debugPrint</span><span class="p">(</span><span class="s1">&#39;开始滚动&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">              <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">case</span> <span class="nl">ScrollUpdateNotification:</span>
+</span></span><span class="line"><span class="cl">              <span class="n">debugPrint</span><span class="p">(</span><span class="s1">&#39;正在滚动&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">              <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">case</span> <span class="nl">ScrollEndNotification:</span>
+</span></span><span class="line"><span class="cl">              <span class="n">debugPrint</span><span class="p">(</span><span class="s1">&#39;滚动停止&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">              <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">case</span> <span class="nl">OverscrollNotification:</span>
+</span></span><span class="line"><span class="cl">              <span class="n">debugPrint</span><span class="p">(</span><span class="s1">&#39;滚动到边界&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">              <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">case</span> <span class="nl">UserScrollNotification:</span>
+</span></span><span class="line"><span class="cl">              <span class="n">debugPrint</span><span class="p">(</span><span class="s1">&#39;用户滚动&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">              <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">          <span class="p">}</span>
+</span></span><span class="line"><span class="cl">          <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">},</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">child:</span> <span class="n">PageView</span><span class="p">.</span><span class="n">builder</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">          <span class="nl">itemCount:</span> <span class="n">_widgets</span><span class="p">.</span><span class="n">length</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="nl">itemBuilder:</span> <span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="n">_widgets</span><span class="p">[</span><span class="n">index</span><span class="p">],</span>
+</span></span><span class="line"><span class="cl">        <span class="p">),</span>
+</span></span><span class="line"><span class="cl">      <span class="p">),</span>
+</span></span><span class="line"><span class="cl">    <span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>程序运行起来后，效果如下：</p>
+<img title="" src="/img/flutter/解读Flutter源码之NotificationListener/2.gif" alt="" width="235">
+<p>当滑动<em>PageView</em>时，上面这5个通知均会输出相应的日志：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">I/flutter (21018): 开始滚动
+</span></span><span class="line"><span class="cl">I/flutter (21018): 正在滚动
+</span></span><span class="line"><span class="cl">I/flutter (21018): 正在滚动
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">I/flutter (21018): 正在滚动
+</span></span><span class="line"><span class="cl">I/flutter (21018): 正在滚动
+</span></span><span class="line"><span class="cl">I/flutter (21018): 滚动停止
+</span></span><span class="line"><span class="cl">I/flutter (21018): 用户滚动
+</span></span><span class="line"><span class="cl">I/flutter (21018): 开始滚动
+</span></span><span class="line"><span class="cl">I/flutter (21018): 用户滚动
+</span></span><span class="line"><span class="cl">I/flutter (21018): 正在滚动
+</span></span><span class="line"><span class="cl">I/flutter (21018): 滚动到边界
+</span></span><span class="line"><span class="cl">I/flutter (21018): 滚动到边界
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">I/flutter (21018): 滚动到边界
+</span></span><span class="line"><span class="cl">I/flutter (21018): 滚动停止
+</span></span><span class="line"><span class="cl">I/flutter (21018): 用户滚动
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>通过查看它们的源码可以发现它们均继承自<em>ScrollNotification</em>类，并且不同类型的通知会包含不同的信息，比如<em>ScrollUpdateNotification</em>就有一个<em>scrollDelta</em>属性，它记录了移动的位移等。</p>
+<table>
+<thead>
+<tr>
+<th>通知</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>ScrollStartNotification</em></td>
+<td><em>Scrollable</em>小部件已开始滚动的通知</td>
+</tr>
+<tr>
+<td><em>ScrollUpdateNotification</em></td>
+<td><em>Scrollable</em>小部件已更改其滚动位置的通知</td>
+</tr>
+<tr>
+<td><em>ScrollEndNotification</em></td>
+<td><em>Scrollable</em>小部件已停止滚动的通知</td>
+</tr>
+<tr>
+<td><em>OverscrollNotification</em></td>
+<td><em>Scrollable</em>小部件尚未更改其滚动位置，因为更改会导致其滚动位置超出其滚动范围的通知</td>
+</tr>
+<tr>
+<td><em>UserScrollNotification</em></td>
+<td>用户已更改滚动<em>ScrollDirection</em>或已停止滚动的通知</td>
+</tr>
+</tbody>
+</table>
+<p>除了上面提到的和滚动相关的通知，还有一些其它的通知，例如<em>KeepAliveNotification</em>等，这些其它的通知和特定的功能相关。</p>
+<img title="" src="/img/flutter/解读Flutter源码之NotificationListener/Notification继承关系.png" alt="" width="535">
+<h1 id="四分析通知源码">四、分析通知源码</h1>
+<h2 id="41通知节点树的形成">4.1、通知节点树的形成</h2>
+<p>当你使用<em>NotificationListener</em>这个<em>Widget</em>时，它所关联的<em>Element</em>为 <em>_NotificationElement</em>，对于每个 <em>_NotificationElement</em> 来说，它会持有一个父通知节点 <em>_NotificationNode</em>（上一个 <em>_NotificationElement</em> 所创建的通知节点）。</p>
+<p>那么，在<em>Element</em>树的背后就会形成一颗通知节点树，来看下源码，了解下这颗通知节点树是怎么形成的。</p>
+<p>通知节点树形成的关键在于<em>attachNotificationTree</em>方法，那么它是在哪里执行的？</p>
+<p>当新创建的<em>Element</em>第一次添加到树中时，就会执行<em>mount</em>方法，在<em>mount</em>方法中会执行attachNotificationTree方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="err">@</span><span class="n">mustCallSuper</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">mount</span><span class="p">(</span><span class="n">Element</span><span class="o">?</span> <span class="n">parent</span><span class="p">,</span> <span class="kt">Object</span><span class="o">?</span> <span class="n">newSlot</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="n">_lifecycleState</span> <span class="o">==</span> <span class="n">_ElementLifecycle</span><span class="p">.</span><span class="n">initial</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="n">_parent</span> <span class="o">==</span> <span class="kc">null</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="n">parent</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">||</span> <span class="n">parent</span><span class="p">.</span><span class="n">_lifecycleState</span> <span class="o">==</span> <span class="n">_ElementLifecycle</span><span class="p">.</span><span class="n">active</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="n">slot</span> <span class="o">==</span> <span class="kc">null</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">_slot</span> <span class="o">=</span> <span class="n">newSlot</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">_lifecycleState</span> <span class="o">=</span> <span class="n">_ElementLifecycle</span><span class="p">.</span><span class="n">active</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">_depth</span> <span class="o">=</span> <span class="n">_parent</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">?</span> <span class="n">_parent</span><span class="o">!</span><span class="p">.</span><span class="n">depth</span> <span class="o">+</span> <span class="m">1</span> <span class="o">:</span> <span class="m">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">parent</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// Only assign ownership if the parent is non-null. If parent is null
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// (the root node), the owner should have already been assigned.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// See RootRenderObjectElement.assignOwner().
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">_owner</span> <span class="o">=</span> <span class="n">parent</span><span class="p">.</span><span class="n">owner</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="n">owner</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">final</span> <span class="n">Key</span><span class="o">?</span> <span class="n">key</span> <span class="o">=</span> <span class="n">widget</span><span class="p">.</span><span class="n">key</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">key</span> <span class="k">is</span> <span class="n">GlobalKey</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">owner</span><span class="o">!</span><span class="p">.</span><span class="n">_registerGlobalKey</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="k">this</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">_updateInheritance</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 创建通知节点
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">attachNotificationTree</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>以及在<em>Element</em>的<em>activate</em>方法中触发，也就是当先前停用的<em>Element</em>重新合并到<em>Element</em>树中时，也会执行<em>attachNotificationTree</em>方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="err">@</span><span class="n">mustCallSuper</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">activate</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="n">_lifecycleState</span> <span class="o">==</span> <span class="n">_ElementLifecycle</span><span class="p">.</span><span class="n">inactive</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="n">owner</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">final</span> <span class="kt">bool</span> <span class="n">hadDependencies</span> <span class="o">=</span> <span class="p">(</span><span class="n">_dependencies</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">_dependencies</span><span class="o">!</span><span class="p">.</span><span class="n">isNotEmpty</span><span class="p">)</span> <span class="o">||</span> <span class="n">_hadUnsatisfiedDependencies</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">_lifecycleState</span> <span class="o">=</span> <span class="n">_ElementLifecycle</span><span class="p">.</span><span class="n">active</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// We unregistered our dependencies in deactivate, but never cleared the list.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// Since we&#39;re going to be reused, let&#39;s clear our list now.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">_dependencies</span><span class="o">?</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">_hadUnsatisfiedDependencies</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">_updateInheritance</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 创建通知节点
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">attachNotificationTree</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">_dirty</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">owner</span><span class="o">!</span><span class="p">.</span><span class="n">scheduleBuildFor</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">hadDependencies</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">didChangeDependencies</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>看下<em>Element</em>的attachNotificationTree方法，对于在<em>mount</em>第一个 <em>_NotificationElement</em> 之前的<em>Element</em>来说，它的通知节点为<em>null</em>。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="n">Element</span><span class="o">?</span> <span class="n">_parent</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">_NotificationNode</span><span class="o">?</span> <span class="n">_notificationTree</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">@</span><span class="n">protected</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">attachNotificationTree</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">_notificationTree</span> <span class="o">=</span> <span class="n">_parent</span><span class="o">?</span><span class="p">.</span><span class="n">_notificationTree</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>另外，<em>attachNotificationTree</em>方法会被子类<em>NotifiableElementMixin</em>重写，而且<em>NotificationListener</em>所关联的 <em>_NotificationElement</em> 会混入<em>NotifiableElementMixin</em>。</p>
+<p>因此，对于 <em>_NotificationElement</em> 来说，它会创建一个新的通知节点 <em>_NotificationNode</em>，看下<em>NotifiableElementMixin</em>的<em>attachNotificationTree</em>方法源码就知道。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="n">mixin</span> <span class="n">NotifiableElementMixin</span> <span class="n">on</span> <span class="n">Element</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">void</span> <span class="n">attachNotificationTree</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_notificationTree</span> <span class="o">=</span> <span class="n">_NotificationNode</span><span class="p">(</span><span class="n">_parent</span><span class="o">?</span><span class="p">.</span><span class="n">_notificationTree</span><span class="p">,</span> <span class="k">this</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>再看下 <em>_NotificationNode</em> 源码可以发现， <em>_NotificationNode</em> 会持有父组件的 <em>_NotificationNode</em>（上一个 _NotificationElement 所创建的通知节点），也就是对应于<em>parent</em>参数，以及持有当前 <em>_NotificationElement</em> 所混入<em>NotifiableElementMixin</em>实例，也就是对应于<em>current</em>参数。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">_NotificationNode</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">_NotificationNode</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="n">parent</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="n">current</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">NotifiableElementMixin</span><span class="o">?</span> <span class="n">current</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">_NotificationNode</span><span class="o">?</span> <span class="n">parent</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p><em>总结：当Element执行mount方法挂载，如果遇到第一个_NotificationElement时，就会为其创建一个_NotificationNode通知节点，该通知节点会持有上一个_NotificationElement所创建的通知节点，注意此时之前Element的通知节点均为null，所以该通知节点持有的上一个_NotificationElement所创建的通知节点为null。之后的Element继续执行mount方法挂载，这些Element持有的通知节点依然是第一个_NotificationElement所创建的通知节点。如果遇到第二个_NotificationElement时，就会为其创建一个_NotificationNode通知节点，该通知节点会持有上一个_NotificationElement所创建的通知节点，也就是第一个_NotificationElement所创建的通知节点，如此往复形成一颗通知节点树。</em></p>
+</blockquote>
+<h2 id="42触发通知分发的过程">4.2、触发通知分发的过程</h2>
+<p>以上面<em>PageView</em>为例，之前看过它的<em>build</em>方法实现，内部会构建一个<em>Scrollable</em>，<em>Scrollable</em>是一个<em>StatefulWidget</em>，它所创建的<em>State</em>为<em>ScrollableState</em>。</p>
+<p>在<em>ScrollableState</em>中，有一个 <em>_updatePosition</em> 方法，来看下它的源码，发现它会执行 <em>_effectiveScrollController.createScrollPosition</em> 来创建一个<em>ScrollPosition</em>。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="c1">// 仅在肯定会触发重建的地方调用此方法
+</span></span></span><span class="line"><span class="cl"><span class="c1">// Only call this from places that will definitely trigger a rebuild.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">void</span> <span class="n">_updatePosition</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">_configuration</span> <span class="o">=</span> <span class="n">widget</span><span class="p">.</span><span class="n">scrollBehavior</span> <span class="o">??</span> <span class="n">ScrollConfiguration</span><span class="p">.</span><span class="n">of</span><span class="p">(</span><span class="n">context</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">_physics</span> <span class="o">=</span> <span class="n">_configuration</span><span class="p">.</span><span class="n">getScrollPhysics</span><span class="p">(</span><span class="n">context</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">widget</span><span class="p">.</span><span class="n">physics</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_physics</span> <span class="o">=</span> <span class="n">widget</span><span class="p">.</span><span class="n">physics</span><span class="o">!</span><span class="p">.</span><span class="n">applyTo</span><span class="p">(</span><span class="n">_physics</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">widget</span><span class="p">.</span><span class="n">scrollBehavior</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_physics</span> <span class="o">=</span> <span class="n">widget</span><span class="p">.</span><span class="n">scrollBehavior</span><span class="o">!</span><span class="p">.</span><span class="n">getScrollPhysics</span><span class="p">(</span><span class="n">context</span><span class="p">).</span><span class="n">applyTo</span><span class="p">(</span><span class="n">_physics</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">final</span> <span class="n">ScrollPosition</span><span class="o">?</span> <span class="n">oldPosition</span> <span class="o">=</span> <span class="n">_position</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">oldPosition</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_effectiveScrollController</span><span class="p">.</span><span class="n">detach</span><span class="p">(</span><span class="n">oldPosition</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// It&#39;s important that we not dispose the old position until after the
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// viewport has had a chance to unregister its listeners from the old
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// position. So, schedule a microtask to do it.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">scheduleMicrotask</span><span class="p">(</span><span class="n">oldPosition</span><span class="p">.</span><span class="n">dispose</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 创建一个ScrollPosition
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">_position</span> <span class="o">=</span> <span class="n">_effectiveScrollController</span><span class="p">.</span><span class="n">createScrollPosition</span><span class="p">(</span><span class="n">_physics</span><span class="o">!</span><span class="p">,</span> <span class="k">this</span><span class="p">,</span> <span class="n">oldPosition</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="n">_position</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 将ScrollPosition添加到ScrollController中的_positions中保存
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">_effectiveScrollController</span><span class="p">.</span><span class="n">attach</span><span class="p">(</span><span class="n">position</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>看下<em>ScrollController</em>的<em>createScrollPosition</em>方法，这个方法有子类<em>PageController</em>实现，发现它内部创建了一个 <em>_PagePosition</em> 实例。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl"><span class="n">ScrollPosition</span> <span class="n">createScrollPosition</span><span class="p">(</span><span class="n">ScrollPhysics</span> <span class="n">physics</span><span class="p">,</span> <span class="n">ScrollContext</span> <span class="n">context</span><span class="p">,</span> <span class="n">ScrollPosition</span><span class="o">?</span> <span class="n">oldPosition</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">_PagePosition</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="nl">physics:</span> <span class="n">physics</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nl">context:</span> <span class="n">context</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nl">initialPage:</span> <span class="n">initialPage</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nl">keepPage:</span> <span class="n">keepPage</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nl">viewportFraction:</span> <span class="n">viewportFraction</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nl">oldPosition:</span> <span class="n">oldPosition</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>通过跟踪 <em>_PagePosition</em> 的源码，可以发现它继承自<em>ScrollPositionWithSingleContext</em>，而<em>ScrollPositionWithSingleContext</em>又继承自<em>ScrollPosition</em>。</p>
+<p>在<em>ScrollPosition</em>中，定义了几个通知分发的方法，供子类 <em>_PagePosition</em> 调用。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="c1">// NOTIFICATION DISPATCH
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="c1">/// Called by [beginActivity] to report when an activity has started.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">void</span> <span class="n">didStartScroll</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">activity</span><span class="o">!</span><span class="p">.</span><span class="n">dispatchScrollStartNotification</span><span class="p">(</span><span class="n">copyWith</span><span class="p">(),</span> <span class="n">context</span><span class="p">.</span><span class="n">notificationContext</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">/// Called by [setPixels] to report a change to the [pixels] position.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">void</span> <span class="n">didUpdateScrollPositionBy</span><span class="p">(</span><span class="kt">double</span> <span class="n">delta</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">activity</span><span class="o">!</span><span class="p">.</span><span class="n">dispatchScrollUpdateNotification</span><span class="p">(</span><span class="n">copyWith</span><span class="p">(),</span> <span class="n">context</span><span class="p">.</span><span class="n">notificationContext</span><span class="o">!</span><span class="p">,</span> <span class="n">delta</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">/// Called by [beginActivity] to report when an activity has ended.
+</span></span></span><span class="line"><span class="cl"><span class="c1">///
+</span></span></span><span class="line"><span class="cl"><span class="c1">/// This also saves the scroll offset using [saveScrollOffset].
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">void</span> <span class="n">didEndScroll</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">activity</span><span class="o">!</span><span class="p">.</span><span class="n">dispatchScrollEndNotification</span><span class="p">(</span><span class="n">copyWith</span><span class="p">(),</span> <span class="n">context</span><span class="p">.</span><span class="n">notificationContext</span><span class="o">!</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">saveOffset</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">keepScrollOffset</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">saveScrollOffset</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">/// Called by [setPixels] to report overscroll when an attempt is made to
+</span></span></span><span class="line"><span class="cl"><span class="c1">/// change the [pixels] position. Overscroll is the amount of change that was
+</span></span></span><span class="line"><span class="cl"><span class="c1">/// not applied to the [pixels] value.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">void</span> <span class="n">didOverscrollBy</span><span class="p">(</span><span class="kt">double</span> <span class="n">value</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="n">activity</span><span class="o">!</span><span class="p">.</span><span class="n">isScrolling</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">activity</span><span class="o">!</span><span class="p">.</span><span class="n">dispatchOverscrollNotification</span><span class="p">(</span><span class="n">copyWith</span><span class="p">(),</span> <span class="n">context</span><span class="p">.</span><span class="n">notificationContext</span><span class="o">!</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">/// Dispatches a notification that the [userScrollDirection] has changed.
+</span></span></span><span class="line"><span class="cl"><span class="c1">///
+</span></span></span><span class="line"><span class="cl"><span class="c1">/// Subclasses should call this function when they change [userScrollDirection].
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">void</span> <span class="n">didUpdateScrollDirection</span><span class="p">(</span><span class="n">ScrollDirection</span> <span class="n">direction</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">UserScrollNotification</span><span class="p">(</span><span class="nl">metrics:</span> <span class="n">copyWith</span><span class="p">(),</span> <span class="nl">context:</span> <span class="n">context</span><span class="p">.</span><span class="n">notificationContext</span><span class="o">!</span><span class="p">,</span> <span class="nl">direction:</span> <span class="n">direction</span><span class="p">).</span><span class="n">dispatch</span><span class="p">(</span><span class="n">context</span><span class="p">.</span><span class="n">notificationContext</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">/// Dispatches a notification that the [ScrollMetrics] have changed.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">void</span> <span class="n">didUpdateScrollMetrics</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="n">SchedulerBinding</span><span class="p">.</span><span class="n">instance</span><span class="p">.</span><span class="n">schedulerPhase</span> <span class="o">!=</span> <span class="n">SchedulerPhase</span><span class="p">.</span><span class="n">persistentCallbacks</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="n">_haveScheduledUpdateNotification</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">_haveScheduledUpdateNotification</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">context</span><span class="p">.</span><span class="n">notificationContext</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ScrollMetricsNotification</span><span class="p">(</span><span class="nl">metrics:</span> <span class="n">copyWith</span><span class="p">(),</span> <span class="nl">context:</span> <span class="n">context</span><span class="p">.</span><span class="n">notificationContext</span><span class="o">!</span><span class="p">).</span><span class="n">dispatch</span><span class="p">(</span><span class="n">context</span><span class="p">.</span><span class="n">notificationContext</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>当<em>PageController</em>调用<em>jumpToPage</em>方法时，就会执行 <em>_PagePosition</em> 的jumpTo方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">jumpToPage</span><span class="p">(</span><span class="kt">int</span> <span class="n">page</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">final</span> <span class="n">_PagePosition</span> <span class="n">position</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="n">position</span> <span class="o">as</span> <span class="n">_PagePosition</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">position</span><span class="p">.</span><span class="n">_cachedPage</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">position</span><span class="p">.</span><span class="n">_cachedPage</span> <span class="o">=</span> <span class="n">page</span><span class="p">.</span><span class="n">toDouble</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">position</span><span class="p">.</span><span class="n">jumpTo</span><span class="p">(</span><span class="n">position</span><span class="p">.</span><span class="n">getPixelsFromPage</span><span class="p">(</span><span class="n">page</span><span class="p">.</span><span class="n">toDouble</span><span class="p">()));</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>因为<em>ScrollPosition</em>定义了<em>jumpTo</em>抽象方法，由子类来实现，所以看下 <em>_PagePosition</em> 的<em>jumpTo</em>方法，但是跟踪源码后发现 <em>_PagePosition</em> 并没有实现<em>jumpTo</em>方法，所以看下它的父类<em>ScrollPositionWithSingleContext</em>的<em>jumpTo</em>方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">jumpTo</span><span class="p">(</span><span class="kt">double</span> <span class="n">value</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">goIdle</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">pixels</span> <span class="o">!=</span> <span class="n">value</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">final</span> <span class="kt">double</span> <span class="n">oldPixels</span> <span class="o">=</span> <span class="n">pixels</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">forcePixels</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">didStartScroll</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">didUpdateScrollPositionBy</span><span class="p">(</span><span class="n">pixels</span> <span class="o">-</span> <span class="n">oldPixels</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">didEndScroll</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">goBallistic</span><span class="p">(</span><span class="m">0.0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以发现，在<em>ScrollPositionWithSingleContext</em>的<em>jumpTo</em>方法中，调用它的父类<em>ScrollPosition</em>的一些方法，它们是<em>didStartScroll</em>、<em>didUpdateScrollPositionBy</em>以及<em>didEndScroll</em>，之前讲过这几个方法是用来分发通知的。</p>
+<p>这里以<em>didStartScroll</em>方法为例，看下它的源码，执行了<em>ScrollActivity</em>的<em>dispatchScrollStartNotification</em>方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">didStartScroll</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">activity</span><span class="o">!</span><span class="p">.</span><span class="n">dispatchScrollStartNotification</span><span class="p">(</span><span class="n">copyWith</span><span class="p">(),</span> <span class="n">context</span><span class="p">.</span><span class="n">notificationContext</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>看下<em>ScrollActivity</em>的<em>dispatchScrollStartNotification</em>方法，可以看到，执行了<em>ScrollStartNotification</em>的<em>dispatch</em>方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">dispatchScrollStartNotification</span><span class="p">(</span><span class="n">ScrollMetrics</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">BuildContext</span><span class="o">?</span> <span class="n">context</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">ScrollStartNotification</span><span class="p">(</span><span class="nl">metrics:</span> <span class="n">metrics</span><span class="p">,</span> <span class="nl">context:</span> <span class="n">context</span><span class="p">).</span><span class="n">dispatch</span><span class="p">(</span><span class="n">context</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="42通知分发">4.2、通知分发</h2>
+<p>看下<em>ScrollStartNotification</em>的<em>dispatch</em>方法，因为<em>ScrollStartNotification</em>的终极父类是<em>Notification</em>，所以执行的是<em>Notification</em>的<em>dispatch</em>方法。</p>
+<p>在<em>Notification</em>的<em>dispatch</em>方法中，执行<em>BuildContext</em>的<em>dispatchNotification</em>方法，并把当前<em>Notification</em>实例，也就是<em>ScrollStartNotification</em>作为参数传入了<em>dispatchNotification</em>方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">Notification</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">/// Abstract const constructor. This constructor enables subclasses to provide
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">/// const constructors so that they can be used in const expressions.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="kd">const</span> <span class="n">Notification</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">/// Start bubbling this notification at the given build context.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">///
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">/// The notification will be delivered to any [NotificationListener] widgets
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">/// with the appropriate type parameters that are ancestors of the given
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">/// [BuildContext]. If the [BuildContext] is null, the notification is not
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">/// dispatched.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="kt">void</span> <span class="n">dispatch</span><span class="p">(</span><span class="n">BuildContext</span><span class="o">?</span> <span class="n">target</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">target</span><span class="o">?</span><span class="p">.</span><span class="n">dispatchNotification</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>因为<em>BuildContext</em>只是一个句柄，所以看下它的实现类<em>Element</em>的<em>dispatchNotification</em>方法。可以看到，执行了 <em>_notificationTree</em> 的<em>dispatchNotification</em>方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="n">_NotificationNode</span><span class="o">?</span> <span class="n">_notificationTree</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"> 
+</span></span><span class="line"><span class="cl"><span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">dispatchNotification</span><span class="p">(</span><span class="n">Notification</span> <span class="n">notification</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">_notificationTree</span><span class="o">?</span><span class="p">.</span><span class="n">dispatchNotification</span><span class="p">(</span><span class="n">notification</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>看下 <em>_NotificationNode</em>的<em>dispatchNotification</em>方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">_NotificationNode</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">_NotificationNode</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="n">parent</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="n">current</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">NotifiableElementMixin</span><span class="o">?</span> <span class="n">current</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">_NotificationNode</span><span class="o">?</span> <span class="n">parent</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="kt">void</span> <span class="n">dispatchNotification</span><span class="p">(</span><span class="n">Notification</span> <span class="n">notification</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 分析1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">current</span><span class="o">?</span><span class="p">.</span><span class="n">onNotification</span><span class="p">(</span><span class="n">notification</span><span class="p">)</span> <span class="o">??</span> <span class="kc">true</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 分析2
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">parent</span><span class="o">?</span><span class="p">.</span><span class="n">dispatchNotification</span><span class="p">(</span><span class="n">notification</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>分析1</li>
+</ul>
+<p>这里分2种情况：</p>
+<p>1、如果<em>current</em>为空，说明通知分发已完成，这时直接<em>return</em>，不执行分析2。</p>
+<p>2、如果<em>current</em>不为空，说明通知分发正在进行中，可以发现调用了<em>NotifiableElementMixin</em>的<em>onNotification</em>方法，而 <em>_NotificationElement</em> 混入了<em>NotifiableElementMixin</em>，所以实际上调用了 <em>_NotificationElement</em> 的<em>onNotification</em>方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">_NotificationElement</span><span class="o">&lt;</span><span class="n">T</span> <span class="kd">extends</span> <span class="n">Notification</span><span class="o">&gt;</span> <span class="kd">extends</span> <span class="n">ProxyElement</span> <span class="kd">with</span> <span class="n">NotifiableElementMixin</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">_NotificationElement</span><span class="p">(</span><span class="n">NotificationListener</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="k">super</span><span class="p">.</span><span class="n">widget</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">bool</span> <span class="n">onNotification</span><span class="p">(</span><span class="n">Notification</span> <span class="n">notification</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">final</span> <span class="n">NotificationListener</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">listener</span> <span class="o">=</span> <span class="n">widget</span> <span class="o">as</span> <span class="n">NotificationListener</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">listener</span><span class="p">.</span><span class="n">onNotification</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">notification</span> <span class="k">is</span> <span class="n">T</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">return</span> <span class="n">listener</span><span class="p">.</span><span class="n">onNotification</span><span class="o">!</span><span class="p">(</span><span class="n">notification</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>此处<em>widget</em>指的是<em>NotificationListener</em>，如果<em>NotificationListener</em>传入了<em>onNotification</em>回调并且<em>notification</em>是泛型T以及泛型T的子类时，就会通过调用<em>listener.onNotification</em>回调出去。</p>
+<p>关于 <em>_NotificationElement</em> 的<em>onNotification</em>方法返回值有3种情况：</p>
+<p>1、如果<em>NotificationListener</em>没有传入了<em>onNotification</em>回调，那么 <em>_NotificationElement</em>的<em>onNotification</em>就会返回<em>false</em>，此时会执行 <em>_NotificationNode</em>的<em>dispatchNotification</em>方法中的分析2部分。</p>
+<p>2、如果<em>NotificationListener</em>传入了<em>onNotification</em>回调，并且该方法返回<em>false</em>，同样会执行 <em>_NotificationNode</em> 的<em>dispatchNotification</em>方法中的分析2部分。</p>
+<p>3、如果<em>NotificationListener</em>传入了<em>onNotification</em>回调，并且该方法返回<em>true</em>，则不会执行 <em>_NotificationNode</em>的<em>dispatchNotification</em>方法中的分析2部分。</p>
+<ul>
+<li>分析2</li>
+</ul>
+<p>执行了<em>parent?.dispatchNotification</em>，也就是继续向上分发通知。</p>
+<h1 id="五自定义通知">五、自定义通知</h1>
+<p>从源码分析中可以知道，通知分发是调用<em>Notification</em>的<em>dispatch</em>方法，那我们可以自定义一个<em>Notification</em>来进行分发。</p>
+<p>这里还是改造之前的计数器示例，实现与在<em>InheritedWidget</em>中传入<em>Listener</em>的方式的同等效果。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span><span class="lnt">123
+</span><span class="lnt">124
+</span><span class="lnt">125
+</span><span class="lnt">126
+</span><span class="lnt">127
+</span><span class="lnt">128
+</span><span class="lnt">129
+</span><span class="lnt">130
+</span><span class="lnt">131
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">runApp</span><span class="p">(</span><span class="kd">const</span> <span class="n">MyApp</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">MyApp</span> <span class="kd">extends</span> <span class="n">StatelessWidget</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">const</span> <span class="n">MyApp</span><span class="p">({</span><span class="k">super</span><span class="p">.</span><span class="n">key</span><span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Widget</span> <span class="n">build</span><span class="p">(</span><span class="n">BuildContext</span> <span class="n">context</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">MaterialApp</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">title:</span> <span class="s1">&#39;Flutter Demo&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">theme:</span> <span class="n">ThemeData</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">colorScheme:</span> <span class="n">ColorScheme</span><span class="p">.</span><span class="n">fromSeed</span><span class="p">(</span><span class="nl">seedColor:</span> <span class="n">Colors</span><span class="p">.</span><span class="n">deepPurple</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">useMaterial3:</span> <span class="kc">true</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="p">),</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">home:</span> <span class="kd">const</span> <span class="n">MyPage</span><span class="p">(</span><span class="nl">title:</span> <span class="s1">&#39;计数器&#39;</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">    <span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">MyPage</span> <span class="kd">extends</span> <span class="n">StatefulWidget</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">const</span> <span class="n">MyPage</span><span class="p">({</span><span class="k">super</span><span class="p">.</span><span class="n">key</span><span class="p">,</span> <span class="kd">required</span> <span class="k">this</span><span class="p">.</span><span class="n">title</span><span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="kd">final</span> <span class="kt">String</span> <span class="n">title</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="n">State</span><span class="o">&lt;</span><span class="n">MyPage</span><span class="o">&gt;</span> <span class="n">createState</span><span class="p">()</span> <span class="o">=&gt;</span> <span class="n">_MyPageState</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">_MyPageState</span> <span class="kd">extends</span> <span class="n">State</span><span class="o">&lt;</span><span class="n">MyPage</span><span class="o">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">_counter</span> <span class="o">=</span> <span class="m">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="kt">void</span> <span class="n">_increment</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">setState</span><span class="p">(()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">_counter</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">});</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Widget</span> <span class="n">build</span><span class="p">(</span><span class="n">BuildContext</span> <span class="n">context</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">Scaffold</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">appBar:</span> <span class="n">AppBar</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">backgroundColor:</span> <span class="n">Theme</span><span class="p">.</span><span class="n">of</span><span class="p">(</span><span class="n">context</span><span class="p">).</span><span class="n">colorScheme</span><span class="p">.</span><span class="n">inversePrimary</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">title:</span> <span class="n">Text</span><span class="p">(</span><span class="n">widget</span><span class="p">.</span><span class="n">title</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">      <span class="p">),</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">body:</span> <span class="n">NotificationListener</span><span class="o">&lt;</span><span class="n">MyNotification</span><span class="o">&gt;</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">onNotification:</span> <span class="p">(</span><span class="n">MyNotification</span> <span class="n">notification</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">          <span class="n">ScaffoldMessenger</span><span class="p">.</span><span class="n">of</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="p">..</span><span class="n">removeCurrentSnackBar</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">            <span class="p">..</span><span class="n">showSnackBar</span><span class="p">(</span><span class="n">SnackBar</span><span class="p">(</span><span class="nl">content:</span> <span class="n">Text</span><span class="p">(</span><span class="n">notification</span><span class="p">.</span><span class="n">msg</span><span class="p">)));</span>
+</span></span><span class="line"><span class="cl">          <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">},</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">child:</span> <span class="n">MyParent</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">          <span class="nl">counter:</span> <span class="n">_counter</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="nl">child:</span> <span class="kd">const</span> <span class="n">MyChild</span><span class="p">(),</span>
+</span></span><span class="line"><span class="cl">        <span class="p">),</span>
+</span></span><span class="line"><span class="cl">      <span class="p">),</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">floatingActionButton:</span> <span class="n">FloatingActionButton</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">onPressed:</span> <span class="n">_increment</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">tooltip:</span> <span class="s1">&#39;increment&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">child:</span> <span class="kd">const</span> <span class="n">Icon</span><span class="p">(</span><span class="n">Icons</span><span class="p">.</span><span class="n">add</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">      <span class="p">),</span>
+</span></span><span class="line"><span class="cl">    <span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">MyParent</span> <span class="kd">extends</span> <span class="n">InheritedWidget</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">final</span> <span class="kt">int</span> <span class="n">counter</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="kd">const</span> <span class="n">MyParent</span><span class="p">({</span>
+</span></span><span class="line"><span class="cl">    <span class="k">super</span><span class="p">.</span><span class="n">key</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">required</span> <span class="k">this</span><span class="p">.</span><span class="n">counter</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">required</span> <span class="k">super</span><span class="p">.</span><span class="n">child</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="kd">static</span> <span class="n">MyParent</span><span class="o">?</span> <span class="n">maybeOf</span><span class="p">(</span><span class="n">BuildContext</span> <span class="n">context</span><span class="p">)</span> <span class="o">=&gt;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">context</span><span class="p">.</span><span class="n">dependOnInheritedWidgetOfExactType</span><span class="o">&lt;</span><span class="n">MyParent</span><span class="o">&gt;</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="kd">static</span> <span class="n">MyParent</span> <span class="n">of</span><span class="p">(</span><span class="n">BuildContext</span> <span class="n">context</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">final</span> <span class="n">MyParent</span><span class="o">?</span> <span class="n">result</span> <span class="o">=</span> <span class="n">maybeOf</span><span class="p">(</span><span class="n">context</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">assert</span><span class="p">(</span><span class="n">result</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">,</span> <span class="s1">&#39;No MyParent found in context&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">result</span><span class="o">!</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">bool</span> <span class="n">updateShouldNotify</span><span class="p">(</span><span class="n">covariant</span> <span class="n">MyParent</span> <span class="n">oldWidget</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="n">counter</span> <span class="o">!=</span> <span class="n">oldWidget</span><span class="p">.</span><span class="n">counter</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">MyChild</span> <span class="kd">extends</span> <span class="n">StatefulWidget</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">const</span> <span class="n">MyChild</span><span class="p">({</span><span class="k">super</span><span class="p">.</span><span class="n">key</span><span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="n">State</span><span class="o">&lt;</span><span class="n">MyChild</span><span class="o">&gt;</span> <span class="n">createState</span><span class="p">()</span> <span class="o">=&gt;</span> <span class="n">_MyChildState</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">_MyChildState</span> <span class="kd">extends</span> <span class="n">State</span><span class="o">&lt;</span><span class="n">MyChild</span><span class="o">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">void</span> <span class="n">didChangeDependencies</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">super</span><span class="p">.</span><span class="n">didChangeDependencies</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">debugPrint</span><span class="p">(</span><span class="s1">&#39;didChangeDependencies&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Widget</span> <span class="n">build</span><span class="p">(</span><span class="n">BuildContext</span> <span class="n">context</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">debugPrint</span><span class="p">(</span><span class="s1">&#39;build&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">Center</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">child:</span> <span class="n">Column</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">mainAxisSize:</span> <span class="n">MainAxisSize</span><span class="p">.</span><span class="n">min</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">children:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">          <span class="n">Text</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="s1">&#39;</span><span class="si">${</span><span class="n">MyParent</span><span class="p">.</span><span class="n">of</span><span class="p">(</span><span class="n">context</span><span class="p">).</span><span class="n">counter</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nl">style:</span> <span class="kd">const</span> <span class="n">TextStyle</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">              <span class="nl">fontSize:</span> <span class="m">100</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">              <span class="nl">color:</span> <span class="n">Colors</span><span class="p">.</span><span class="n">black</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="p">),</span>
+</span></span><span class="line"><span class="cl">          <span class="p">),</span>
+</span></span><span class="line"><span class="cl">          <span class="n">ElevatedButton</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="nl">onPressed:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="n">MyNotification</span><span class="p">(</span><span class="nl">msg:</span> <span class="s1">&#39;Hello World!&#39;</span><span class="p">).</span><span class="n">dispatch</span><span class="p">(</span><span class="n">context</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">            <span class="nl">child:</span> <span class="kd">const</span> <span class="n">Text</span><span class="p">(</span><span class="s1">&#39;Post&#39;</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">          <span class="p">),</span>
+</span></span><span class="line"><span class="cl">        <span class="p">],</span>
+</span></span><span class="line"><span class="cl">      <span class="p">),</span>
+</span></span><span class="line"><span class="cl">    <span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">MyNotification</span> <span class="kd">extends</span> <span class="n">Notification</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">final</span> <span class="kt">String</span> <span class="n">msg</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">MyNotification</span><span class="p">({</span><span class="kd">required</span> <span class="k">this</span><span class="p">.</span><span class="n">msg</span><span class="p">});</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div>
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">文章作者</span>
+    <span class="item-content">AndDevMK</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">上次更新</span>
+    <span class="item-content">
+        2023-11-07
+        
+    </span>
+  </p>
+  
+  <p class="copyright-item">
+    <span class="item-title">许可协议</span>
+    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a></span>
+  </p>
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">赞赏支持</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat-qr-code.JPG">
+        <span>微信打赏</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay-qr-code.JPG">
+        <span>支付宝打赏</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      
+      <nav class="post-nav">
+        
+        <a class="next" href="/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Banimation/">
+            <span class="next-text nav-default">解读Flutter源码之Animation</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="AndDevMK/blog-utterances"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    
+    <div id="search_mask" class="search_mask">
+    <div class="search_modal">
+        <div id="close_search" class="close_search">关闭</div>
+        <div class="search_divider"></div>
+        <input id="input_search_key" class="input_search_key" placeholder="请输入你要搜索的内容" tabindex="0">
+        <ul id="search_list">
+        </ul>
+    </div>
+</div>
+
+<script src="/js/fuse.js"></script> 
+<script src="/js/fastsearch.js"></script>
+
+    <footer id="footer" class="footer">
+      
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a id="hexo-link" class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    
+    <span id="run-time" class="run-time"></span> 
+    <span class="heart"><i class="iconfont icon-heart"></i></span>
+    &copy; 
+    2023&nbsp;
+    <span>AndDevMK</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  <script type="text/javascript" src="/lib/jquery/jquery-3.2.1.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout-1.0.1.min.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox-3.1.20.min.js"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.11a4ba15caf2d921d57eaf6568c4ad21eafd5d2c001cbcb31693586c63f93005.js"></script>
+
+<script id="baidu_analytics">
+  var _hmt = _hmt || [];
+  (function() {
+    if (window.location.hostname === 'localhost') return;
+    var hm = document.createElement("script"); hm.async = true;
+    hm.src = "https://hm.baidu.com/hm.js?6db179fb88e600cf326b0515a8aa1de3";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+
+
+
+
+<script src="/js/codecopy.js"></script>
+
+
+
+<link disabled id="dark-mode-theme" rel="stylesheet" href="/css/dark.css"></link>
+<script src="/js/dark.js"></script>
+
+
+<script src="/js/site_runtime.js"></script>
+
+
+
+
+</body>
+</html>
