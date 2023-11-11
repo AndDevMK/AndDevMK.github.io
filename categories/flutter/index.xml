@@ -7,7 +7,16 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>AndDevMK</copyright>
-    <lastBuildDate>Tue, 07 Nov 2023 11:28:31 +0800</lastBuildDate><atom:link href="https://anddevmk.cn/categories/flutter/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 11 Nov 2023 09:28:31 +0800</lastBuildDate><atom:link href="https://anddevmk.cn/categories/flutter/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>解读Flutter源码之Listener</title>
+      <link>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Blistener/</link>
+      <pubDate>Sat, 11 Nov 2023 09:28:31 +0800</pubDate>
+      
+      <guid>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Blistener/</guid>
+      <description>注：本文代码基于Flutter SDK 3.13.5 一、什么是Listener？ Listener可以用来监听原始指针事件（Raw Pointer Event，在移动设备上通常为触摸事件），先来看下它的注释&amp;amp;部分源码。 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45</description>
+    </item>
+    
     <item>
       <title>解读Flutter源码之NotificationListener</title>
       <link>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bnotificationlistener/</link>
