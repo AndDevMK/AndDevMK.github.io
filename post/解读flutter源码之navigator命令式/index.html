@@ -1005,10 +1005,10 @@
 <h2 id="21路由跳转方法">2.1、路由跳转方法</h2>
 <p>对于路由跳转方法，它有两种方式：</p>
 <ul>
-<li><em><strong>直接路由跳转</strong></em>：想要跳转到哪个<em>Page</em>，那么直接将<em>Page</em>当作参数传递进去就可以了。</li>
+<li><em><strong>组件路由跳转</strong></em>：想要跳转到哪个<em>Page</em>，那么直接将<em>Page</em>当作参数传递进去就可以了。</li>
 </ul>
 <blockquote>
-<p><em>注意：不建议直接路由跳转与命名路由跳转进行混用，对于直接路由跳转来说，它没有路由名称，在使用pushAndRemoveUntil或pushNamedAndRemoveUntil方法时会因为无法找到ModalRoute.withName配置的路由名称而导致不能实现预期效果。</em></p>
+<p><em>注意：不建议组件路由跳转与命名路由跳转进行混用，对于组件路由跳转来说，它没有路由名称，在使用pushAndRemoveUntil或pushNamedAndRemoveUntil方法时会因为无法找到ModalRoute.withName配置的路由名称而导致不能实现预期效果。</em></p>
 </blockquote>
 <ul>
 <li><em><strong>命名路由跳转</strong></em>：先将<em>Page</em>注册到路由表内并起一个名字，然后其它页面通过这个名字进行跳转。</li>
