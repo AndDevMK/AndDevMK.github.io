@@ -1,0 +1,2375 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>解读Flutter源码之布局Layout过程 - AndDevMK&#39;s android blog site</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="AndDevMK" /><meta name="description" content="注：本文代码基于Flutter SDK 3.13.5 一、理解布局约束 在学习Flutter的过程中可能会遇到这样一个问题：为什么给Widget设置了width: 100，但是不起作用？ 这时候最应该做的不是怎样去解决这个问题，而是要先去熟悉这条规则：首先，上层Widget向下层Widget传递约束条件；" /><meta name="keywords" content="Android, Java, Kotlin, C&#43;&#43;, C, Flutter, Dart, NDK" />
+
+
+<meta name="baidu-site-verification" content="codeva-wQ7uOo4V09" />
+<meta name="google-site-verification" content="yHzWB9BxTR74LiaUhuL5ncr89fnDYXiplTaPY565zqo" />
+
+
+<meta name="generator" content="Hugo 0.111.3 with theme even" />
+
+
+<link rel="canonical" href="https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8B%E5%B8%83%E5%B1%80layout%E8%BF%87%E7%A8%8B/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.c11aaf02bef1025d6b0813ba5e1a8a8551aee15fa8f2bcea906d41b20bdf5c69.css" rel="stylesheet">
+<link href="/lib/fancybox/jquery.fancybox-3.1.20.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/css/codecopy.css">
+
+
+<meta property="og:title" content="解读Flutter源码之布局Layout过程" />
+<meta property="og:description" content="注：本文代码基于Flutter SDK 3.13.5 一、理解布局约束 在学习Flutter的过程中可能会遇到这样一个问题：为什么给Widget设置了width: 100，但是不起作用？ 这时候最应该做的不是怎样去解决这个问题，而是要先去熟悉这条规则：首先，上层Widget向下层Widget传递约束条件；" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8B%E5%B8%83%E5%B1%80layout%E8%BF%87%E7%A8%8B/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2023-12-01T08:00:00+08:00" />
+<meta property="article:modified_time" content="2023-12-01T08:00:00+08:00" />
+<meta itemprop="name" content="解读Flutter源码之布局Layout过程">
+<meta itemprop="description" content="注：本文代码基于Flutter SDK 3.13.5 一、理解布局约束 在学习Flutter的过程中可能会遇到这样一个问题：为什么给Widget设置了width: 100，但是不起作用？ 这时候最应该做的不是怎样去解决这个问题，而是要先去熟悉这条规则：首先，上层Widget向下层Widget传递约束条件；"><meta itemprop="datePublished" content="2023-12-01T08:00:00+08:00" />
+<meta itemprop="dateModified" content="2023-12-01T08:00:00+08:00" />
+<meta itemprop="wordCount" content="14034">
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="解读Flutter源码之布局Layout过程"/>
+<meta name="twitter:description" content="注：本文代码基于Flutter SDK 3.13.5 一、理解布局约束 在学习Flutter的过程中可能会遇到这样一个问题：为什么给Widget设置了width: 100，但是不起作用？ 这时候最应该做的不是怎样去解决这个问题，而是要先去熟悉这条规则：首先，上层Widget向下层Widget传递约束条件；"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">AndDevMK</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">首页</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">归档</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">关于</li>
+      </a>
+
+    
+    <li class="mobile-menu-item-search">
+      <div id="mobile_open_search" class="mobile_open_search">
+        搜索
+      </div>
+    </li>
+
+    
+    <li class="mobile-menu-item-dark-mode">
+      <div id="mobile_dark_mode_toggle" class="mobile_light_mode">
+       
+      </div>
+    </li>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">AndDevMK</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">首页</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">归档</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">关于</a>
+      </li>
+    
+    <div id="open_search" class="open_search">
+      搜索
+    </div>
+
+    
+    <div id="dark_mode_toggle" class="light_mode">
+
+    </div>
+  
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">解读Flutter源码之布局Layout过程</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2023-12-01 </span>
+        <div class="post-category">
+            <a href="/categories/flutter/"> Flutter </a>
+            </div>
+          <span class="more-meta"> 约 14034 字 </span>
+          <span class="more-meta"> 预计阅读 29 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#一理解布局约束">一、理解布局约束</a></li>
+    <li><a href="#二示例演示">二、示例演示</a>
+      <ul>
+        <li><a href="#21单子组件布局示例">2.1、单子组件布局示例</a></li>
+        <li><a href="#22多子组件布局示例">2.2、多子组件布局示例</a></li>
+        <li><a href="#23总结flutter布局layout过程">2.3、总结<em>Flutter</em>布局<em>Layout</em>过程</a></li>
+      </ul>
+    </li>
+    <li><a href="#三源码分析">三、源码分析</a>
+      <ul>
+        <li><a href="#31renderview初始化">3.1、<em>RenderView</em>初始化</a></li>
+        <li><a href="#32schedulerbinding的schedulewarmupframe方法">3.2、<em>SchedulerBinding</em>的<em>scheduleWarmUpFrame</em>方法</a></li>
+        <li><a href="#33renderobject的layout方法">3.3、<em>RenderObject</em>的<em>layout</em>方法</a></li>
+      </ul>
+    </li>
+    <li><a href="#四扩展">四、扩展</a>
+      <ul>
+        <li><a href="#41sizedbyparent属性">4.1、<em>sizedByParent</em>属性</a></li>
+        <li><a href="#42markneedslayout方法">4.2、<em>markNeedsLayout</em>方法</a></li>
+      </ul>
+    </li>
+    <li><a href="#五参考文献">五、参考文献</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <blockquote>
+<p><em>注：本文代码基于Flutter SDK 3.13.5</em></p>
+</blockquote>
+<h1 id="一理解布局约束">一、理解布局约束</h1>
+<p>在学习<em>Flutter</em>的过程中可能会遇到这样一个问题：为什么给<em>Widget</em>设置了<em>width: 100</em>，但是不起作用？</p>
+<p>这时候最应该做的不是怎样去解决这个问题，而是要先去熟悉这条规则：<em><strong>首先，上层Widget向下层Widget传递约束条件；然后，下层Widget向上层Widget传递大小信息。最后，上层Widget决定下层Widget的位置</strong></em>。如果您在开发时无法熟练运用这条规则，在布局时就不能完全理解其原理，所以越早掌握这条规则越好！</p>
+<p>例如，如果一个<em>Widget</em>中包含了一个具有<em>padding</em>的<em>Column</em>，并且要对<em>Column</em>的子 <em>Widget</em>进行如下的布局：</p>
+<img title="" src="/img/flutter/解读Flutter源码之布局Layout过程/children.png" alt="" width="535">
+<p>那么<em>Parent</em>与<em>Child</em>之间就像一场谈判，将会像下面这样：</p>
+<p>1、<em><strong>Widget</strong></em>：“嘿！我的父级。我的约束是多少？”</p>
+<p>2、<em><strong>Parent</strong></em>：“你的宽度必须在80到300像素之间，高度必须在30到85之间。”</p>
+<p>3、<em><strong>Widget</strong></em>：“嗯…我想要5个像素的内边距，这样我的子级能最多拥有290个像素宽度和75个像素高度。”</p>
+<p>4、<em><strong>Widget</strong></em>：“嘿，我的第一个子级，你的宽度必须要在0到290，长度在0到75之间。”</p>
+<p>5、<em><strong>First Child</strong></em>：“OK，那我想要290像素的宽度，20个像素的长度。”</p>
+<p>6、<em><strong>Widget</strong></em>：“嗯…由于我想要将我的第二个子级放在第一个子级下面，所以我们仅剩55个像素的高度给第二个子级了。”</p>
+<p>7、<em><strong>Widget</strong></em>：“嘿，我的第二个子级，你的宽度必须要在0到290，长度在0到55之间。”</p>
+<p>8、<em><strong>Second Child</strong></em>：“OK，那我想要140像素的宽度，30个像素的长度。”</p>
+<p>9、<em><strong>Widget</strong></em>：“很好。我的第一个子级将被放在x: 5 &amp; y: 5的位置，而我的第二个子级将在x: 80 &amp; y: 25的位置。”</p>
+<p>10、<em><strong>Widget</strong></em>：“嘿，我的父级，我决定我的大小为300像素宽度，60像素高度。”</p>
+<p><em>OK</em>，现在再回想最初的问题：为什么给<em>Widget</em>设置了固定宽高，但是不起作用？看下关于这个问题的几个例子就知道了。</p>
+<ul>
+<li>示例一</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="n">Container</span><span class="p">(</span><span class="nl">color:</span> <span class="n">red</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>整个屏幕作为<em>Container</em>的父级，并且强制<em>Container</em>变成和屏幕一样的大小。所以这个<em>Container</em>充满了整个屏幕，并绘制成红色。</p>
+<img title="" src="/img/flutter/解读Flutter源码之布局Layout过程/layout-1.png" alt="" width="235">
+<ul>
+<li>示例二</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="n">Container</span><span class="p">(</span><span class="nl">width:</span> <span class="m">100</span><span class="p">,</span> <span class="nl">height:</span> <span class="m">100</span><span class="p">,</span> <span class="nl">color:</span> <span class="n">red</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>红色的<em>Container</em>想要变成100 x 100的大小，但是它无法变成，因为屏幕强制它变成和屏幕一样的大小。所以<em>Container</em>充满了整个屏幕。</p>
+<img title="" src="/img/flutter/解读Flutter源码之布局Layout过程/layout-1.png" alt="" width="235">
+<ul>
+<li>示例三</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="n">Center</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">  <span class="nl">child:</span> <span class="n">Container</span><span class="p">(</span><span class="nl">width:</span> <span class="m">100</span><span class="p">,</span> <span class="nl">height:</span> <span class="m">100</span><span class="p">,</span> <span class="nl">color:</span> <span class="n">red</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>屏幕强制<em>Center</em>变得和屏幕一样大，所以<em>Center</em>充满了屏幕。然后<em>Center</em>告诉<em>Container</em>可以变成任意大小，但是不能超出屏幕。现在，<em>Container</em>可以真正变成100 × 100大小了。</p>
+<img title="" src="/img/flutter/解读Flutter源码之布局Layout过程/layout-3.png" alt="" width="235">
+<p>分析一下上面例子的现象，这涉及一个名词<em>Constraints</em>（约束），它主要描述了最小和最大宽高的限制，这里需要介绍一下两种常用的约束：</p>
+<ul>
+<li><em><strong>宽松约束</strong></em>：宽松约束的最小宽度/高度为0。它不限制最小宽高，只限制最大宽高，可以通过 <em>BoxConstraints.loose(Size size)</em> 来快速创建。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="n">BoxConstraints</span> <span class="n">loosen</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="n">debugAssertIsValid</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">BoxConstraints</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="nl">maxWidth:</span> <span class="n">maxWidth</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nl">maxHeight:</span> <span class="n">maxHeight</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><em><strong>严格约束</strong></em>：严格约束给你了一种获得确切大小的选择。换句话来说就是，它的最大/最小宽度是一致的，高度也一样。可以通过 <em>BoxConstraints.tight(Size size)</em> 来快速创建。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="n">BoxConstraints</span><span class="p">.</span><span class="n">tight</span><span class="p">(</span><span class="n">Size</span> <span class="n">size</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="o">:</span> <span class="n">minWidth</span> <span class="o">=</span> <span class="n">size</span><span class="p">.</span><span class="n">width</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">maxWidth</span> <span class="o">=</span> <span class="n">size</span><span class="p">.</span><span class="n">width</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">minHeight</span> <span class="o">=</span> <span class="n">size</span><span class="p">.</span><span class="n">height</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="n">maxHeight</span> <span class="o">=</span> <span class="n">size</span><span class="p">.</span><span class="n">height</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>对于前面三个示例来说，为什么示例一与示例二的<em>Container</em>充满了整个屏幕？因为<em>Container</em>的<em>Render</em>父组件为<em>RenderView</em>，所以看下<em>RenderView</em>的<em>performLayout</em>方法就知晓了。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">performLayout</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="n">_rootTransform</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// configuration为根渲染对象的布局约束，size为当前屏幕大小
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">_size</span> <span class="o">=</span> <span class="n">configuration</span><span class="p">.</span><span class="n">size</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="n">_size</span><span class="p">.</span><span class="n">isFinite</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">child</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 这里使用了严格约束，要求子组件Container和当前屏幕一样大小
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">child</span><span class="o">!</span><span class="p">.</span><span class="n">layout</span><span class="p">(</span><span class="n">BoxConstraints</span><span class="p">.</span><span class="n">tight</span><span class="p">(</span><span class="n">_size</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>对于示例三来说，为什么<em>Container</em>不再是充满了整个屏幕？因为<em>Container</em>的<em>Render</em>父组件为<em>RenderPositionedBox</em>，所以看下<em>RenderPositionedBox</em>的<em>performLayout</em>方法就知晓了。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">performLayout</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">final</span> <span class="n">BoxConstraints</span> <span class="n">constraints</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="n">constraints</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">final</span> <span class="kt">bool</span> <span class="n">shrinkWrapWidth</span> <span class="o">=</span> <span class="n">_widthFactor</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">||</span> <span class="n">constraints</span><span class="p">.</span><span class="n">maxWidth</span> <span class="o">==</span> <span class="kt">double</span><span class="p">.</span><span class="n">infinity</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">final</span> <span class="kt">bool</span> <span class="n">shrinkWrapHeight</span> <span class="o">=</span> <span class="n">_heightFactor</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">||</span> <span class="n">constraints</span><span class="p">.</span><span class="n">maxHeight</span> <span class="o">==</span> <span class="kt">double</span><span class="p">.</span><span class="n">infinity</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">child</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 这里使用了宽松约束，只要求子组件Container最大宽高和Center组件一样大小，也就是当前屏幕大小
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">child</span><span class="o">!</span><span class="p">.</span><span class="n">layout</span><span class="p">(</span><span class="n">constraints</span><span class="p">.</span><span class="n">loosen</span><span class="p">(),</span> <span class="nl">parentUsesSize:</span> <span class="kc">true</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">size</span> <span class="o">=</span> <span class="n">constraints</span><span class="p">.</span><span class="n">constrain</span><span class="p">(</span><span class="n">Size</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="n">shrinkWrapWidth</span> <span class="o">?</span> <span class="n">child</span><span class="o">!</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">width</span> <span class="o">*</span> <span class="p">(</span><span class="n">_widthFactor</span> <span class="o">??</span> <span class="m">1.0</span><span class="p">)</span> <span class="o">:</span> <span class="kt">double</span><span class="p">.</span><span class="n">infinity</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="n">shrinkWrapHeight</span> <span class="o">?</span> <span class="n">child</span><span class="o">!</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">height</span> <span class="o">*</span> <span class="p">(</span><span class="n">_heightFactor</span> <span class="o">??</span> <span class="m">1.0</span><span class="p">)</span> <span class="o">:</span> <span class="kt">double</span><span class="p">.</span><span class="n">infinity</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="n">alignChild</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">size</span> <span class="o">=</span> <span class="n">constraints</span><span class="p">.</span><span class="n">constrain</span><span class="p">(</span><span class="n">Size</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="n">shrinkWrapWidth</span> <span class="o">?</span> <span class="m">0.0</span> <span class="o">:</span> <span class="kt">double</span><span class="p">.</span><span class="n">infinity</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="n">shrinkWrapHeight</span> <span class="o">?</span> <span class="m">0.0</span> <span class="o">:</span> <span class="kt">double</span><span class="p">.</span><span class="n">infinity</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="p">));</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以发现，<em>RenderView</em>中给子组件传递的是一个严格约束，即强制子组件大小等于屏幕大小，所以<em>Container</em>便撑满了屏幕。那怎么才能让指定的大小生效呢？标准答案就是引入一个中间组件，让这个中间组件遵守父组件的约束，然后对子组件传递新的约束。</p>
+<p>对于示例二来讲，最简单的方式是用一个<em>Center</em>（Align）组件来包裹<em>Container</em>，<em>Center</em>会遵守<em>RenderView</em>的约束，让自身撑满屏幕，然后会给子组件传递一个宽松约束。</p>
+<p>当然还可以使用其它组件来代替<em>Align</em>，比如<em>UnconstrainedBox</em>，原理也是相同的，具体可以查看源码验证，这里就不带大家分析了。</p>
+<h1 id="二示例演示">二、示例演示</h1>
+<p>在深入分析<em>Flutter</em>布局<em>Layout</em>过程之前，先分别自定义一个单子组件和多子组件来直观看一下<em>Flutter</em>布局的主要过程。</p>
+<h2 id="21单子组件布局示例">2.1、单子组件布局示例</h2>
+<p>实现一个单子组件<em>CustomCenter</em>，功能基本和<em>Center</em>组件对齐。这里不采用组合的方式来实现组件，而是直接通过定制<em>RenderObject</em>的方式来实现，因为居中组件需要包含一个子组件，所以可以直接继承<em>SingleChildRenderObjectWidget</em>。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="c1">// 此处实现与RenderAligningShiftedBox相似
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">class</span> <span class="nc">CustomCenter</span> <span class="kd">extends</span> <span class="n">SingleChildRenderObjectWidget</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">const</span> <span class="n">CustomCenter</span><span class="p">({</span><span class="k">super</span><span class="p">.</span><span class="n">key</span><span class="p">,</span> <span class="kd">required</span> <span class="k">super</span><span class="p">.</span><span class="n">child</span><span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="n">RenderObject</span> <span class="n">createRenderObject</span><span class="p">(</span><span class="n">BuildContext</span> <span class="n">context</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 此处虽然没有传入child，但是在RenderObject树构建过程中，insertRenderObjectChild方法已经插入child，完成child的赋值
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="n">CustomRenderPositionedBox</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>接着实现<em>CustomRenderPositionedBox</em>。这里直接继承<em>RenderObject</em>会更接近底层一点，但这需要自己手动实现一些和布局无关的东西，例如事件分发等逻辑。</p>
+<p>为了更聚焦布局本身，可以选择继承自<em>RenderShiftedBox</em>，它会帮我们实现布局之外的一些功能，这样就只需要重写<em>performLayout</em>方法，在该方法中实现子组件居中算法即可。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="c1">// 此处实现与RenderPositionedBox相似
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">class</span> <span class="nc">CustomRenderPositionedBox</span> <span class="kd">extends</span> <span class="n">RenderShiftedBox</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CustomRenderPositionedBox</span><span class="p">({</span><span class="n">RenderBox</span><span class="o">?</span> <span class="n">child</span><span class="p">})</span> <span class="o">:</span> <span class="k">super</span><span class="p">(</span><span class="n">child</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">void</span> <span class="n">performLayout</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// CustomCenter存在子组件
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">child</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// 对子组件进行layout，随后获取它的size
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="n">child</span><span class="o">!</span><span class="p">.</span><span class="n">layout</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="n">constraints</span><span class="p">.</span><span class="n">loosen</span><span class="p">(),</span> <span class="c1">// 对子组件实行宽松约束
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nl">parentUsesSize:</span> <span class="kc">true</span><span class="p">,</span> <span class="c1">// 如果接下来想要使用child的size，parentUsesSize就需要设置为true
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">      <span class="n">debugPrint</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">${</span><span class="n">constraints</span><span class="p">.</span><span class="n">maxWidth</span> <span class="o">==</span> <span class="kt">double</span><span class="p">.</span><span class="n">infinity</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">);</span> <span class="c1">// 这里一般情况都打印false
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// 根据子组件的大小确定CustomCenter自身的大小
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="c1">// constrain方法的作用：返回既满足约束又尽可能接近给定大小的大小
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="n">size</span> <span class="o">=</span> <span class="n">constraints</span><span class="p">.</span><span class="n">constrain</span><span class="p">(</span><span class="n">Size</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 如果CustomCenter父组件传递给它最大宽高约束是无限大时，CustomCenter的宽高会设置为它子组件的宽高
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="c1">// 否则CustomCenter的宽高会设置为它父组件的最大宽高
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">constraints</span><span class="p">.</span><span class="n">maxWidth</span> <span class="o">==</span> <span class="kt">double</span><span class="p">.</span><span class="n">infinity</span> <span class="o">?</span> <span class="n">child</span><span class="o">!</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">width</span> <span class="o">:</span> <span class="kt">double</span><span class="p">.</span><span class="n">infinity</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="n">constraints</span><span class="p">.</span><span class="n">maxHeight</span> <span class="o">==</span> <span class="kt">double</span><span class="p">.</span><span class="n">infinity</span> <span class="o">?</span> <span class="n">child</span><span class="o">!</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">height</span> <span class="o">:</span> <span class="kt">double</span><span class="p">.</span><span class="n">infinity</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// CustomCenter不存在子组件
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="n">size</span> <span class="o">=</span> <span class="n">constraints</span><span class="p">.</span><span class="n">constrain</span><span class="p">(</span><span class="n">Size</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 如果CustomCenter父组件传递给它最大宽高约束是无限大时，CustomCenter的宽高会设置为0
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="c1">// 否则CustomCenter的宽高会设置为它父组件的最大宽高
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">constraints</span><span class="p">.</span><span class="n">maxWidth</span> <span class="o">==</span> <span class="kt">double</span><span class="p">.</span><span class="n">infinity</span> <span class="o">?</span> <span class="m">0.0</span> <span class="o">:</span> <span class="kt">double</span><span class="p">.</span><span class="n">infinity</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="n">constraints</span><span class="p">.</span><span class="n">maxHeight</span> <span class="o">==</span> <span class="kt">double</span><span class="p">.</span><span class="n">infinity</span> <span class="o">?</span> <span class="m">0.0</span> <span class="o">:</span> <span class="kt">double</span><span class="p">.</span><span class="n">infinity</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 根据父组件（CustomCenter）与子组件的大小，算出子组件在父组件中居中之后的偏移，然后将这个偏移保存在子组件的parentData中，以便后续的绘制阶段使用
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">BoxParentData</span> <span class="n">parentData</span> <span class="o">=</span> <span class="n">child</span><span class="o">!</span><span class="p">.</span><span class="n">parentData</span> <span class="o">as</span> <span class="n">BoxParentData</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">parentData</span><span class="p">.</span><span class="n">offset</span> <span class="o">=</span> <span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="n">child</span><span class="o">!</span><span class="p">.</span><span class="n">size</span> <span class="o">as</span> <span class="n">Offset</span><span class="p">)</span> <span class="o">/</span> <span class="m">2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">void</span> <span class="n">paint</span><span class="p">(</span><span class="n">PaintingContext</span> <span class="n">context</span><span class="p">,</span> <span class="n">Offset</span> <span class="n">offset</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 打印CustomCenter的背景，看下它的大小
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">kDebugMode</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">context</span><span class="p">.</span><span class="n">canvas</span><span class="p">.</span><span class="n">drawRect</span><span class="p">(</span><span class="n">offset</span> <span class="o">&amp;</span> <span class="n">size</span><span class="p">,</span> <span class="n">Paint</span><span class="p">()..</span><span class="n">color</span> <span class="o">=</span> <span class="n">Colors</span><span class="p">.</span><span class="n">white</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">super</span><span class="p">.</span><span class="n">paint</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">offset</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>下面去使用<em>CustomCenter</em>，与前面示例三相似。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">runApp</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="n">CustomCenter</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">child:</span> <span class="n">Container</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">width:</span> <span class="m">100</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">height:</span> <span class="m">100</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">color:</span> <span class="n">Colors</span><span class="p">.</span><span class="n">blueAccent</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="p">),</span>
+</span></span><span class="line"><span class="cl">    <span class="p">),</span>
+</span></span><span class="line"><span class="cl">  <span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><img title="" src="/img/flutter/解读Flutter源码之布局Layout过程/单子组件示例.png" alt="" width="235">
+<h2 id="22多子组件布局示例">2.2、多子组件布局示例</h2>
+<p>在实际开发中可能会遇到贴边左-右布局，现在就来自定义一个<em>CustomLeftRightBox</em>组件来实现左-右布局，因为<em>CustomLeftRightBox</em>有两个孩子，用一个<em>Widget</em>数组来保存子组件。</p>
+<p>在定义组件时，与单子组件不同的是多子组件需要继承自<em>MultiChildRenderObjectWidget</em>。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">CustomLeftRightBox</span> <span class="kd">extends</span> <span class="n">MultiChildRenderObjectWidget</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">const</span> <span class="n">CustomLeftRightBox</span><span class="p">({</span>
+</span></span><span class="line"><span class="cl">    <span class="k">super</span><span class="p">.</span><span class="n">key</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">required</span> <span class="k">super</span><span class="p">.</span><span class="n">children</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="p">})</span> <span class="o">:</span> <span class="k">assert</span><span class="p">(</span><span class="n">children</span><span class="p">.</span><span class="n">length</span> <span class="o">==</span> <span class="m">2</span><span class="p">,</span> <span class="s1">&#39;children只能有2个孩子&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="n">RenderObject</span> <span class="n">createRenderObject</span><span class="p">(</span><span class="n">BuildContext</span> <span class="n">context</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="n">CustomRenderLeftRightBox</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>接下来需要实现<em>CustomRenderLeftRightBox</em>，在其<em>performLayout</em>方法中实现左-右布局算法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">LeftRightBoxParentData</span> <span class="kd">extends</span> <span class="n">ContainerBoxParentData</span><span class="o">&lt;</span><span class="n">RenderBox</span><span class="o">&gt;</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">CustomRenderLeftRightBox</span> <span class="kd">extends</span> <span class="n">RenderBox</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">with</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 这两个组合mixin实现了通用的绘制和事件处理相关逻辑
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">ContainerRenderObjectMixin</span><span class="o">&lt;</span><span class="n">RenderBox</span><span class="p">,</span> <span class="n">LeftRightBoxParentData</span><span class="o">&gt;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="n">RenderBoxContainerDefaultsMixin</span><span class="o">&lt;</span><span class="n">RenderBox</span><span class="p">,</span> <span class="n">LeftRightBoxParentData</span><span class="o">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">/// 初始化每一个child的parentData
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">void</span> <span class="n">setupParentData</span><span class="p">(</span><span class="n">covariant</span> <span class="n">RenderObject</span> <span class="n">child</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">child</span><span class="p">.</span><span class="n">parentData</span> <span class="k">is</span><span class="o">!</span> <span class="n">LeftRightBoxParentData</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">child</span><span class="p">.</span><span class="n">parentData</span> <span class="o">=</span> <span class="n">LeftRightBoxParentData</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">void</span> <span class="n">performLayout</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 获取CustomLeftRightBox父组件的约束
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kd">final</span> <span class="n">BoxConstraints</span> <span class="n">constraints</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="n">constraints</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 获取CustomLeftRightBox第一个孩子，也就是左子组件
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">RenderBox</span> <span class="n">leftChild</span> <span class="o">=</span> <span class="n">firstChild</span><span class="o">!</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">LeftRightBoxParentData</span> <span class="n">childParentData</span> <span class="o">=</span> <span class="n">leftChild</span><span class="p">.</span><span class="n">parentData</span><span class="o">!</span> <span class="o">as</span> <span class="n">LeftRightBoxParentData</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 获取CustomLeftRightBox下一个孩子，也就是右子组件
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">RenderBox</span> <span class="n">rightChild</span> <span class="o">=</span> <span class="n">childParentData</span><span class="p">.</span><span class="n">nextSibling</span><span class="o">!</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 布局右子组件
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">rightChild</span><span class="p">.</span><span class="n">layout</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// 这里rightChild最小宽高为0，最大宽度为CustomRenderLeftRightBox父组件的最大宽度/2，最大高度为CustomRenderLeftRightBox父组件的最大高度
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="n">BoxConstraints</span><span class="p">(</span><span class="nl">maxWidth:</span> <span class="n">constraints</span><span class="p">.</span><span class="n">maxWidth</span> <span class="o">/</span> <span class="m">2</span><span class="p">,</span> <span class="nl">maxHeight:</span> <span class="n">constraints</span><span class="p">.</span><span class="n">maxHeight</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">parentUsesSize:</span> <span class="kc">true</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 只调整右子组件的Offset，对齐到CustomRenderLeftRightBox父组件的顶部
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">childParentData</span> <span class="o">=</span> <span class="n">rightChild</span><span class="p">.</span><span class="n">parentData</span><span class="o">!</span> <span class="o">as</span> <span class="n">LeftRightBoxParentData</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">childParentData</span><span class="p">.</span><span class="n">offset</span> <span class="o">=</span> <span class="n">Offset</span><span class="p">(</span><span class="n">constraints</span><span class="p">.</span><span class="n">maxWidth</span> <span class="o">-</span> <span class="n">rightChild</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">width</span><span class="p">,</span> <span class="m">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 布局左子组件
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 左子组件的Offset默认为（0，0），为了确保左子组件始终能显示，这里不修改它的Offset
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">leftChild</span><span class="p">.</span><span class="n">layout</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// 这里leftChild最小宽高为0，最大宽度为左侧剩余宽度，最大高度为CustomRenderLeftRightBox父组件的最大高度
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="n">BoxConstraints</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">          <span class="nl">maxWidth:</span> <span class="n">constraints</span><span class="p">.</span><span class="n">maxWidth</span> <span class="o">-</span> <span class="n">rightChild</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">width</span><span class="p">,</span> <span class="nl">maxHeight:</span> <span class="n">constraints</span><span class="p">.</span><span class="n">maxHeight</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">parentUsesSize:</span> <span class="kc">true</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 设置CustomLeftRightBox自身的size
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">size</span> <span class="o">=</span> <span class="n">constraints</span><span class="p">.</span><span class="n">constrain</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="n">Size</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="n">constraints</span><span class="p">.</span><span class="n">maxWidth</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// CustomLeftRightBox的高度会设置为它子组件中的最大高度
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">max</span><span class="p">(</span><span class="n">leftChild</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">height</span><span class="p">,</span> <span class="n">rightChild</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">height</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">      <span class="p">),</span>
+</span></span><span class="line"><span class="cl">    <span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">void</span> <span class="n">paint</span><span class="p">(</span><span class="n">PaintingContext</span> <span class="n">context</span><span class="p">,</span> <span class="n">Offset</span> <span class="n">offset</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 打印CustomLeftRightBox的背景，看下它的大小
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">kDebugMode</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">context</span><span class="p">.</span><span class="n">canvas</span><span class="p">.</span><span class="n">drawRect</span><span class="p">(</span><span class="n">offset</span> <span class="o">&amp;</span> <span class="n">size</span><span class="p">,</span> <span class="n">Paint</span><span class="p">()..</span><span class="n">color</span> <span class="o">=</span> <span class="n">Colors</span><span class="p">.</span><span class="n">white</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">defaultPaint</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">offset</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">bool</span> <span class="n">hitTestChildren</span><span class="p">(</span><span class="n">BoxHitTestResult</span> <span class="n">result</span><span class="p">,</span> <span class="p">{</span><span class="kd">required</span> <span class="n">Offset</span> <span class="n">position</span><span class="p">})</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">defaultHitTestChildren</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nl">position:</span> <span class="n">position</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>下面去使用<em>CustomLeftRightBox</em>。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">runApp</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Center</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">child:</span> <span class="n">CustomLeftRightBox</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">children:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">          <span class="n">Container</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="nl">width:</span> <span class="m">80</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nl">height:</span> <span class="m">80</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nl">color:</span> <span class="n">Colors</span><span class="p">.</span><span class="n">redAccent</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="p">),</span>
+</span></span><span class="line"><span class="cl">          <span class="n">Container</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="nl">width:</span> <span class="m">160</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nl">height:</span> <span class="m">160</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nl">color:</span> <span class="n">Colors</span><span class="p">.</span><span class="n">blueAccent</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="p">),</span>
+</span></span><span class="line"><span class="cl">        <span class="p">],</span>
+</span></span><span class="line"><span class="cl">      <span class="p">),</span>
+</span></span><span class="line"><span class="cl">    <span class="p">),</span>
+</span></span><span class="line"><span class="cl">  <span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><img title="" src="/img/flutter/解读Flutter源码之布局Layout过程/多子组件示例.png" alt="" width="235">
+<p>可以看到，实际布局流程和单子组件并没有太大区别，只不过多子组件需要同时对多个子组件进行布局。</p>
+<p>另外和<em>CustomRenderPositionedBox</em>不同的是，<em>CustomRenderLeftRightBox</em>是直接继承自<em>RenderBox</em>，同时混入了<em>ContainerRenderObjectMixin</em>和 <em>RenderBoxContainerDefaultsMixin</em>两个<em>mixin</em>，这两个<em>mixin</em>组合实现了通用的绘制和事件处理相关逻辑。</p>
+<p>除此之外，您可能还会注意到自定义的<em>LeftRightBoxParentData</em>，它的最终父类是<em>ParentData</em>。在上面两个例子中，在实现相应的<em>RenderObject</em>时都用到了子组件的<em>parentData</em>对象（将子组件的<em>Offset</em>信息保存其中），可以看到<em>parentData</em>虽然属于<em>child</em>的属性，但它从设置（包括初始化）到使用都在父组件中，这也是为什么起名叫“<em>parentData</em>”。实际上<em>Flutter</em>框架中，<em>parentData</em>这个属性主要就是为了在布局<em>layout</em>阶段保存组件布局信息而设计的。</p>
+<p>需要注意：“<em>parentData</em>用于保存组件的布局信息”只是一个约定，您在定义组件时完全可以将子组件的布局信息保存在任意地方，也可以保存非布局信息。但是，还是强烈建议大家遵循<em>Flutter</em>的规范，这样的代码会更容易被他人看懂，也会更容易维护。</p>
+<h2 id="23总结flutter布局layout过程">2.3、总结<em>Flutter</em>布局<em>Layout</em>过程</h2>
+<p><em>Flutter</em>布局<em>Layout</em>过程主要是确定每一个组件的布局信息（大小和位置），<em>Flutter</em>的布局过程如下：</p>
+<p>1、父组件向子组件传递约束（<em>constraints</em>）信息，限制子组件的最大和最小宽高。</p>
+<p>2、子组件根据约束信息确定自己的大小（<em>size</em>）。</p>
+<p>3、父组件根据特定布局规则（不同布局组件会有不同的布局算法）确定每一个子组件在父组件布局空间中的位置，用偏移<em>Offset</em>表示。</p>
+<p>4、递归整个过程，确定出每一个组件的大小和位置。</p>
+<p>至此，相信你已经对<em>Flutter</em>的布局流程熟悉了，现在看一张<em>Flutter</em>官网的图。</p>
+<img title="" src="/img/flutter/解读Flutter源码之布局Layout过程/Flutter布局过程.png" alt="" width="535">
+<p>官方对于<em>Flutter</em>布局过程是这么描述的：</p>
+<blockquote>
+<p><em>在进行布局的时候，Flutter会以DFS（深度优先遍历）方式遍历渲染树，并将限制以自上而下的方式从父组件传递给子组件。子组件若要确定自己的大小，则必须遵循父组件传递的限制。子组件的响应方式是在父组件建立的约束内将大小以自下而上的方式传递给父组件。</em></p>
+</blockquote>
+<p>看完官方的描述是不是理解的更透彻了一些！</p>
+<h1 id="三源码分析">三、源码分析</h1>
+<p>以上面单子组件布局示例为例，进行源码分析。</p>
+<h2 id="31renderview初始化">3.1、<em>RenderView</em>初始化</h2>
+<p>在<em>runApp</em>方法中，会执行<em>WidgetsFlutterBinding.ensureInitialized()</em>，此处会执行<em>RendererBinding</em>的<em>initInstances</em>方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">initInstances</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">super</span><span class="p">.</span><span class="n">initInstances</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">...</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 创建PipelineOwner实例
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// 管道所有者提供用于驱动渲染管道的接口，并存储有关在管道的每个阶段中请求访问哪些渲染对象的状态。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">_pipelineOwner</span> <span class="o">=</span> <span class="n">PipelineOwner</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="nl">onSemanticsOwnerCreated:</span> <span class="n">_handleSemanticsOwnerCreated</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nl">onSemanticsUpdate:</span> <span class="n">_handleSemanticsUpdate</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nl">onSemanticsOwnerDisposed:</span> <span class="n">_handleSemanticsOwnerDisposed</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">...</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 创建根组件RenderView
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">initRenderView</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 注册持久帧回调
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">addPersistentFrameCallback</span><span class="p">(</span><span class="n">_handlePersistentFrameCallback</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">...</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">PipelineOwner</span> <span class="kd">get</span> <span class="n">pipelineOwner</span> <span class="o">=&gt;</span> <span class="n">_pipelineOwner</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">late</span> <span class="n">PipelineOwner</span> <span class="n">_pipelineOwner</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在<em>initInstances</em>方法中执行了<em>initRenderView</em>方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">initRenderView</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="p">...</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 创建RenderView实例，传入configuration，此处为屏幕大小
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">renderView</span> <span class="o">=</span> <span class="n">RenderView</span><span class="p">(</span><span class="nl">configuration:</span> <span class="n">createViewConfiguration</span><span class="p">(),</span> <span class="nl">view:</span> <span class="n">platformDispatcher</span><span class="p">.</span><span class="n">implicitView</span><span class="o">!</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 通过准备第一帧来引导渲染管道。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// 这应该只调用一次，并且必须在更改configuration之前调用。它通常在调用构造函数后立即调用。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// 这实际上并没有安排第一帧。对owner调用PipelineOwner.requestVisualUpdate来执行此操作
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">renderView</span><span class="p">.</span><span class="n">prepareInitialFrame</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>先看下<em>RenderView</em>构造方法传入的<em>configuration</em>，它是一个<em>createViewConfiguration</em>方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="n">ViewConfiguration</span> <span class="n">createViewConfiguration</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">final</span> <span class="n">FlutterView</span> <span class="n">view</span> <span class="o">=</span> <span class="n">platformDispatcher</span><span class="p">.</span><span class="n">implicitView</span><span class="o">!</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">final</span> <span class="kt">double</span> <span class="n">devicePixelRatio</span> <span class="o">=</span> <span class="n">view</span><span class="p">.</span><span class="n">devicePixelRatio</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 创建ViewConfiguration实例，这是子组件的约束条件
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">return</span> <span class="n">ViewConfiguration</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="nl">size:</span> <span class="n">view</span><span class="p">.</span><span class="n">physicalSize</span> <span class="o">/</span> <span class="n">devicePixelRatio</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nl">devicePixelRatio:</span> <span class="n">devicePixelRatio</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>看下<em>RenderView</em>的构造方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">RenderView</span> <span class="kd">extends</span> <span class="n">RenderObject</span> <span class="kd">with</span> <span class="n">RenderObjectWithChildMixin</span><span class="o">&lt;</span><span class="n">RenderBox</span><span class="o">&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">RenderView</span><span class="p">({</span>
+</span></span><span class="line"><span class="cl">    <span class="n">RenderBox</span><span class="o">?</span> <span class="n">child</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">required</span> <span class="n">ViewConfiguration</span> <span class="n">configuration</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">required</span> <span class="n">ui</span><span class="p">.</span><span class="n">FlutterView</span> <span class="n">view</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="p">})</span> <span class="o">:</span> <span class="n">_configuration</span> <span class="o">=</span> <span class="n">configuration</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">       <span class="n">_view</span> <span class="o">=</span> <span class="n">view</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">this</span><span class="p">.</span><span class="n">child</span> <span class="o">=</span> <span class="n">child</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// RenderView持有了ViewConfiguration
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">ViewConfiguration</span> <span class="kd">get</span> <span class="n">configuration</span> <span class="o">=&gt;</span> <span class="n">_configuration</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">ViewConfiguration</span> <span class="n">_configuration</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>创建<em>RenderView</em>实例赋值给<em>renderView</em>，会执行<em>setter</em>方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="n">RenderView</span> <span class="kd">get</span> <span class="n">renderView</span> <span class="o">=&gt;</span> <span class="n">_pipelineOwner</span><span class="p">.</span><span class="n">rootNode</span><span class="o">!</span> <span class="o">as</span> <span class="n">RenderView</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">set</span> <span class="n">renderView</span><span class="p">(</span><span class="n">RenderView</span> <span class="n">value</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 将RenderView赋值给rootNode
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">_pipelineOwner</span><span class="p">.</span><span class="n">rootNode</span> <span class="o">=</span> <span class="n">value</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>看下<em>PipelineOwner</em>的<em>rootNode</em>。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="c1">// 此管道管理的唯一对象，没有父对象。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">RenderObject</span><span class="o">?</span> <span class="kd">get</span> <span class="n">rootNode</span> <span class="o">=&gt;</span> <span class="n">_rootNode</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">RenderObject</span><span class="o">?</span> <span class="n">_rootNode</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kd">set</span> <span class="n">rootNode</span><span class="p">(</span><span class="n">RenderObject</span><span class="o">?</span> <span class="n">value</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">_rootNode</span> <span class="o">==</span> <span class="n">value</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">_rootNode</span><span class="o">?</span><span class="p">.</span><span class="n">detach</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">_rootNode</span> <span class="o">=</span> <span class="n">value</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 执行这里
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">_rootNode</span><span class="o">?</span><span class="p">.</span><span class="n">attach</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>看下<em>RenderObject</em>的<em>attach</em>方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="n">PipelineOwner</span><span class="o">?</span> <span class="kd">get</span> <span class="n">owner</span> <span class="o">=&gt;</span> <span class="n">_owner</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">PipelineOwner</span><span class="o">?</span> <span class="n">_owner</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="err">@</span><span class="n">mustCallSuper</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">attach</span><span class="p">(</span><span class="n">PipelineOwner</span> <span class="n">owner</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="o">!</span><span class="n">_debugDisposed</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="n">_owner</span> <span class="o">==</span> <span class="kc">null</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 此处赋值后，RenderObject持有了PipelineOwner对象
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">_owner</span> <span class="o">=</span> <span class="n">owner</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">...</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>再回过头来看下<em>RenderView</em>的<em>prepareInitialFrame</em>方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">prepareInitialFrame</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="n">owner</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="n">_rootTransform</span> <span class="o">==</span> <span class="kc">null</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 执行这里
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">scheduleInitialLayout</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">scheduleInitialPaint</span><span class="p">(</span><span class="n">_updateMatricesAndCreateNewRootLayer</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="n">_rootTransform</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>看下<em>RenderObject</em>的<em>scheduleInitialLayout</em>方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="n">RenderObject</span><span class="o">?</span> <span class="n">_relayoutBoundary</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">scheduleInitialLayout</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="o">!</span><span class="n">_debugDisposed</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="n">attached</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="n">parent</span> <span class="k">is</span><span class="o">!</span> <span class="n">RenderObject</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="o">!</span><span class="n">owner</span><span class="o">!</span><span class="p">.</span><span class="n">_debugDoingLayout</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="n">_relayoutBoundary</span> <span class="o">==</span> <span class="kc">null</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 设置布局边界为RenderView自己
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">_relayoutBoundary</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_debugCanParentUseSize</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}());</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 将RenderView添加到PipelineOwner中List保存，表示自己是需要布局的组件
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">owner</span><span class="o">!</span><span class="p">.</span><span class="n">_nodesNeedingLayout</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="32schedulerbinding的schedulewarmupframe方法">3.2、<em>SchedulerBinding</em>的<em>scheduleWarmUpFrame</em>方法</h2>
+<p>在<em>runApp</em>方法中，执行完<em>WidgetsBinding</em>的<em>scheduleAttachRootWidget</em>方法后，三颗树也会创建完成，随后继续执行<em>SchedulerBinding</em>的<em>scheduleWarmUpFrame</em>方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">scheduleWarmUpFrame</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">_warmUpFrame</span> <span class="o">||</span> <span class="n">schedulerPhase</span> <span class="o">!=</span> <span class="n">SchedulerPhase</span><span class="p">.</span><span class="n">idle</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">_warmUpFrame</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">final</span> <span class="n">TimelineTask</span> <span class="n">timelineTask</span> <span class="o">=</span> <span class="n">TimelineTask</span><span class="p">()..</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;Warm-up frame&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">final</span> <span class="kt">bool</span> <span class="n">hadScheduledFrame</span> <span class="o">=</span> <span class="n">_hasScheduledFrame</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// We use timers here to ensure that microtasks flush in between.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">Timer</span><span class="p">.</span><span class="n">run</span><span class="p">(()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">assert</span><span class="p">(</span><span class="n">_warmUpFrame</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 由引擎调用去准备框架以生成新帧。该函数调用由scheduleFrameCallback注册的所有瞬态帧回调
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">handleBeginFrame</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">});</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Timer</span><span class="p">.</span><span class="n">run</span><span class="p">(()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">assert</span><span class="p">(</span><span class="n">_warmUpFrame</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 由引擎调用以产生新的帧。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 该方法在handleBeginFrame之后立即调用。它调用addPersistentFrameCallback注册的所有回调（通常驱动渲染管道），然后调用addPostFrameCallback注册的回调。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">handleDrawFrame</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// We call resetEpoch after this frame so that, in the hot reload case,
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// the very next frame pretends to have occurred immediately after this
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// warm-up frame. The warm-up frame&#39;s timestamp will typically be far in
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// the past (the time of the last real frame), so if we didn&#39;t reset the
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// epoch we would see a sudden jump from the old time in the warm-up frame
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// to the new time in the &#34;real&#34; frame. The biggest problem with this is
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// that implicit animations end up being triggered at the old time and
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// then skipping every frame and finishing in the new time.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">resetEpoch</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_warmUpFrame</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">hadScheduledFrame</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// 通过调用dart:ui.PlatformDispatcher.scheduleFrame来安排新帧
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="n">scheduleFrame</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// Lock events so touch events etc don&#39;t insert themselves until the
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// scheduled frame has finished.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">lockEvents</span><span class="p">(()</span> <span class="kd">async</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">await</span> <span class="n">endOfFrame</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">timelineTask</span><span class="p">.</span><span class="n">finish</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">});</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>看下<em>SchedulerBinding</em>的<em>handleDrawFrame</em>方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">handleDrawFrame</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="n">_schedulerPhase</span> <span class="o">==</span> <span class="n">SchedulerPhase</span><span class="p">.</span><span class="n">midFrameMicrotasks</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">_frameTimelineTask</span><span class="o">?</span><span class="p">.</span><span class="n">finish</span><span class="p">();</span> <span class="c1">// end the &#34;Animate&#34; phase
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">try</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// PERSISTENT FRAME CALLBACKS
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">_schedulerPhase</span> <span class="o">=</span> <span class="n">SchedulerPhase</span><span class="p">.</span><span class="n">persistentCallbacks</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 遍历_persistentCallbacks执行FrameCallback
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">for</span> <span class="p">(</span><span class="kd">final</span> <span class="n">FrameCallback</span> <span class="n">callback</span> <span class="k">in</span> <span class="n">_persistentCallbacks</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">_invokeFrameCallback</span><span class="p">(</span><span class="n">callback</span><span class="p">,</span> <span class="n">_currentFrameTimeStamp</span><span class="o">!</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// POST-FRAME CALLBACKS
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">_schedulerPhase</span> <span class="o">=</span> <span class="n">SchedulerPhase</span><span class="p">.</span><span class="n">postFrameCallbacks</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">FrameCallback</span><span class="o">&gt;</span> <span class="n">localPostFrameCallbacks</span> <span class="o">=</span>
+</span></span><span class="line"><span class="cl">        <span class="n">List</span><span class="o">&lt;</span><span class="n">FrameCallback</span><span class="o">&gt;</span><span class="p">.</span><span class="n">of</span><span class="p">(</span><span class="n">_postFrameCallbacks</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_postFrameCallbacks</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kd">final</span> <span class="n">FrameCallback</span> <span class="n">callback</span> <span class="k">in</span> <span class="n">localPostFrameCallbacks</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">_invokeFrameCallback</span><span class="p">(</span><span class="n">callback</span><span class="p">,</span> <span class="n">_currentFrameTimeStamp</span><span class="o">!</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_schedulerPhase</span> <span class="o">=</span> <span class="n">SchedulerPhase</span><span class="p">.</span><span class="n">idle</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_frameTimelineTask</span><span class="o">?</span><span class="p">.</span><span class="n">finish</span><span class="p">();</span> <span class="c1">// end the Frame
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">assert</span><span class="p">(()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="n">debugPrintEndFrameBanner</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">debugPrint</span><span class="p">(</span><span class="s1">&#39;▀&#39;</span> <span class="o">*</span> <span class="n">_debugBanner</span><span class="o">!</span><span class="p">.</span><span class="n">length</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="n">_debugBanner</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}());</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_currentFrameTimeStamp</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><em>_persistentCallbacks</em> 是在<em>RendererBinding</em>的<em>initInstances</em>方法中调用<em>addPersistentFrameCallback</em>方法注册，之前讲过，这里直接看 <em>_handlePersistentFrameCallback</em> 方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">_handlePersistentFrameCallback</span><span class="p">(</span><span class="n">Duration</span> <span class="n">timeStamp</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 泵送渲染管道以生成帧
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">drawFrame</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">_scheduleMouseTrackerUpdate</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>看下<em>RendererBinding</em>的<em>drawFrame</em>方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="err">@</span><span class="n">protected</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">drawFrame</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 系统中所有脏的RenderObject都被布局
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// 该函数是渲染管线的核心阶段之一。在绘制之前会清理布局信息，以便渲染对象将出现在屏幕上的最新位置
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">pipelineOwner</span><span class="p">.</span><span class="n">flushLayout</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">pipelineOwner</span><span class="p">.</span><span class="n">flushCompositingBits</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">pipelineOwner</span><span class="p">.</span><span class="n">flushPaint</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">sendFramesToEngine</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">renderView</span><span class="p">.</span><span class="n">compositeFrame</span><span class="p">();</span> <span class="c1">// this sends the bits to the GPU
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">pipelineOwner</span><span class="p">.</span><span class="n">flushSemantics</span><span class="p">();</span> <span class="c1">// this also sends the semantics to the OS.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">_firstFrameSent</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>看下<em>PipelineOwner</em>的<em>flushLayout</em>方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">flushLayout</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="p">...</span>
+</span></span><span class="line"><span class="cl">  <span class="k">try</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="n">_nodesNeedingLayout</span><span class="p">.</span><span class="n">isNotEmpty</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">assert</span><span class="p">(</span><span class="o">!</span><span class="n">_shouldMergeDirtyNodes</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// 此时_nodesNeedingLayout中只有一个RenderView，然后赋值给dirtyNodes
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">RenderObject</span><span class="o">&gt;</span> <span class="n">dirtyNodes</span> <span class="o">=</span> <span class="n">_nodesNeedingLayout</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// 创建新的_nodesNeedingLayout，相当于清空了_nodesNeedingLayout
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="n">_nodesNeedingLayout</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">RenderObject</span><span class="o">&gt;</span><span class="p">[];</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// 对dirtyNodes进行渲染树按深度从小到大排序
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="n">dirtyNodes</span><span class="p">.</span><span class="n">sort</span><span class="p">((</span><span class="n">RenderObject</span> <span class="n">a</span><span class="p">,</span> <span class="n">RenderObject</span> <span class="n">b</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="n">a</span><span class="p">.</span><span class="n">depth</span> <span class="o">-</span> <span class="n">b</span><span class="p">.</span><span class="n">depth</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// 遍历dirtyNodes
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">dirtyNodes</span><span class="p">.</span><span class="n">length</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// _shouldMergeDirtyNodes默认为false，这里不执行
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">_shouldMergeDirtyNodes</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">          <span class="n">_shouldMergeDirtyNodes</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">          <span class="k">if</span> <span class="p">(</span><span class="n">_nodesNeedingLayout</span><span class="p">.</span><span class="n">isNotEmpty</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">_nodesNeedingLayout</span><span class="p">.</span><span class="n">addAll</span><span class="p">(</span><span class="n">dirtyNodes</span><span class="p">.</span><span class="n">getRange</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">dirtyNodes</span><span class="p">.</span><span class="n">length</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">          <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 从dirtyNodes中取出RenderView，执行_layoutWithoutResize方法
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="kd">final</span> <span class="n">RenderObject</span> <span class="n">node</span> <span class="o">=</span> <span class="n">dirtyNodes</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">node</span><span class="p">.</span><span class="n">_needsLayout</span> <span class="o">&amp;&amp;</span> <span class="n">node</span><span class="p">.</span><span class="n">owner</span> <span class="o">==</span> <span class="k">this</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">          <span class="n">node</span><span class="p">.</span><span class="n">_layoutWithoutResize</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// No need to merge dirty nodes generated from processing the last
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="c1">// relayout boundary back.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="n">_shouldMergeDirtyNodes</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="p">...</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 这里_children为空，不执行
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">for</span> <span class="p">(</span><span class="kd">final</span> <span class="n">PipelineOwner</span> <span class="n">child</span> <span class="k">in</span> <span class="n">_children</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">child</span><span class="p">.</span><span class="n">flushLayout</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">assert</span><span class="p">(</span><span class="n">_nodesNeedingLayout</span><span class="p">.</span><span class="n">isEmpty</span><span class="p">,</span> <span class="s1">&#39;Child PipelineOwners must not dirty nodes in their parent.&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_shouldMergeDirtyNodes</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">...</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>看下<em>RenderObject</em>的 <em>_layoutWithoutResize</em> 方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="err">@</span><span class="n">pragma</span><span class="p">(</span><span class="s1">&#39;vm:notify-debugger-on-exception&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">_layoutWithoutResize</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="n">_relayoutBoundary</span> <span class="o">==</span> <span class="k">this</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">...</span>
+</span></span><span class="line"><span class="cl">  <span class="k">try</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 执行这里
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">performLayout</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">markNeedsSemanticsUpdate</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">stack</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_reportException</span><span class="p">(</span><span class="s1">&#39;performLayout&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">stack</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">...</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// RenderView已经布局完成，不需要再布局
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">_needsLayout</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 将渲染对象RenderView标记为需要绘制，从而安排视觉更新
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">markNeedsPaint</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>此处执行<em>RenderObject</em>的<em>performLayout</em>方法，该方法由子类<em>RenderView</em>实现。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">performLayout</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="n">_rootTransform</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 获取屏幕大小约束
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">_size</span> <span class="o">=</span> <span class="n">configuration</span><span class="p">.</span><span class="n">size</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="n">_size</span><span class="p">.</span><span class="n">isFinite</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// 对子组件CustomRenderPositionedBox执行严格约束，也就是要求子组件和屏幕一样大小
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">if</span> <span class="p">(</span><span class="n">child</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">child</span><span class="o">!</span><span class="p">.</span><span class="n">layout</span><span class="p">(</span><span class="n">BoxConstraints</span><span class="p">.</span><span class="n">tight</span><span class="p">(</span><span class="n">_size</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="33renderobject的layout方法">3.3、<em>RenderObject</em>的<em>layout</em>方法</h2>
+<p>这里执行了<em>CustomRenderPositionedBox</em>父类<em>RenderObject</em>的<em>layout</em>方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="n">Constraints</span><span class="o">?</span> <span class="n">_constraints</span><span class="p">;</span>  <span class="c1">// 上次布局时父组件传递给当前组件的约束
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">bool</span> <span class="n">_needsLayout</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>   <span class="c1">// 当前组件是否被标记为需要布局
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="n">RenderObject</span><span class="o">?</span> <span class="n">_relayoutBoundary</span><span class="p">;</span>  <span class="c1">// 上次布局时当前组件的布局边界
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="err">@</span><span class="n">pragma</span><span class="p">(</span><span class="s1">&#39;vm:notify-debugger-on-exception&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">layout</span><span class="p">(</span><span class="n">Constraints</span> <span class="n">constraints</span><span class="p">,</span> <span class="p">{</span> <span class="kt">bool</span> <span class="n">parentUsesSize</span> <span class="o">=</span> <span class="kc">false</span> <span class="p">})</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="p">...</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 因为parentUsesSize没有传入，取默认值为false，所以isRelayoutBoundary为true
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// isRelayoutBoundary表示该child（也就是CustomRenderPositionedBox）是否是布局边界
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="kd">final</span> <span class="kt">bool</span> <span class="n">isRelayoutBoundary</span> <span class="o">=</span> <span class="o">!</span><span class="n">parentUsesSize</span> <span class="o">||</span> <span class="n">sizedByParent</span> <span class="o">||</span> <span class="n">constraints</span><span class="p">.</span><span class="n">isTight</span> <span class="o">||</span> <span class="n">parent</span> <span class="k">is</span><span class="o">!</span> <span class="n">RenderObject</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 因为parentUsesSize为false，表示当前组件父组件的大小不依赖当前组件大小，所以CustomRenderPositionedBox自身就是布局边界
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// 分析一
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="kd">final</span> <span class="n">RenderObject</span> <span class="n">relayoutBoundary</span> <span class="o">=</span> <span class="n">isRelayoutBoundary</span> <span class="o">?</span> <span class="k">this</span> <span class="o">:</span> <span class="n">parent</span><span class="o">!</span><span class="p">.</span><span class="n">_relayoutBoundary</span><span class="o">!</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">...</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// _needsLayout为true，这里不执行
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// 这里的判断意思：当当前组件没有被标记为需要重新布局，且父组件传递的约束没有发生变化时，就看布局边界有无发生变化
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">_needsLayout</span> <span class="o">&amp;&amp;</span> <span class="n">constraints</span> <span class="o">==</span> <span class="n">_constraints</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="p">...</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 如果当前组件的布局边界与上一次不同，那么更新当前组件的布局边界，并且向上递归查询对应的布局边界，整个操作相当于把父组件的布局边界传递给子组件
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">relayoutBoundary</span> <span class="o">!=</span> <span class="n">_relayoutBoundary</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">_relayoutBoundary</span> <span class="o">=</span> <span class="n">relayoutBoundary</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// 分析二
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="n">visitChildren</span><span class="p">(</span><span class="n">_propagateRelayoutBoundaryToChild</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">...</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 缓存来自父组件的约束，后面当前组件需要时可以使用该约束
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">_constraints</span> <span class="o">=</span> <span class="n">constraints</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// _relayoutBoundary为null，这里不执行
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">if</span> <span class="p">(</span><span class="n">_relayoutBoundary</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">relayoutBoundary</span> <span class="o">!=</span> <span class="n">_relayoutBoundary</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 本地重新布局边界已更改，必须通知子级，以防它们也需要更新。否则，它们稍后会对实际的重新布局边界感到困惑。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// The local relayout boundary has changed, must notify children in case
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// they also need updating. Otherwise, they will be confused about what
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// their actual relayout boundary is later.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">visitChildren</span><span class="p">(</span><span class="n">_cleanChildRelayoutBoundary</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 更新当前组件的布局边界
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">_relayoutBoundary</span> <span class="o">=</span> <span class="n">relayoutBoundary</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">...</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 后面解释
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">if</span> <span class="p">(</span><span class="n">sizedByParent</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="p">...</span>
+</span></span><span class="line"><span class="cl">    <span class="k">try</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">performResize</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">      <span class="p">...</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">stack</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">_reportException</span><span class="p">(</span><span class="s1">&#39;performResize&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">stack</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">...</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">...</span>
+</span></span><span class="line"><span class="cl">  <span class="k">try</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 执行当前组件的performLayout方法，也就是CustomRenderPositionedBox的performLayout方法
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">performLayout</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">markNeedsSemanticsUpdate</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="p">...</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">stack</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_reportException</span><span class="p">(</span><span class="s1">&#39;performLayout&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">stack</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">...</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 布局结束后将_needsLayout置为false
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">_needsLayout</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 将当前组件标记为需要重绘，因为布局发生变化后，需要重新绘制
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">markNeedsPaint</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">...</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>分析一：关于<em>relayoutBoundary</em></p>
+<p>理论上，某个组件的布局变化后，就可能会影响其它组件的布局，所以当有组件布局发生变化后，最笨的办法是对整棵组件树<em>relayout</em>（重新布局）！但是对所有组件进行<em>relayout</em>的成本还是太大，所以需要探索一下降低<em>relayout</em>成本的方案。实际上，在一些特定场景下，组件发生变化后只需要对部分组件进行重新布局即可（而无需对整棵树<em>relayout</em>）。</p>
+<p>假如有一个页面的组件树结构如下图所示：</p>
+<img title="" src="/img/flutter/解读Flutter源码之布局Layout过程/组件树结构示例.png" alt="" width="535">
+<p>假如<em>Text3</em>的文本长度发生变化，则会导致<em>Text4</em>的位置和<em>Column2</em>的大小也会变化；又因为<em>Column2</em>的父组件<em>SizedBox</em>已经限定了大小，所以<em>SizedBox</em>的大小和位置都不会变化。所以最终需要进行<em>relayout</em>的组件是：<em>Text3</em>、<em>Column2</em>，这里需要注意：</p>
+<p>1、<em>Text4</em>是不需要重新布局的，因为<em>Text4</em>的大小没有发生变化，只是位置发生变化，而它的位置是在父组件<em>Column2</em>布局时确定的。</p>
+<p>2、很容易发现：假如<em>Text3</em>和<em>Column2</em>之间还有其它组件，则这些组件也都是需要<em>relayout</em>的。</p>
+<p>在本例中，<em>Column2</em>就是<em>Text3</em>的<em>relayoutBoundary</em>（重新布局的边界节点）。每个组件的<em>renderObject</em>中都有一个 <em>_relayoutBoundary</em> 属性指向自身的布局边界节点，如果当前节点布局发生变化后，自身到其布局边界节点路径上的所有的节点都需要<em>relayout</em>。</p>
+<p>那么，一个组件是否是<em>relayoutBoundary</em>的条件是什么呢？这里有一个原则和四个场景，原则是“<em><strong>组件自身的大小变化不会影响父组件</strong></em>”，如果一个组件满足以下四种情况之一，则它便是<em>relayoutBoundary</em>：</p>
+<p>1、当前组件父组件的大小不依赖当前组件大小时；这种情况下父组件在布局时会调用子组件布局函数时并会给子组件传递一个<em>parentUsesSize</em>参数，该参数为<em>false</em>时表示父组件的布局算法不会依赖子组件的大小。</p>
+<p>2、组件的大小只取决于父组件传递的约束，而不会依赖后代组件的大小。这样的话后代组件的大小变化就不会影响自身的大小了，这种情况组件的<em>sizedByParent</em>属性必须为<em>true</em>（后面再讲）。</p>
+<p>3、父组件传递给自身的约束是一个严格约束（固定宽高，下面会讲）；这种情况下即使自身的大小依赖后代元素，但也不会影响父组件。</p>
+<p>4、组件为根组件；<em>Flutter</em>应用的根组件是<em>RenderView</em>，它的默认大小是当前设备屏幕大小。</p>
+<p>对应的代码实现为：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kd">final</span> <span class="kt">bool</span> <span class="n">isRelayoutBoundary</span> <span class="o">=</span> <span class="o">!</span><span class="n">parentUsesSize</span> <span class="o">||</span> <span class="n">sizedByParent</span> <span class="o">||</span> <span class="n">constraints</span><span class="p">.</span><span class="n">isTight</span> <span class="o">||</span> <span class="n">parent</span> <span class="k">is</span><span class="o">!</span> <span class="n">RenderObject</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kd">final</span> <span class="n">RenderObject</span> <span class="n">relayoutBoundary</span> <span class="o">=</span> <span class="n">isRelayoutBoundary</span> <span class="o">?</span> <span class="k">this</span> <span class="o">:</span> <span class="n">parent</span><span class="o">!</span><span class="p">.</span><span class="n">_relayoutBoundary</span><span class="o">!</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>分析二：</p>
+<p>这里<em>visitChildren</em>方法会递归执行<em>RenderObject</em>的 <em>_propagateRelayoutBoundaryToChild</em> 方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kd">static</span> <span class="kt">void</span> <span class="n">_propagateRelayoutBoundaryToChild</span><span class="p">(</span><span class="n">RenderObject</span> <span class="n">child</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">child</span><span class="p">.</span><span class="n">_propagateRelayoutBoundary</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">_propagateRelayoutBoundary</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 当向上找到对应的布局边界时，终止递归
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">if</span> <span class="p">(</span><span class="n">_relayoutBoundary</span> <span class="o">==</span> <span class="k">this</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 递归向上查询父组件的布局边界，直到父组件的布局边界与当前组件的布局边界相等
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="kd">final</span> <span class="n">RenderObject</span><span class="o">?</span> <span class="n">parentRelayoutBoundary</span> <span class="o">=</span> <span class="n">parent</span><span class="o">?</span><span class="p">.</span><span class="n">_relayoutBoundary</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="n">parentRelayoutBoundary</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">parentRelayoutBoundary</span> <span class="o">!=</span> <span class="n">_relayoutBoundary</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_relayoutBoundary</span> <span class="o">=</span> <span class="n">parentRelayoutBoundary</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">visitChildren</span><span class="p">(</span><span class="n">_propagateRelayoutBoundaryToChild</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><em>OK</em>，继续看<em>CustomRenderPositionedBox</em>的<em>performLayout</em>方法，可以看到继续执行<em>RenderObject</em>的<em>layout</em>方法，很明显这是一个递归的过程，递归结束后整个组件树的布局也就完成了。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="n">child</span><span class="o">!</span><span class="p">.</span><span class="n">layout</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">  <span class="n">constraints</span><span class="p">.</span><span class="n">loosen</span><span class="p">(),</span> <span class="c1">// 对子组件实行宽松约束
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nl">parentUsesSize:</span> <span class="kc">true</span><span class="p">,</span> <span class="c1">// 如果接下来想要使用child的size，parentUsesSize就需要设置为true
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h1 id="四扩展">四、扩展</h1>
+<h2 id="41sizedbyparent属性">4.1、<em>sizedByParent</em>属性</h2>
+<p>在<em>RenderObject</em>的<em>layout</em>方法中，有如下逻辑：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="n">sizedByParent</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">try</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">performResize</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">stack</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_reportException</span><span class="p">(</span><span class="s1">&#39;performResize&#39;</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">stack</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>上面说过<em>sizedByParent</em>为<em>true</em>时表示：当前组件的大小只取决于父组件传递的约束，而不会依赖后代组件的大小。</p>
+<p>前面也说过，<em>performLayout</em>中确定当前组件的大小时通常会依赖子组件的大小，如果<em>sizedByParent</em>为<em>true</em>，则当前组件的大小就不依赖子组件大小了，为了逻辑清晰，<em>Flutter</em>框架中约定，当<em>sizedByParent</em>为<em>true</em>时，确定当前组件大小的逻辑应抽离到 <em>performResize</em>中，这种情况下<em>performLayout</em>主要的任务便只有两个：<em>对子组件进行布局和确定子组件在当前组件中的布局起始位置偏移</em>。</p>
+<p>下面通过一个<em>CustomSizeBox</em>示例来演示一下<em>sizedByParent</em>为<em>true</em>时应该如何布局。在此之前，先讲下关于<em>SizeBox</em>的一个小问题：<em>Flutter</em>中的<em>SizedBox</em>组件会将其父组件的约束传递给其子组件，这也就意味着，如果父组件限制了最小宽度为100，即使我们通过<em>SizedBox</em>指定宽度为50，那也是没用的，因为<em>SizedBox</em>的实现中会让<em>SizedBox</em>的子组件先满足<em>SizedBox</em>父组件的约束。例如在<em>AppBar</em>中限制<em>Loading</em>组件大小。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">runApp</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="n">MaterialApp</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">home:</span> <span class="n">Scaffold</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">appBar:</span> <span class="n">AppBar</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">          <span class="nl">actions:</span> <span class="kd">const</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">            <span class="n">SizedBox</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">              <span class="nl">width:</span> <span class="m">20</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">              <span class="nl">height:</span> <span class="m">20</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">              <span class="nl">child:</span> <span class="n">CircularProgressIndicator</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">                <span class="nl">strokeWidth:</span> <span class="m">3</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="nl">valueColor:</span> <span class="n">AlwaysStoppedAnimation</span><span class="p">(</span><span class="n">Colors</span><span class="p">.</span><span class="n">white</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">              <span class="p">),</span>
+</span></span><span class="line"><span class="cl">            <span class="p">),</span>
+</span></span><span class="line"><span class="cl">          <span class="p">],</span>
+</span></span><span class="line"><span class="cl">        <span class="p">),</span>
+</span></span><span class="line"><span class="cl">      <span class="p">),</span>
+</span></span><span class="line"><span class="cl">    <span class="p">),</span>
+</span></span><span class="line"><span class="cl">  <span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><img title="" src="/img/flutter/解读Flutter源码之布局Layout过程/SizeBox问题.gif" alt="" width="235">
+<p>之所以不生效，是因为父组件限制了最小高度，当然这里还是可以使用<em>UnconstrainedBox + SizedBox</em>来实现想要的效果。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">runApp</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="n">MaterialApp</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">home:</span> <span class="n">Scaffold</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">appBar:</span> <span class="n">AppBar</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">          <span class="nl">actions:</span> <span class="kd">const</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">            <span class="n">SizedBox</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">              <span class="nl">width:</span> <span class="m">20</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">              <span class="nl">height:</span> <span class="m">20</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">              <span class="nl">child:</span> <span class="n">CircularProgressIndicator</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">                <span class="nl">strokeWidth:</span> <span class="m">3</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="nl">valueColor:</span> <span class="n">AlwaysStoppedAnimation</span><span class="p">(</span><span class="n">Colors</span><span class="p">.</span><span class="n">white</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">              <span class="p">),</span>
+</span></span><span class="line"><span class="cl">            <span class="p">),</span>
+</span></span><span class="line"><span class="cl">            <span class="n">UnconstrainedBox</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">              <span class="nl">child:</span> <span class="n">SizedBox</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">                <span class="nl">width:</span> <span class="m">20</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="nl">height:</span> <span class="m">20</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="nl">child:</span> <span class="n">CircularProgressIndicator</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">                  <span class="nl">strokeWidth:</span> <span class="m">3</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                  <span class="nl">valueColor:</span> <span class="n">AlwaysStoppedAnimation</span><span class="p">(</span><span class="n">Colors</span><span class="p">.</span><span class="n">white</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">                <span class="p">),</span>
+</span></span><span class="line"><span class="cl">              <span class="p">),</span>
+</span></span><span class="line"><span class="cl">            <span class="p">),</span>
+</span></span><span class="line"><span class="cl">          <span class="p">],</span>
+</span></span><span class="line"><span class="cl">        <span class="p">),</span>
+</span></span><span class="line"><span class="cl">      <span class="p">),</span>
+</span></span><span class="line"><span class="cl">    <span class="p">),</span>
+</span></span><span class="line"><span class="cl">  <span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><img title="" src="/img/flutter/解读Flutter源码之布局Layout过程/SizeBox问题解决一.gif" alt="" width="235">
+<p>但是这里希望通过一个组件就能搞定，为此可以自定义一个<em>CustomSizedBox</em>组件，它和<em>SizedBox</em>的主要区别是<em>CustomSizedBox</em>自身会遵守其父组件传递的约束而不是让其子组件去满足<em>CustomSizedBox</em>父组件的约束，具体如下：</p>
+<p>1、<em>CustomSizedBox</em>自身大小只取决于父组件的约束和用户指定的宽高。</p>
+<p>2、<em>CustomSizedBox</em>确定自身大小后，限制其子组件大小。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">CustomSizeBox</span> <span class="kd">extends</span> <span class="n">SingleChildRenderObjectWidget</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">final</span> <span class="kt">double</span> <span class="n">width</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">final</span> <span class="kt">double</span> <span class="n">height</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="kd">const</span> <span class="n">CustomSizeBox</span><span class="p">({</span>
+</span></span><span class="line"><span class="cl">    <span class="k">super</span><span class="p">.</span><span class="n">key</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">required</span> <span class="k">super</span><span class="p">.</span><span class="n">child</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="k">this</span><span class="p">.</span><span class="n">width</span> <span class="o">=</span> <span class="m">0</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="k">this</span><span class="p">.</span><span class="n">height</span> <span class="o">=</span> <span class="m">0</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="n">RenderObject</span> <span class="n">createRenderObject</span><span class="p">(</span><span class="n">BuildContext</span> <span class="n">context</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">CustomRenderSizeBox</span><span class="p">(</span><span class="nl">width:</span> <span class="n">width</span><span class="p">,</span> <span class="nl">height:</span> <span class="n">height</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">void</span> <span class="n">updateRenderObject</span><span class="p">(</span><span class="n">BuildContext</span> <span class="n">context</span><span class="p">,</span> <span class="n">covariant</span> <span class="n">CustomRenderSizeBox</span> <span class="n">renderObject</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">renderObject</span>
+</span></span><span class="line"><span class="cl">      <span class="p">..</span><span class="n">width</span> <span class="o">=</span> <span class="n">width</span>
+</span></span><span class="line"><span class="cl">      <span class="p">..</span><span class="n">height</span> <span class="o">=</span> <span class="n">height</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">CustomRenderSizeBox</span> <span class="kd">extends</span> <span class="n">RenderProxyBoxWithHitTestBehavior</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CustomRenderSizeBox</span><span class="p">({</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">double</span> <span class="n">width</span> <span class="o">=</span> <span class="m">0</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">double</span> <span class="n">height</span> <span class="o">=</span> <span class="m">0</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="p">})</span>  <span class="o">:</span> <span class="n">_width</span> <span class="o">=</span> <span class="n">width</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_height</span> <span class="o">=</span> <span class="n">height</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="kt">double</span> <span class="kd">get</span> <span class="n">width</span> <span class="o">=&gt;</span> <span class="n">_width</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">double</span> <span class="n">_width</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="kd">set</span> <span class="n">width</span><span class="p">(</span><span class="kt">double</span> <span class="n">value</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">_width</span> <span class="o">==</span> <span class="n">value</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_width</span> <span class="o">=</span> <span class="n">value</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">markNeedsLayout</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="kt">double</span> <span class="kd">get</span> <span class="n">height</span> <span class="o">=&gt;</span> <span class="n">_height</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">double</span> <span class="n">_height</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="kd">set</span> <span class="n">height</span><span class="p">(</span><span class="kt">double</span> <span class="n">value</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">_height</span> <span class="o">==</span> <span class="n">value</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_height</span> <span class="o">=</span> <span class="n">value</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">markNeedsLayout</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// CustomRenderSizeBox的大小只取决于父组件传递的约束
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">bool</span> <span class="kd">get</span> <span class="n">sizedByParent</span> <span class="o">=&gt;</span> <span class="kc">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Size</span> <span class="n">computeDryLayout</span><span class="p">(</span><span class="n">BoxConstraints</span> <span class="n">constraints</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 设置CustomRenderSizeBox自身的size，遵守父组件的约束
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="n">constraints</span><span class="p">.</span><span class="n">constrain</span><span class="p">(</span><span class="n">Size</span><span class="p">(</span><span class="n">_width</span><span class="p">,</span> <span class="n">_height</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">void</span> <span class="n">performLayout</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">child</span><span class="o">!</span><span class="p">.</span><span class="n">layout</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// 约束子组件的宽高为CustomRenderSizeBox与子组件之间宽高的最小值
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="n">BoxConstraints</span><span class="p">.</span><span class="n">tight</span><span class="p">(</span><span class="n">Size</span><span class="p">(</span><span class="n">min</span><span class="p">(</span><span class="n">size</span><span class="p">.</span><span class="n">width</span><span class="p">,</span> <span class="n">_width</span><span class="p">),</span> <span class="n">min</span><span class="p">(</span><span class="n">size</span><span class="p">.</span><span class="n">height</span><span class="p">,</span> <span class="n">_height</span><span class="p">))),</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// parentUseSize为false时，子组件的布局边界会是它自身，子组件布局发生变化后不会影响CustomSizedBox组件
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="nl">parentUsesSize:</span> <span class="kc">false</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">void</span> <span class="n">paint</span><span class="p">(</span><span class="n">PaintingContext</span> <span class="n">context</span><span class="p">,</span> <span class="n">Offset</span> <span class="n">offset</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 打印CustomRenderSizeBox的背景，看下它的大小
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">kDebugMode</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">context</span><span class="p">.</span><span class="n">canvas</span><span class="p">.</span><span class="n">drawRect</span><span class="p">(</span><span class="n">offset</span> <span class="o">&amp;</span> <span class="n">size</span><span class="p">,</span> <span class="n">Paint</span><span class="p">()..</span><span class="n">color</span> <span class="o">=</span> <span class="n">Colors</span><span class="p">.</span><span class="n">redAccent</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">super</span><span class="p">.</span><span class="n">paint</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">offset</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>上面代码有三点需要注意：</p>
+<p>1、<em>CustomRenderSizeBox</em>不再直接继承自<em>RenderBox</em>，而是继承自 <em>RenderProxyBoxWithHitTestBehavior</em>，<em>RenderProxyBoxWithHitTestBehavior</em>是间接继承自<em>RenderBox</em>的，它里面包含了默认的命中测试和绘制相关逻辑，继承自它后就不用我们再手动实现了。</p>
+<p>2、这里将确定当前组件大小的逻辑挪到了<em>computeDryLayout</em>方法中，因为<em>RenderBox</em>的<em>performResize</em>方法会调用<em>computeDryLayout</em>，并将返回结果作为当前组件的大小。</p>
+<p>按照<em>Flutter</em>框架约定，开发者应该重写<em>computeDryLayout</em>方法而不是<em>performResize</em>方法，就像在布局时应该重写<em>performLayout</em>方法而不是<em>layout</em>方法；不过这只是一个约定并非强制，但应该尽可能遵守这个约定，除非你清楚的知道自己在干什么并且能确保之后维护你代码的人也清楚。</p>
+<p>3、<em>CustomRenderSizeBox</em>在调用子组件<em>layout</em>时，将<em>parentUsesSize</em>置为<em>false</em>，这样的话子组件就会变成一个布局边界。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">runApp</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="n">MaterialApp</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">      <span class="nl">home:</span> <span class="n">Scaffold</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="nl">appBar:</span> <span class="n">AppBar</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">          <span class="nl">actions:</span> <span class="kd">const</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">            <span class="n">SizedBox</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">              <span class="nl">width:</span> <span class="m">20</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">              <span class="nl">height:</span> <span class="m">20</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">              <span class="nl">child:</span> <span class="n">CircularProgressIndicator</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">                <span class="nl">strokeWidth:</span> <span class="m">3</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="nl">valueColor:</span> <span class="n">AlwaysStoppedAnimation</span><span class="p">(</span><span class="n">Colors</span><span class="p">.</span><span class="n">white</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">              <span class="p">),</span>
+</span></span><span class="line"><span class="cl">            <span class="p">),</span>
+</span></span><span class="line"><span class="cl">            <span class="n">UnconstrainedBox</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">              <span class="nl">child:</span> <span class="n">SizedBox</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">                <span class="nl">width:</span> <span class="m">20</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="nl">height:</span> <span class="m">20</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="nl">child:</span> <span class="n">CircularProgressIndicator</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">                  <span class="nl">strokeWidth:</span> <span class="m">3</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                  <span class="nl">valueColor:</span> <span class="n">AlwaysStoppedAnimation</span><span class="p">(</span><span class="n">Colors</span><span class="p">.</span><span class="n">white</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">                <span class="p">),</span>
+</span></span><span class="line"><span class="cl">              <span class="p">),</span>
+</span></span><span class="line"><span class="cl">            <span class="p">),</span>
+</span></span><span class="line"><span class="cl">            <span class="n">CustomSizeBox</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">              <span class="nl">width:</span> <span class="m">20</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">              <span class="nl">height:</span> <span class="m">20</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">              <span class="nl">child:</span> <span class="n">CircularProgressIndicator</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">                <span class="nl">strokeWidth:</span> <span class="m">3</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="nl">valueColor:</span> <span class="n">AlwaysStoppedAnimation</span><span class="p">(</span><span class="n">Colors</span><span class="p">.</span><span class="n">white</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">              <span class="p">),</span>
+</span></span><span class="line"><span class="cl">            <span class="p">),</span>
+</span></span><span class="line"><span class="cl">          <span class="p">],</span>
+</span></span><span class="line"><span class="cl">        <span class="p">),</span>
+</span></span><span class="line"><span class="cl">      <span class="p">),</span>
+</span></span><span class="line"><span class="cl">    <span class="p">),</span>
+</span></span><span class="line"><span class="cl">  <span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><img title="" src="/img/flutter/解读Flutter源码之布局Layout过程/SizeBox问题解决二.gif" alt="" width="235">
+<p>可以发现，当父组件<em>AppBar</em>约束子组件大小宽高是56时，我们通过<em>SizedBox</em>指定<em>CircularProgressIndicator</em>大小是为20 × 20是不能成功的，而通过<em>CustomSizeBox</em>时成功了。</p>
+<p>这里需要提醒一下，如果一个组件的<em>sizedByParent</em>为<em>true</em>，那它在布局子组件时也是能将 <em>parentUsesSize</em>置为<em>true</em>的，<em>sizedByParent</em>为<em>true</em>表示自己是布局边界，而将 <em>parentUsesSize</em>置为<em>true</em>或<em>false</em>决定的是子组件是否是布局边界，两者并不矛盾，这个不要混淆了。</p>
+<p>顺便提一点<em>Flutter</em>自带的<em>OverflowBox</em>组件的实现中，它的<em>sizedByParent</em>为 <em>true</em>，在调用子组件<em>layout</em>方法时，<em>parentUsesSize</em>传的是<em>true</em>，具体详情可以查看 <em>OverflowBox</em>的实现源码。</p>
+<h2 id="42markneedslayout方法">4.2、<em>markNeedsLayout</em>方法</h2>
+<p>当组件布局发生变化时，它需要调用<em>markNeedsLayout</em>方法来更新布局，它的功能主要有两个：</p>
+<p>1、将自身到其<em>relayoutBoundary</em>路径上的所有节点标记为“需要布局”。</p>
+<p>2、请求新的<em>frame</em>，在新的<em>frame</em>中会对标记为“需要布局”的节点重新布局。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">markNeedsLayout</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="n">_debugCanPerformMutations</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 如果_needsLayout为true，说明上一次还没布局完成，直接返回
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">if</span> <span class="p">(</span><span class="n">_needsLayout</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">assert</span><span class="p">(</span><span class="n">_debugSubtreeRelayoutRootAlreadyMarkedNeedsLayout</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 如果布局边界为null，说明已经在layout方法中被清理过了
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">if</span> <span class="p">(</span><span class="n">_relayoutBoundary</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_needsLayout</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">parent</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// _relayoutBoundary由RenderObject.layout中的祖先清理。保守地将所有内容标记为脏，直到它到达最近的已知重新布局边界。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="c1">// _relayoutBoundary is cleaned by an ancestor in RenderObject.layout.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="c1">// Conservatively mark everything dirty until it reaches the closest
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="c1">// known relayout boundary.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="c1">// 递归调用当前组件到其布局边界节点路径上所有组件的方法markNeedsLayout
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="n">markParentNeedsLayout</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 如果不是布局边界节点
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">if</span> <span class="p">(</span><span class="n">_relayoutBoundary</span> <span class="o">!=</span> <span class="k">this</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 递归调用当前组件到其布局边界节点路径上所有组件的方法markNeedsLayout
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">markParentNeedsLayout</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_needsLayout</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">owner</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="p">...</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// 将布局边界组件加入到pipelineOwner._nodesNeedingLayout列表中
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="n">owner</span><span class="o">!</span><span class="p">.</span><span class="n">_nodesNeedingLayout</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// 该方法最终会请求新的frame
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="n">owner</span><span class="o">!</span><span class="p">.</span><span class="n">requestVisualUpdate</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>看下<em>markParentNeedsLayout</em>方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="err">@</span><span class="n">protected</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">markParentNeedsLayout</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="n">_debugCanPerformMutations</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">_needsLayout</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="n">parent</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">final</span> <span class="n">RenderObject</span> <span class="n">parent</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="n">parent</span><span class="o">!</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 此渲染对象的invokeLayoutCallback当前是否正在运行
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">_doingThisLayoutWithCallback</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 执行父组件的markNeedsLayout
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">parent</span><span class="p">.</span><span class="n">markNeedsLayout</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">assert</span><span class="p">(</span><span class="n">parent</span><span class="p">.</span><span class="n">_debugDoingThisLayout</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">assert</span><span class="p">(</span><span class="n">parent</span> <span class="o">==</span> <span class="k">this</span><span class="p">.</span><span class="n">parent</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>再看下<em>requestVisualUpdate</em>方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kt">void</span> <span class="n">requestVisualUpdate</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">onNeedVisualUpdate</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">onNeedVisualUpdate</span><span class="o">!</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 此处执行RendererBinding的ensureVisualUpdate方法，内部会使用scheduleFrame调度一个新帧
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">_manifold</span><span class="o">?</span><span class="p">.</span><span class="n">requestVisualUpdate</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h1 id="五参考文献">五、参考文献</h1>
+<blockquote>
+<ul>
+<li><a href="https://juejin.cn/post/6846687593745088526"><em>深入理解布局约束</em></a></li>
+<li><a href="https://juejin.cn/post/7049563669562146846"><em>布局（Layout）过程</em></a></li>
+</ul>
+</blockquote>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">文章作者</span>
+    <span class="item-content">AndDevMK</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">上次更新</span>
+    <span class="item-content">
+        2023-12-01
+        
+    </span>
+  </p>
+  
+  <p class="copyright-item">
+    <span class="item-title">许可协议</span>
+    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a></span>
+  </p>
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">赞赏支持</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat-qr-code.JPG">
+        <span>微信打赏</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay-qr-code.JPG">
+        <span>支付宝打赏</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      
+      <nav class="post-nav">
+        
+        <a class="next" href="/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bnavigator%E5%A3%B0%E6%98%8E%E5%BC%8F/">
+            <span class="next-text nav-default">解读Flutter源码之Navigator（声明式）</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="AndDevMK/blog-utterances"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    
+    <div id="search_mask" class="search_mask">
+    <div class="search_modal">
+        <div id="close_search" class="close_search">关闭</div>
+        <div class="search_divider"></div>
+        <input id="input_search_key" class="input_search_key" placeholder="请输入你要搜索的内容" tabindex="0">
+        <ul id="search_list">
+        </ul>
+    </div>
+</div>
+
+<script src="/js/fuse.js"></script> 
+<script src="/js/fastsearch.js"></script>
+
+    <footer id="footer" class="footer">
+      
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a id="hexo-link" class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    
+    <span id="run-time" class="run-time"></span> 
+    <span class="heart"><i class="iconfont icon-heart"></i></span>
+    &copy; 
+    2023&nbsp;
+    <span>AndDevMK</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  <script type="text/javascript" src="/lib/jquery/jquery-3.2.1.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout-1.0.1.min.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox-3.1.20.min.js"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.11a4ba15caf2d921d57eaf6568c4ad21eafd5d2c001cbcb31693586c63f93005.js"></script>
+
+<script id="baidu_analytics">
+  var _hmt = _hmt || [];
+  (function() {
+    if (window.location.hostname === 'localhost') return;
+    var hm = document.createElement("script"); hm.async = true;
+    hm.src = "https://hm.baidu.com/hm.js?6db179fb88e600cf326b0515a8aa1de3";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+
+
+
+
+<script src="/js/codecopy.js"></script>
+
+
+
+<link disabled id="dark-mode-theme" rel="stylesheet" href="/css/dark.css"></link>
+<script src="/js/dark.js"></script>
+
+
+<script src="/js/site_runtime.js"></script>
+
+
+
+
+</body>
+</html>
