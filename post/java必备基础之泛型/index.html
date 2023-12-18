@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Java必备基础之泛型 - AndDevMK&#39;s android blog site</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="AndDevMK" /><meta name="description" content="一、基本概念和原理 “泛型”的字面意思是广泛的类型，类、接口和方法都可以应用于广泛的类型，也就是说，代码与它们能够操作的数据类型不再需要绑定到一起，同一套代码也可以用于多种数据类型，这样不仅可以复用代码，降低耦合，还可以提高代码的可读性和安全性。 1.1、泛型类 举个例子，请看如下代码" /><meta name="keywords" content="Android, Java, Kotlin, C&#43;&#43;, C, Flutter, Dart, NDK" />
+
+
+<meta name="baidu-site-verification" content="codeva-wQ7uOo4V09" />
+<meta name="google-site-verification" content="yHzWB9BxTR74LiaUhuL5ncr89fnDYXiplTaPY565zqo" />
+
+
+<meta name="generator" content="Hugo 0.111.3 with theme even" />
+
+
+<link rel="canonical" href="https://anddevmk.cn/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E6%B3%9B%E5%9E%8B/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.c11aaf02bef1025d6b0813ba5e1a8a8551aee15fa8f2bcea906d41b20bdf5c69.css" rel="stylesheet">
+<link href="/lib/fancybox/jquery.fancybox-3.1.20.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/css/codecopy.css">
+
+
+<meta property="og:title" content="Java必备基础之泛型" />
+<meta property="og:description" content="一、基本概念和原理 “泛型”的字面意思是广泛的类型，类、接口和方法都可以应用于广泛的类型，也就是说，代码与它们能够操作的数据类型不再需要绑定到一起，同一套代码也可以用于多种数据类型，这样不仅可以复用代码，降低耦合，还可以提高代码的可读性和安全性。 1.1、泛型类 举个例子，请看如下代码" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://anddevmk.cn/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E6%B3%9B%E5%9E%8B/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2023-12-18T08:00:00+08:00" />
+<meta property="article:modified_time" content="2023-12-18T08:00:00+08:00" />
+<meta itemprop="name" content="Java必备基础之泛型">
+<meta itemprop="description" content="一、基本概念和原理 “泛型”的字面意思是广泛的类型，类、接口和方法都可以应用于广泛的类型，也就是说，代码与它们能够操作的数据类型不再需要绑定到一起，同一套代码也可以用于多种数据类型，这样不仅可以复用代码，降低耦合，还可以提高代码的可读性和安全性。 1.1、泛型类 举个例子，请看如下代码"><meta itemprop="datePublished" content="2023-12-18T08:00:00+08:00" />
+<meta itemprop="dateModified" content="2023-12-18T08:00:00+08:00" />
+<meta itemprop="wordCount" content="9074">
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Java必备基础之泛型"/>
+<meta name="twitter:description" content="一、基本概念和原理 “泛型”的字面意思是广泛的类型，类、接口和方法都可以应用于广泛的类型，也就是说，代码与它们能够操作的数据类型不再需要绑定到一起，同一套代码也可以用于多种数据类型，这样不仅可以复用代码，降低耦合，还可以提高代码的可读性和安全性。 1.1、泛型类 举个例子，请看如下代码"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">AndDevMK</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">首页</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">归档</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">关于</li>
+      </a>
+
+    
+    <li class="mobile-menu-item-search">
+      <div id="mobile_open_search" class="mobile_open_search">
+        搜索
+      </div>
+    </li>
+
+    
+    <li class="mobile-menu-item-dark-mode">
+      <div id="mobile_dark_mode_toggle" class="mobile_light_mode">
+       
+      </div>
+    </li>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">AndDevMK</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">首页</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">归档</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">关于</a>
+      </li>
+    
+    <div id="open_search" class="open_search">
+      搜索
+    </div>
+
+    
+    <div id="dark_mode_toggle" class="light_mode">
+
+    </div>
+  
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Java必备基础之泛型</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2023-12-18 </span>
+        <div class="post-category">
+            <a href="/categories/java/"> Java </a>
+            </div>
+          <span class="more-meta"> 约 9074 字 </span>
+          <span class="more-meta"> 预计阅读 19 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#一基本概念和原理">一、基本概念和原理</a>
+      <ul>
+        <li><a href="#11泛型类">1.1、泛型类</a></li>
+        <li><a href="#12泛型方法">1.2、泛型方法</a></li>
+        <li><a href="#13泛型接口">1.3、泛型接口</a></li>
+      </ul>
+    </li>
+    <li><a href="#二类型参数的限定">二、类型参数的限定</a>
+      <ul>
+        <li><a href="#21上界为某个具体类">2.1、上界为某个具体类</a></li>
+        <li><a href="#22上界为某个接口">2.2、上界为某个接口</a></li>
+        <li><a href="#23上界为其它类型参数">2.3、上界为其它类型参数</a></li>
+      </ul>
+    </li>
+    <li><a href="#三解析通配符">三、解析通配符</a>
+      <ul>
+        <li><a href="#31有限定通配符">3.1、有限定通配符</a></li>
+        <li><a href="#32无限定通配符">3.2、无限定通配符</a></li>
+        <li><a href="#33超类型通配符">3.3、超类型通配符</a></li>
+      </ul>
+    </li>
+    <li><a href="#四细节和局限性">四、细节和局限性</a>
+      <ul>
+        <li><a href="#41使用泛型类方法和接口">4.1、使用泛型类、方法和接口</a></li>
+        <li><a href="#42定义泛型类方法和接口">4.2、定义泛型类、方法和接口</a></li>
+        <li><a href="#43泛型和数组">4.3、泛型和数组</a></li>
+      </ul>
+    </li>
+    <li><a href="#五概念扩展">五、概念扩展</a>
+      <ul>
+        <li><a href="#51协变与逆变">5.1、协变与逆变</a></li>
+        <li><a href="#52pecs原则">5.2、<em>PECS</em>原则</a></li>
+        <li><a href="#53泛型桥方法">5.3、泛型桥方法</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h1 id="一基本概念和原理">一、基本概念和原理</h1>
+<p>“泛型”的字面意思是广泛的类型，类、接口和方法都可以应用于广泛的类型，也就是说，代码与它们能够操作的数据类型不再需要绑定到一起，同一套代码也可以用于多种数据类型，这样不仅可以复用代码，降低耦合，还可以提高代码的可读性和安全性。</p>
+<h2 id="11泛型类">1.1、泛型类</h2>
+<p>举个例子，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyPair</span><span class="o">&lt;</span><span class="n">F</span><span class="o">,</span> <span class="n">S</span><span class="o">&gt;</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">final</span> <span class="n">F</span> <span class="n">first</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">final</span> <span class="n">S</span> <span class="n">second</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="nf">MyPair</span><span class="o">(</span><span class="n">F</span> <span class="n">first</span><span class="o">,</span> <span class="n">S</span> <span class="n">second</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">this</span><span class="o">.</span><span class="na">first</span> <span class="o">=</span> <span class="n">first</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">this</span><span class="o">.</span><span class="na">second</span> <span class="o">=</span> <span class="n">second</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>解释一下，<em>MyPair</em>是一个泛型类，与普通类的区别是：</p>
+<p>1、类名后面多一个&lt;F, S&gt;</p>
+<p>2、<em>first</em>的类型是F，<em>second</em>的类型是S</p>
+<p>F、S表示类型参数，因此，<em><strong>泛型实际是类型参数化，处理的数据类型不是固定的，而是可以作为参数传入</strong></em>。</p>
+<p>接下来，我们给<em>MyPair</em>类传递类型参数，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">MyPair</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Integer</span><span class="o">&gt;</span> <span class="n">myPair</span> <span class="o">=</span> <span class="k">new</span> <span class="n">MyPair</span><span class="o">&lt;&gt;(</span><span class="s">&#34;Tony&#34;</span><span class="o">,</span> <span class="mi">26</span><span class="o">);</span> 
+</span></span><span class="line"><span class="cl"><span class="n">String</span> <span class="n">first</span> <span class="o">=</span> <span class="n">myPair</span><span class="o">.</span><span class="na">first</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">Integer</span> <span class="n">second</span> <span class="o">=</span> <span class="n">myPair</span><span class="o">.</span><span class="na">second</span><span class="o">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>解释一下，<em>MyPair&lt;String, Integer&gt;<em>中的</em>String、Integer</em>就是传递的实际类型参数，<em>MyPair</em>类的代码和它处理的数据类型不是绑定的，具体类型可以变化。</p>
+<p>当然了，有人可能会有疑问：为什么一定要定义类型参数呢? 我们把<em>MyPair</em>定义成普通类，直接使用<em>Object</em>不也可以？请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyPair</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">final</span> <span class="n">Object</span> <span class="n">first</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">final</span> <span class="n">Object</span> <span class="n">second</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="nf">MyPair</span><span class="o">(</span><span class="n">Object</span> <span class="n">first</span><span class="o">,</span> <span class="n">Object</span> <span class="n">second</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">this</span><span class="o">.</span><span class="na">first</span> <span class="o">=</span> <span class="n">first</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">this</span><span class="o">.</span><span class="na">second</span> <span class="o">=</span> <span class="n">second</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>使用<em>MyPair</em>，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">MyPair</span> <span class="n">myPair</span> <span class="o">=</span> <span class="k">new</span> <span class="n">MyPair</span><span class="o">(</span><span class="s">&#34;Tony&#34;</span><span class="o">,</span> <span class="mi">26</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">String</span> <span class="n">first</span> <span class="o">=</span> <span class="o">(</span><span class="n">String</span><span class="o">)</span> <span class="n">myPair</span><span class="o">.</span><span class="na">first</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">Integer</span> <span class="n">second</span> <span class="o">=</span> <span class="o">(</span><span class="n">Integer</span><span class="o">)</span> <span class="n">myPair</span><span class="o">.</span><span class="na">second</span><span class="o">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>解释一下，这样的写法完全可以，实际上泛型的内部原理就像上面代码描述的那样。为什么这么说呢？我们知道，<em>Java</em>编译器会将<em>Java</em>源代码转换为.class文件，然后由<em>Java</em>虚拟机加载并运行.class文件。对于泛型类，<em>Java</em>编译器会将泛型代码转换为普通的非泛型代码，就像上面的<em>MyPair</em>类代码及其使用代码一样，将类型参数F、S擦除，替换为<em>Object</em>，插入必要的强制类型转换。<em>Java</em>虚拟机实际执行的时候，它是不知道泛型这回事的，只知道普通的类及代码。</p>
+<p>泛型是<em>Java 5</em>以后才支持的，这么设计是为了兼容性而不得已的一个选择。</p>
+<p>既然只使用普通类和<em>Object</em>就可以，而且泛型最后也转换为了普通类，那泛型的好处是什么？泛型主要的好处是更好的安全性与更好的可读性。</p>
+<p>只使用<em>Object</em>，代码写错的时候，编译器发现不了问题，当程序运行时就会抛出类型转换异常<em>ClassCastException</em>，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">MyPair</span> <span class="n">myPair</span> <span class="o">=</span> <span class="k">new</span> <span class="n">MyPair</span><span class="o">(</span><span class="s">&#34;Tony&#34;</span><span class="o">,</span> <span class="mi">26</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">String</span> <span class="n">first</span> <span class="o">=</span> <span class="o">(</span><span class="n">String</span><span class="o">)</span> <span class="n">myPair</span><span class="o">.</span><span class="na">first</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">String</span> <span class="n">second</span> <span class="o">=</span> <span class="o">(</span><span class="n">String</span><span class="o">)</span> <span class="n">myPair</span><span class="o">.</span><span class="na">second</span><span class="o">;</span> <span class="c1">// 运行错误
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>但是，如果使用泛型，编译器就会确保不用错类型，为程序多设置一道安全防护网，并且会省去烦琐的强制类型转换，加上明确的类型信息，代码可读性也会更好，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">MyPair</span> <span class="n">myPair</span> <span class="o">=</span> <span class="k">new</span> <span class="n">MyPair</span><span class="o">(</span><span class="s">&#34;Tony&#34;</span><span class="o">,</span> <span class="mi">26</span><span class="o">);</span> 
+</span></span><span class="line"><span class="cl"><span class="n">String</span> <span class="n">first</span> <span class="o">=</span> <span class="n">myPair</span><span class="o">.</span><span class="na">first</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">String</span> <span class="n">second</span> <span class="o">=</span> <span class="n">myPair</span><span class="o">.</span><span class="na">second</span><span class="o">;</span> <span class="c1">// 编译错误
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="12泛型方法">1.2、泛型方法</h2>
+<p>除了泛型类，方法也可以是泛型的，并且一个方法是不是泛型的，与它所在的类是不是泛型没有什么关系，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">static</span> <span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="kt">int</span> <span class="nf">indexOf</span><span class="o">(</span><span class="n">T</span><span class="o">[]</span> <span class="n">arr</span><span class="o">,</span> <span class="n">T</span> <span class="n">element</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">arr</span><span class="o">.</span><span class="na">length</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="o">(</span><span class="n">arr</span><span class="o">[</span><span class="n">i</span><span class="o">].</span><span class="na">equals</span><span class="o">(</span><span class="n">element</span><span class="o">))</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">i</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>使用<em>indexOf</em>方法，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">index</span> <span class="o">=</span> <span class="n">indexOf</span><span class="o">(</span><span class="k">new</span> <span class="n">Integer</span><span class="o">[]{</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">},</span> <span class="mi">2</span><span class="o">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><em>indexOf</em>表示一个算法，在给定数组中寻找某个元素，这个算法的基本过程与具体数据类型没有什么关系，通过泛型它可以方便地应用于各种数据类型，且由编译器保证类型安全。</p>
+<h2 id="13泛型接口">1.3、泛型接口</h2>
+<p>接口也可以是泛型的，比如<em>JDK</em>中提供的<em>Comparable</em>接口，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Comparable</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">compareTo</span><span class="o">(</span><span class="n">T</span> <span class="n">o</span><span class="o">);</span> 
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>具体的接口实现在<em>JDK</em>中也有提供，比如<em>Integer</em>类，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">Integer</span> <span class="kd">extends</span> <span class="n">Number</span> <span class="kd">implements</span> <span class="n">Comparable</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;{</span>       
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">compareTo</span><span class="o">(</span><span class="n">Integer</span> <span class="n">anotherInteger</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">compare</span><span class="o">(</span><span class="k">this</span><span class="o">.</span><span class="na">value</span><span class="o">,</span> <span class="n">anotherInteger</span><span class="o">.</span><span class="na">value</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>上面的<em>Integer</em>类实现了<em>Comparable</em>接口，指定了实际类型参数为<em>Integer</em>，表示<em>Integer</em>只能与<em>Integer</em>对象进行比较。</p>
+<h1 id="二类型参数的限定">二、类型参数的限定</h1>
+<p>无论是泛型类、泛型方法亦或是泛型接口，关于类型参数，我们一般把它当作<em>Object</em>，其实<em>Java</em>支持给类型参数限定一个上界（通过<em>extends</em>关键字来表示），这个上界可以是某个具体的类或者某个具体的接口，也可以是其它的类型参数。</p>
+<h2 id="21上界为某个具体类">2.1、上界为某个具体类</h2>
+<p>上面提过的<em>MyPair</em>类，我们可以定义一个子类<em>NumberPair</em>，限定两个类型参数必须为<em>Number</em>，再添加一个求和方法<em>sum</em>，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">NumberPair</span><span class="o">&lt;</span><span class="n">F</span> <span class="kd">extends</span> <span class="n">Number</span><span class="o">,</span> <span class="n">S</span> <span class="kd">extends</span> <span class="n">Number</span><span class="o">&gt;</span> <span class="kd">extends</span> <span class="n">MyPair</span><span class="o">&lt;</span><span class="n">F</span><span class="o">,</span> <span class="n">S</span><span class="o">&gt;</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="nf">NumberPair</span><span class="o">(</span><span class="n">F</span> <span class="n">first</span><span class="o">,</span> <span class="n">S</span> <span class="n">second</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kd">super</span><span class="o">(</span><span class="n">first</span><span class="o">,</span> <span class="n">second</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">double</span> <span class="nf">sum</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">first</span><span class="o">.</span><span class="na">doubleValue</span><span class="o">()</span> <span class="o">+</span> <span class="n">second</span><span class="o">.</span><span class="na">doubleValue</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>使用<em>NumberPair</em>，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">NumberPair</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">,</span> <span class="n">Double</span><span class="o">&gt;</span> <span class="n">numberPair</span> <span class="o">=</span> <span class="k">new</span> <span class="n">NumberPair</span><span class="o">&lt;&gt;(</span><span class="mi">10</span><span class="o">,</span> <span class="mf">10.1</span><span class="o">);</span> 
+</span></span><span class="line"><span class="cl"><span class="kt">double</span> <span class="n">sum</span> <span class="o">=</span> <span class="n">numberPair</span><span class="o">.</span><span class="na">sum</span><span class="o">();</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>限定类型后，如果类型使用错误，编译器会提示，并且指定边界后，类型擦除时就不会转换为<em>Object</em>了，而是会转换为它的边界类型。</p>
+<h2 id="22上界为某个接口">2.2、上界为某个接口</h2>
+<p>在泛型方法中，一种常见的场景是限定类型必须实现某个接口，这里以<em>Comparable</em>接口为例，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">static</span> <span class="o">&lt;</span><span class="n">T</span> <span class="kd">extends</span> <span class="n">Comparable</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span> <span class="n">T</span> <span class="nf">max</span><span class="o">(</span><span class="n">T</span><span class="o">[]</span> <span class="n">arr</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">T</span> <span class="n">max</span> <span class="o">=</span> <span class="n">arr</span><span class="o">[</span><span class="mi">0</span><span class="o">];</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">arr</span><span class="o">.</span><span class="na">length</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="o">(</span><span class="n">arr</span><span class="o">[</span><span class="n">i</span><span class="o">].</span><span class="na">compareTo</span><span class="o">(</span><span class="n">max</span><span class="o">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">max</span> <span class="o">=</span> <span class="n">arr</span><span class="o">[</span><span class="n">i</span><span class="o">];</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">max</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><em>&lt;T extends Comparable<T>&gt;<em>是一种令人费解的语法形式，这种形式称为 <em><strong>递归类型限制</strong></em>，可以这么解读：T表示一种数据类型，必须实现</em>Comparable</em>接口，且必须可以与相同类型的元素进行比较。</p>
+<h2 id="23上界为其它类型参数">2.3、上界为其它类型参数</h2>
+<p>泛型类最常见的用途是作为容器类，比如我们实现了一个简化版的<em>ArrayList</em>，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">DynamicArray</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">DEFAULT_CAPACITY</span> <span class="o">=</span> <span class="mi">10</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="kt">int</span> <span class="n">size</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="n">Object</span><span class="o">[]</span> <span class="n">elementData</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="nf">DynamicArray</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">this</span><span class="o">.</span><span class="na">elementData</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[</span><span class="n">DEFAULT_CAPACITY</span><span class="o">];</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">ensureCapacity</span><span class="o">(</span><span class="kt">int</span> <span class="n">minCapacity</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">oldCapacity</span> <span class="o">=</span> <span class="n">elementData</span><span class="o">.</span><span class="na">length</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="o">(</span><span class="n">oldCapacity</span> <span class="o">&gt;=</span> <span class="n">minCapacity</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">newCapacity</span> <span class="o">=</span> <span class="n">oldCapacity</span> <span class="o">*</span> <span class="mi">2</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="o">(</span><span class="n">newCapacity</span> <span class="o">&lt;</span> <span class="n">minCapacity</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">newCapacity</span> <span class="o">=</span> <span class="n">minCapacity</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">elementData</span> <span class="o">=</span> <span class="n">Arrays</span><span class="o">.</span><span class="na">copyOf</span><span class="o">(</span><span class="n">elementData</span><span class="o">,</span> <span class="n">newCapacity</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">add</span><span class="o">(</span><span class="n">E</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ensureCapacity</span><span class="o">(</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">elementData</span><span class="o">[</span><span class="n">size</span><span class="o">++]</span> <span class="o">=</span> <span class="n">e</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">E</span> <span class="nf">get</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="o">(</span><span class="n">E</span><span class="o">)</span> <span class="n">elementData</span><span class="o">[</span><span class="n">index</span><span class="o">];</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">size</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">size</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">E</span> <span class="nf">set</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">,</span> <span class="n">E</span> <span class="n">element</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">E</span> <span class="n">oldValue</span> <span class="o">=</span> <span class="n">get</span><span class="o">(</span><span class="n">index</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">elementData</span><span class="o">[</span><span class="n">index</span><span class="o">]</span> <span class="o">=</span> <span class="n">element</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">oldValue</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>然后再给<em>DynamicArray</em>类增加一个实例方法<em>addAll</em>，这个方法将参数容器中的所有元素都添加到当前容器里来，直觉上可以这么写，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kt">void</span> <span class="nf">addAll</span><span class="o">(</span><span class="n">DynamicArray</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">c</span><span class="o">)</span> <span class="o">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">c</span><span class="o">.</span><span class="na">size</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">add</span><span class="o">(</span><span class="n">c</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">i</span><span class="o">));</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>但是，这么写就会导致一些局限性，出现了编译错误，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">DynamicArray</span><span class="o">&lt;</span><span class="n">Number</span><span class="o">&gt;</span> <span class="n">numbers</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DynamicArray</span><span class="o">&lt;&gt;();</span> 
+</span></span><span class="line"><span class="cl"><span class="n">DynamicArray</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">ints</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DynamicArray</span><span class="o">&lt;&gt;();</span>
+</span></span><span class="line"><span class="cl"><span class="n">ints</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">100</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">ints</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">34</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">numbers</span><span class="o">.</span><span class="na">addAll</span><span class="o">(</span><span class="n">ints</span><span class="o">);</span> <span class="c1">// 编译错误
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>出现编译错误的原因是：我们理所当然地认为<em>numbers</em>是一个<em>Number</em>类型的容器，<em>ints</em>是一个<em>Integer</em>类型的容器，因为<em>Integer</em>是<em>Number</em>的子类，所以就可以将<em>ints</em>添加到<em>numbers</em>中， 但实际上，编译器认为<em>addAll</em>需要的参数类型为<code>DynamicArray&lt;Number&gt;</code>，而传递过来的参数类型为<code>DynamicArray&lt;Integer&gt;</code>。</p>
+<p>为什么不行呢？这里我们可以假设编译通过，这时<code>DynamicArray&lt;Integer&gt;</code>中就会出现<em>Double</em>类型的值，而这显然破坏了<em>Java</em>泛型关于类型安全的保证，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="n">DynamicArray</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">ints</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DynamicArray</span><span class="o">&lt;&gt;</span><span class="p">();</span> 
+</span></span><span class="line"><span class="cl"><span class="n">DynamicArray</span><span class="o">&lt;</span><span class="n">Number</span><span class="o">&gt;</span> <span class="n">numbers</span> <span class="o">=</span> <span class="n">ints</span><span class="p">;</span> <span class="c1">// 假设编译通过
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">numbers</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="k">new</span> <span class="n">Double</span><span class="p">(</span><span class="m">12.34</span><span class="p">));</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><em>Java</em>支持一个类型参数以另一个类型参数作为上界，这个问题可以通过这种方式解决，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="o">&lt;</span><span class="n">T</span> <span class="kd">extends</span> <span class="n">E</span><span class="o">&gt;</span> <span class="kt">void</span> <span class="nf">addAll</span><span class="o">(</span><span class="n">DynamicArray</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">c</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">c</span><span class="o">.</span><span class="na">size</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">add</span><span class="o">(</span><span class="n">c</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">i</span><span class="o">));</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h1 id="三解析通配符">三、解析通配符</h1>
+<h2 id="31有限定通配符">3.1、有限定通配符</h2>
+<p>通配符有着令人费解和混淆的语法，但通配符大量应用于<em>Java</em>容器类中，我们可以优化下<em>DynamicArray</em>中的<em>addAll</em>方法，之前的写法是比较繁琐的，它可以替换为简洁的通配符形式，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kt">void</span> <span class="nf">addAll</span><span class="o">(</span><span class="n">DynamicArray</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">E</span><span class="o">&gt;</span> <span class="n">c</span><span class="o">)</span> <span class="o">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">c</span><span class="o">.</span><span class="na">size</span><span class="o">;</span> <span class="n">i</span><span class="o">++){</span>
+</span></span><span class="line"><span class="cl">        <span class="n">add</span><span class="o">(</span><span class="n">c</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">i</span><span class="o">));</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><em>&lt;? extends E&gt;</em> 表示 <em><strong>有限定通配符</strong></em>，匹配E或E的某个子类型，具体什么子类型是未知的。</p>
+<p>同样是<em>extends</em>关键字，同样应用于泛型，<code>&lt;T extends E&gt;</code>和 <em>&lt;? extends E&gt;</em> 的区别如下：</p>
+<p>1、<code>&lt;T extends E&gt;</code>用于定义类型参数，它声明了一个类型参数T，可放在泛型类定义中类名后面、泛型方法返回值前面</p>
+<p>2、<em>&lt;? extends E&gt;</em> 用于实例化类型参数，它用于实例化泛型变量中的类型参数，只是这个具体类型是未知的，只知道它是E或E的某个子类型。</p>
+<p>虽然它们不一样，但两种写法经常可以达成相同目标，比如下面这两种写法都可以，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kt">void</span> <span class="nf">addAll</span><span class="o">(</span><span class="n">DynamicArray</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">E</span><span class="o">&gt;</span> <span class="n">c</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="o">&lt;</span><span class="n">T</span> <span class="kd">extends</span> <span class="n">E</span><span class="o">&gt;</span> <span class="kt">void</span> <span class="nf">addAll</span><span class="o">(</span><span class="n">DynamicArray</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">c</span><span class="o">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="32无限定通配符">3.2、无限定通配符</h2>
+<p>除了有限定通配符，还有一种通配符，形如<code>DynamicArray&lt;?&gt;</code>，称为 <em><strong>无限定通配符</strong></em>。举个例子，在<em>DynamicArray</em>中查找指定元素，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">static</span> <span class="kt">int</span> <span class="nf">indexOf</span><span class="o">(</span><span class="n">DynamicArray</span><span class="o">&lt;?&gt;</span> <span class="n">arr</span><span class="o">,</span> <span class="n">Object</span> <span class="n">element</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">arr</span><span class="o">.</span><span class="na">size</span><span class="o">();</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="o">(</span><span class="n">arr</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">i</span><span class="o">).</span><span class="na">equals</span><span class="o">(</span><span class="n">element</span><span class="o">))</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">i</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span> 
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>虽然通配符形式更为简洁，但上面两种通配符都有一个重要的限制：<em><strong>只能读，不能写</strong></em>，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">DynamicArray</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">ints</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DynamicArray</span><span class="o">&lt;&gt;();</span> 
+</span></span><span class="line"><span class="cl"><span class="n">DynamicArray</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">Number</span><span class="o">&gt;</span> <span class="n">numbers</span> <span class="o">=</span> <span class="n">ints</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">Integer</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">200</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">numbers</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">a</span><span class="o">);</span> <span class="c1">// 编译错误
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">numbers</span><span class="o">.</span><span class="na">add</span><span class="o">((</span><span class="n">Number</span><span class="o">)</span><span class="n">a</span><span class="o">);</span> <span class="c1">// 编译错误
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>两种<em>add</em>方法都是非法的，无论是<em>Integer</em>还是<em>Number</em>，都会出现编译错误。</p>
+<p>出现编译错误的原因是：问号就是表示类型安全无知，<em>? extends Number</em>表示是<em>Number</em>的某个子类型，但不知道具体子类型，如果允许写入，<em>Java</em>就无法确保类型安全性，所以干脆禁止。</p>
+<p>为什么不行呢？这里我们可以假设如果允许写入<em>Number</em>及其子类型，则最后两行编译就是正确的，也就是说<em>Java</em>将允许把<em>Double</em>对象放入<em>Integer</em>容器，这显然违背了<em>Java</em>关于类型安全的承诺，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">DynamicArray</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">ints</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DynamicArray</span><span class="o">&lt;&gt;();</span> 
+</span></span><span class="line"><span class="cl"><span class="n">DynamicArray</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">Number</span><span class="o">&gt;</span> <span class="n">numbers</span> <span class="o">=</span> <span class="n">ints</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">Number</span> <span class="n">n</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Double</span><span class="o">(</span><span class="mf">23.0</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">numbers</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">n</span><span class="o">);</span> 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>大部分情况下，这种限制是好的，但是这使得一些理应正确的基本操作无法完成，比如交换两个元素的位置，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">swap</span><span class="o">(</span><span class="n">DynamicArray</span><span class="o">&lt;?&gt;</span> <span class="n">arr</span><span class="o">,</span> <span class="kt">int</span> <span class="n">i</span><span class="o">,</span> <span class="kt">int</span> <span class="n">j</span><span class="o">){</span> 
+</span></span><span class="line"><span class="cl">    <span class="n">Object</span> <span class="n">tmp</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">arr</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="n">i</span><span class="o">,</span> <span class="n">arr</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">j</span><span class="o">));</span>
+</span></span><span class="line"><span class="cl">    <span class="n">arr</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="n">j</span><span class="o">,</span> <span class="n">tmp</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这个代码看上去应该是正确的，但<em>Java</em>会提示编译错误，两行<em>set</em>语句都是非法的，不过借助带类型参数的泛型方法，这个问题得到解决，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">private</span> <span class="kd">static</span> <span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="kt">void</span> <span class="nf">swapInternal</span><span class="o">(</span><span class="n">DynamicArray</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">arr</span><span class="o">,</span> <span class="kt">int</span> <span class="n">i</span><span class="o">,</span> <span class="kt">int</span> <span class="n">j</span><span class="o">){</span>
+</span></span><span class="line"><span class="cl">    <span class="n">T</span> <span class="n">tmp</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">arr</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="n">i</span><span class="o">,</span> <span class="n">arr</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">j</span><span class="o">));</span>
+</span></span><span class="line"><span class="cl">    <span class="n">arr</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="n">j</span><span class="o">,</span> <span class="n">tmp</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">swap</span><span class="o">(</span><span class="n">DynamicArray</span><span class="o">&lt;?&gt;</span> <span class="n">arr</span><span class="o">,</span> <span class="kt">int</span> <span class="n">i</span><span class="o">,</span> <span class="kt">int</span> <span class="n">j</span><span class="o">){</span>
+</span></span><span class="line"><span class="cl">    <span class="n">swapInternal</span><span class="o">(</span><span class="n">arr</span><span class="o">,</span> <span class="n">i</span><span class="o">,</span> <span class="n">j</span><span class="o">);</span> 
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><em>Java</em>容器类中就有类似这样的用法，公共的<em>API</em>是通配符形式，形式更简单，但内部调用带类型参数的方法。</p>
+<p>如果参数类型之间有依赖关系，也只能用类型参数，比如将<em>src</em>容器中的内容复制到<em>dest</em>中，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">static</span> <span class="o">&lt;</span><span class="n">D</span><span class="o">,</span> <span class="n">S</span> <span class="kd">extends</span> <span class="n">D</span><span class="o">&gt;</span> <span class="kt">void</span> <span class="nf">copy</span><span class="o">(</span><span class="n">DynamicArray</span><span class="o">&lt;</span><span class="n">D</span><span class="o">&gt;</span> <span class="n">dest</span><span class="o">,</span> <span class="n">DynamicArray</span><span class="o">&lt;</span><span class="n">S</span><span class="o">&gt;</span> <span class="n">src</span><span class="o">){</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">src</span><span class="o">.</span><span class="na">size</span><span class="o">();</span> <span class="n">i</span><span class="o">++){</span>
+</span></span><span class="line"><span class="cl">        <span class="n">dest</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">src</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">i</span><span class="o">));</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>上面的声明可以使用通配符简化，两个参数可以简化为一个，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">static</span> <span class="o">&lt;</span><span class="n">D</span><span class="o">&gt;</span> <span class="kt">void</span> <span class="nf">copy</span><span class="o">(</span><span class="n">DynamicArray</span><span class="o">&lt;</span><span class="n">D</span><span class="o">&gt;</span> <span class="n">dest</span><span class="o">,</span> <span class="n">DynamicArray</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">D</span><span class="o">&gt;</span> <span class="n">src</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">src</span><span class="o">.</span><span class="na">size</span><span class="o">();</span> <span class="n">i</span><span class="o">++){</span>
+</span></span><span class="line"><span class="cl">        <span class="n">dest</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">src</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">i</span><span class="o">));</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>如果返回值依赖于类型参数，也不能用通配符，比如计算动态数组中的最大值，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">static</span> <span class="o">&lt;</span><span class="n">T</span> <span class="kd">extends</span> <span class="n">Comparable</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span> <span class="n">T</span> <span class="nf">max</span><span class="o">(</span><span class="n">DynamicArray</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">arr</span><span class="o">){</span>
+</span></span><span class="line"><span class="cl">    <span class="n">T</span> <span class="n">max</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">arr</span><span class="o">.</span><span class="na">size</span><span class="o">();</span> <span class="n">i</span><span class="o">++){</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span><span class="o">(</span><span class="n">arr</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">i</span><span class="o">).</span><span class="na">compareTo</span><span class="o">(</span><span class="n">max</span><span class="o">)&gt;</span><span class="mi">0</span><span class="o">){</span>
+</span></span><span class="line"><span class="cl">            <span class="n">max</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">max</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>泛型方法到底应该用通配符的形式还是加类型参数，总结一下：</p>
+<p>1、通配符形式都可以用类型参数的形式来替代，通配符能做的，用类型参数都能做。</p>
+<p>2、通配符形式可以减少类型参数，形式上往往更为简单，可读性也更好，所以能用通配符的就用通配符。</p>
+<p>3、如果类型参数之间有依赖关系，或者返回值依赖类型参数，或者需要写操作，则只能用类型参数。</p>
+<p>4、通配符形式和类型参数往往配合使用，比如上面的<em>copy</em>方法，定义必要的类型参数，使用通配符表达依赖，并接受更广泛的数据类型。</p>
+<h2 id="33超类型通配符">3.3、超类型通配符</h2>
+<p>还有一种通配符，它的形式为 <em>&lt;? super E&gt;</em>，称为 <em><strong>超类型通配符</strong></em>，表示E的某个父类型，它是无法用类型参数替代。如果没有这种语法，写入会有一些限制，举个例子，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kt">void</span> <span class="nf">copyTo</span><span class="o">(</span><span class="n">DynamicArray</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">dest</span><span class="o">){</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">size</span><span class="o">;</span> <span class="n">i</span><span class="o">++){</span>
+</span></span><span class="line"><span class="cl">        <span class="n">dest</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">get</span><span class="o">(</span><span class="n">i</span><span class="o">));</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>将当前容器中的元素添加到传入的目标容器中，如果这么用，<em>Java</em>会提示编译错误，理由我们之前也说过了，期望的参数类型是<code>DynamicArray&lt;Integer&gt;</code>，<code>DynamicArray&lt;Number&gt;</code>并不适用，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">DynamicArray</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">ints</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DynamicArray</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;();</span> 
+</span></span><span class="line"><span class="cl"><span class="n">ints</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">100</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">ints</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">34</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">DynamicArray</span><span class="o">&lt;</span><span class="n">Number</span><span class="o">&gt;</span> <span class="n">numbers</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DynamicArray</span><span class="o">&lt;</span><span class="n">Number</span><span class="o">&gt;();</span> 
+</span></span><span class="line"><span class="cl"><span class="n">ints</span><span class="o">.</span><span class="na">copyTo</span><span class="o">(</span><span class="n">numbers</span><span class="o">);</span> <span class="c1">// 编译错误
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>解决这个问题的方法就是超类型通配符，可以将<em>copyTo</em>代码修改，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kt">void</span> <span class="nf">copyTo</span><span class="o">(</span><span class="n">DynamicArray</span><span class="o">&lt;?</span> <span class="kd">super</span> <span class="n">E</span><span class="o">&gt;</span> <span class="n">dest</span><span class="o">){</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">size</span><span class="o">;</span> <span class="n">i</span><span class="o">++){</span>
+</span></span><span class="line"><span class="cl">        <span class="n">dest</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">get</span><span class="o">(</span><span class="n">i</span><span class="o">));</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>关于通配符的比较，我们来总结一下：</p>
+<p>1、<em>&lt;? super E&gt;</em> 用于灵活写入或比较，使得对象可以写入父类型的容器，使得父类型的比较方法可以应用于子类对象，它不能被类型参数形式替代。</p>
+<p>2、<code>&lt;?&gt;</code>和 <em>&lt;? extends E&gt;</em> 用于灵活读取，使得方法可以读取E或E的任意子类型的容器对象，它们可以用类型参数的形式替代，但通配符形式更为简洁。</p>
+<h1 id="四细节和局限性">四、细节和局限性</h1>
+<p><em>Java</em>泛型是通过类型擦除来实现的，类型参数在编译时会被替换为<em>Object</em>，运行时<em>Java</em>虚拟机不知道泛型这回事，这带来了很多局限性，其中有的部分是比较容易理解的，有的则是非常违反直觉的。</p>
+<h2 id="41使用泛型类方法和接口">4.1、使用泛型类、方法和接口</h2>
+<p>在使用泛型类、方法和接口时，有一些值得注意的地方，比如：</p>
+<p>1、基本类型不能用于实例化类型参数，类似下面的写法是不合法的，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">Pair</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">minmax</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Pair</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;(</span><span class="mi">1</span><span class="o">,</span><span class="mi">100</span><span class="o">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>解决方法是使用基本类型对应的包装类。</p>
+<p>2、运行时类型信息不适用于泛型。</p>
+<p>在<em>Java</em>中，这个类型信息也是一个对象，它的类型为<em>Class</em>，<em>Class</em>本身也是一个泛型类，每个类的类型对象可以通过&lt;类名&gt;.class的方式引用，比如<em>String.class</em>、<em>Integer.class</em>，这个类型对象也可以通过对象的getClass()方法获得，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">Class</span><span class="o">&lt;?</span> <span class="o">&gt;</span> <span class="n">cls</span> <span class="o">=</span> <span class="s">&#34;hello&#34;</span><span class="o">.</span><span class="na">getClass</span><span class="o">();</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这个类型对象只有一份，与泛型无关，所以<em>Java</em>不支持类似如下写法，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">Pair</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;.</span><span class="na">class</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>一个泛型对象的<em>getClass</em>方法的返回值与原始类型对象也是相同的，比如下面代码的输出都是<em>true</em>，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">Pair</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">p1</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Pair</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;(</span><span class="mi">1</span><span class="o">,</span><span class="mi">100</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">Pair</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">p2</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Pair</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;(</span><span class="s">&#34;hello&#34;</span><span class="o">,</span><span class="s">&#34;world&#34;</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">Pair</span><span class="o">.</span><span class="na">class</span><span class="o">==</span><span class="n">p1</span><span class="o">.</span><span class="na">getClass</span><span class="o">());</span> <span class="c1">//true
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">Pair</span><span class="o">.</span><span class="na">class</span><span class="o">==</span><span class="n">p2</span><span class="o">.</span><span class="na">getClass</span><span class="o">());</span> <span class="c1">//true
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p><em>instanceof</em>后面是接口或类名，<em>instanceof</em>是运行时判断也与泛型无关，所以<em>Java</em>也不支持类似如下写法，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="k">if</span><span class="o">(</span><span class="n">p1</span> <span class="k">instanceof</span> <span class="n">Pair</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>不过，<em>Java</em>支持如下写法，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="k">if</span><span class="o">(</span><span class="n">p1</span> <span class="k">instanceof</span> <span class="n">Pair</span><span class="o">&lt;?&gt;)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>3、类型擦除可能会引发一些冲突。</p>
+<p>有两个类<em>Base</em>和<em>Child</em>，它们是这样声明的，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">Base</span> <span class="kd">implements</span> <span class="n">Comparable</span><span class="o">&lt;</span><span class="n">Base</span><span class="o">&gt;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">Child</span> <span class="kd">extends</span> <span class="n">Base</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>如果这样修改<em>Child</em>类，会发生什么？请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">Child</span> <span class="kd">extends</span> <span class="n">Base</span> <span class="kd">implements</span> <span class="n">Comparable</span><span class="o">&lt;</span><span class="n">Child</span><span class="o">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><em>Java</em>编译器会提示错误，<em>Comparable</em>接口不能被实现两次，且两次实现的类型参数还不同，一次是<code>Comparable&lt;Base&gt;</code>，一次是<code>Comparable&lt;Child&gt;</code>。因为类型擦除后，实际上只能有一个。解决办法是重写<em>Base</em>类的实现，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">Child</span> <span class="kd">extends</span> <span class="n">Base</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nd">@Override</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">compareTo</span><span class="o">(</span><span class="n">Base</span> <span class="n">o</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="o">...</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>另外，你可能认为可以如下定义重载方法，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">test</span><span class="o">(</span><span class="n">DynamicArray</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">intArr</span><span class="o">)</span> 
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">test</span><span class="o">(</span><span class="n">DynamicArray</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">strArr</span><span class="o">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>虽然参数都是<em>DynamicArray</em>，实例化类型也不同，一个是<code>DynamicArray&lt;Integer&gt;</code>，另一个是<code>DynamicArray&lt;String&gt;</code>，同样遗憾的是，<em>Java</em>不允许这种写法，理由同样是类型擦除后它们的声明是一样的。</p>
+<h2 id="42定义泛型类方法和接口">4.2、定义泛型类、方法和接口</h2>
+<p>在定义泛型类、方法和接口时，也有一些需要注意的地方，比如：</p>
+<p>1、不能通过类型参数创建对象</p>
+<p>比如，T是类型参数，下面的写法都是非法的，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">T</span> <span class="n">t</span> <span class="o">=</span> <span class="k">new</span> <span class="n">T</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl"><span class="n">T</span><span class="o">[]</span> <span class="n">arr</span> <span class="o">=</span> <span class="k">new</span> <span class="n">T</span><span class="o">[</span><span class="mi">10</span><span class="o">];</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>如果允许，那么用户会以为创建的就是对应类型的对象，但由于类型擦除，<em>Java</em>只能创建<em>Object</em>类型的对象，而无法创建T类型的对象，容易引起误解，所以<em>Java</em>干脆禁止这么做。</p>
+<p>解决办法是如果类型有默认构造方法，可以调用<em>Class</em>的<em>newInstance</em>方法构建对象，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">static</span> <span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">T</span> <span class="nf">create</span><span class="o">(</span><span class="n">Class</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">type</span><span class="o">){</span>
+</span></span><span class="line"><span class="cl">    <span class="k">try</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">type</span><span class="o">.</span><span class="na">newInstance</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>2、泛型类的类型参数不能用于静态变量和方法</p>
+<p>下面这种写法是非法的，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Singleton</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="kd">static</span> <span class="n">T</span> <span class="n">instance</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">synchronized</span> <span class="kd">static</span> <span class="n">T</span> <span class="nf">getInstance</span><span class="o">(){</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span><span class="o">(</span><span class="n">instance</span><span class="o">==</span><span class="kc">null</span><span class="o">){</span>
+</span></span><span class="line"><span class="cl">             <span class="c1">// 创建实例
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">instance</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>如果合法，那么对于每种实例化类型，都需要有一个对应的静态变量和方法。但由于类型擦除，<em>Singleton</em>类型只有一份，静态变量和方法都是类型的属性，且与类型参数无关，所以不能使用泛型类类型参数。</p>
+<p>3、了解多个类型限定的语法</p>
+<p><em>Java</em>中还支持多个上界，多个上界之间以&amp;分隔，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">T</span> <span class="kd">extends</span> <span class="n">Base</span> <span class="o">&amp;</span> <span class="n">Comparable</span> <span class="o">&amp;</span> <span class="n">Serializable</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><em>Base</em>为上界类，<em>Comparable</em>和<em>Serializable</em>为上界接口。如果有上界类，类应该放在第一个，类型擦除时，会用第一个上界替换。</p>
+<h2 id="43泛型和数组">4.3、泛型和数组</h2>
+<p>不能创建泛型数组，比如我们可能想这样创建一个<em>Pair</em>的泛型数组，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">Pair</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">,</span><span class="n">Integer</span><span class="o">&gt;[]</span> <span class="n">options</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Pair</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">,</span><span class="n">Integer</span><span class="o">&gt;[]{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">new</span> <span class="n">Pair</span><span class="o">(</span><span class="s">&#34;1元&#34;</span><span class="o">,</span><span class="mi">7</span><span class="o">),</span> <span class="k">new</span> <span class="n">Pair</span><span class="o">(</span><span class="s">&#34;2元&#34;</span><span class="o">,</span> <span class="mi">2</span><span class="o">),</span> <span class="k">new</span> <span class="n">Pair</span><span class="o">(</span><span class="s">&#34;10元&#34;</span><span class="o">,</span> <span class="mi">1</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="o">};</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>如果<em>Java</em>允许创建泛型数组，则会发生非常严重的问题，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">Pair</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">,</span><span class="n">Integer</span><span class="o">&gt;[]</span> <span class="n">options</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Pair</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">,</span><span class="n">Integer</span><span class="o">&gt;[</span><span class="mi">3</span><span class="o">];</span>
+</span></span><span class="line"><span class="cl"><span class="n">Object</span><span class="o">[]</span> <span class="n">objs</span> <span class="o">=</span> <span class="n">options</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">objs</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Pair</span><span class="o">&lt;</span><span class="n">Double</span><span class="o">,</span><span class="n">String</span><span class="o">&gt;(</span><span class="mf">12.34</span><span class="o">,</span> <span class="s">&#34;hello&#34;</span><span class="o">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>如果可以创建泛型数组<em>options</em>，那它就可以赋值给其他类型的数组<em>objs</em>，而最后一行明显错误的赋值操作，则既不会引起编译错误，也不会触发运行时异常，因为<em>Pair&lt;Double, String&gt;<em>的运行时类型是</em>Pair</em>，和<em>objs</em>的运行时类型 <em>Pair[]</em> 是匹配的。但我们知道，它的实际类型是不匹配的，在程序的其它地方，当把 <em>objs[0]</em> 作为 <em>Pair&lt;Object，Integer&gt;</em> 进行处理的时候，一定会触发异常。</p>
+<p>但现实需要能够存放泛型对象的容器，怎么办呢？可以使用原始类型的数组，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">Pair</span><span class="o">[]</span> <span class="n">options</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Pair</span><span class="o">[]{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">new</span> <span class="n">Pair</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span><span class="n">Integer</span><span class="o">&gt;(</span><span class="s">&#34;1元&#34;</span><span class="o">,</span><span class="mi">7</span><span class="o">),</span>
+</span></span><span class="line"><span class="cl">      <span class="k">new</span> <span class="n">Pair</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span><span class="n">Integer</span><span class="o">&gt;(</span><span class="s">&#34;2元&#34;</span><span class="o">,</span> <span class="mi">2</span><span class="o">),</span>
+</span></span><span class="line"><span class="cl">      <span class="k">new</span> <span class="n">Pair</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span><span class="n">Integer</span><span class="o">&gt;(</span><span class="s">&#34;10元&#34;</span><span class="o">,</span> <span class="mi">1</span><span class="o">)};</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>有时，我们希望转换泛型容器为一个数组，比如对于<em>DynamicArray</em>，我们可能希望它有这么一个方法，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="n">E</span><span class="o">[]</span> <span class="nf">toArray</span><span class="o">()</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>而希望可以这么用，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">DynamicArray</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">ints</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DynamicArray</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;();</span>
+</span></span><span class="line"><span class="cl"><span class="n">ints</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">100</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">ints</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">34</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">Integer</span><span class="o">[]</span> <span class="n">arr</span> <span class="o">=</span> <span class="n">ints</span><span class="o">.</span><span class="na">toArray</span><span class="o">();</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>那如何实现这个方法呢？<em>Java</em>必须在运行时知道要转换成的数组类型，类型可以作为参数传递给<em>toArray</em>方法，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="n">E</span><span class="o">[]</span> <span class="nf">toArray</span><span class="o">(</span><span class="n">Class</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">type</span><span class="o">){</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Object</span> <span class="n">copy</span> <span class="o">=</span> <span class="n">Array</span><span class="o">.</span><span class="na">newInstance</span><span class="o">(</span><span class="n">type</span><span class="o">,</span> <span class="n">size</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">System</span><span class="o">.</span><span class="na">arraycopy</span><span class="o">(</span><span class="n">elementData</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">copy</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">size</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="o">(</span><span class="n">E</span><span class="o">[])</span><span class="n">copy</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><em>Class<E><em>表示要转换成的数组类型信息，有了这个类型信息，<em>Array</em>类的</em>newInstance</em>方法就可以创建出真正类型的数组对象。调用<em>toArray</em>方法时，需要传递需要的类型，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">Integer</span><span class="o">[]</span> <span class="n">arr</span> <span class="o">=</span> <span class="n">ints</span><span class="o">.</span><span class="na">toArray</span><span class="o">(</span><span class="n">Integer</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>总结下泛型与数组的关系：</p>
+<p>1、<em>Java</em>不支持创建泛型数组</p>
+<p>2、如果要存放泛型对象，可以使用原始类型的数组，或者使用泛型容器。</p>
+<p>3、泛型容器内部使用<em>Object</em>数组，如果要转换泛型容器为对应类型的数组，需要使用反射。</p>
+<h1 id="五概念扩展">五、概念扩展</h1>
+<h2 id="51协变与逆变">5.1、协变与逆变</h2>
+<p>1、协变</p>
+<p>前面讲有限定通配符时，涉及这么一段代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kt">void</span> <span class="nf">addAll</span><span class="o">(</span><span class="n">DynamicArray</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">E</span><span class="o">&gt;</span> <span class="n">c</span><span class="o">)</span> <span class="o">{</span> 
+</span></span><span class="line"><span class="cl">    <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">c</span><span class="o">.</span><span class="na">size</span><span class="o">;</span> <span class="n">i</span><span class="o">++){</span>
+</span></span><span class="line"><span class="cl">        <span class="n">add</span><span class="o">(</span><span class="n">c</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">i</span><span class="o">));</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>我们也已经知道，下面的代码<em>addAll</em>方法执行是正确的。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">DynamicArray</span><span class="o">&lt;</span><span class="n">Number</span><span class="o">&gt;</span> <span class="n">numbers</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DynamicArray</span><span class="o">&lt;&gt;();</span> 
+</span></span><span class="line"><span class="cl"><span class="n">DynamicArray</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">ints</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DynamicArray</span><span class="o">&lt;&gt;();</span>
+</span></span><span class="line"><span class="cl"><span class="n">ints</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">100</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">ints</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">34</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">numbers</span><span class="o">.</span><span class="na">addAll</span><span class="o">(</span><span class="n">ints</span><span class="o">);</span> 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这其实涉及一个概念，也就是<em>泛型型变</em>，对于上面例子来说，只要<em>DynamicArray</em>泛型参数是<em>Number</em>的子类即可。这种型变被称为<em>covariant</em>（中文翻译为<em><strong>协变</strong></em>）一一<em>Java</em>将这种语法称为 <em><strong>通配符上限</strong></em>。对于“通配符上限”语法而言，从该集合对象中“拿出”对象总是安全的。</p>
+<p>2、逆变</p>
+<p>前面讲超类型通配符时，涉及这么一段代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kt">void</span> <span class="nf">copyTo</span><span class="o">(</span><span class="n">DynamicArray</span><span class="o">&lt;?</span> <span class="kd">super</span> <span class="n">E</span><span class="o">&gt;</span> <span class="n">dest</span><span class="o">){</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">size</span><span class="o">;</span> <span class="n">i</span><span class="o">++){</span>
+</span></span><span class="line"><span class="cl">        <span class="n">dest</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">get</span><span class="o">(</span><span class="n">i</span><span class="o">));</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>我们也已经知道，下面的代码<em>copyTo</em>方法执行是正确的。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">DynamicArray</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">ints</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DynamicArray</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;();</span> 
+</span></span><span class="line"><span class="cl"><span class="n">ints</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">100</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">ints</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="mi">34</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">DynamicArray</span><span class="o">&lt;</span><span class="n">Number</span><span class="o">&gt;</span> <span class="n">numbers</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DynamicArray</span><span class="o">&lt;</span><span class="n">Number</span><span class="o">&gt;();</span> 
+</span></span><span class="line"><span class="cl"><span class="n">ints</span><span class="o">.</span><span class="na">copyTo</span><span class="o">(</span><span class="n">numbers</span><span class="o">);</span> 
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>对于上面例子来说，只要<em>DynamicArray</em>泛型参数是<em>Integer</em>的父类即可。这种型变被称为<em>contravariance</em>（中文翻译为<em><strong>逆变</strong></em>）一一<em>Java</em>将这种语法称为 <em><strong>通配符下限</strong></em>。对于“通配符下限”语法而言，将对象传给泛型对象是安全的。</p>
+<h2 id="52pecs原则">5.2、<em>PECS</em>原则</h2>
+<p><em>PECS</em>原则的全称是&quot;<em>Producer Extends Consumer Super</em>&quot;。</p>
+<p>1、<em>PE</em>原则</p>
+<p><em>PE原则说明：使用extends确定上界的只能是生产者，只能往外生产东西，取出的就是上界类型</em>。</p>
+<p>分析：对于使用了<code>&lt;? extends T&gt;</code>的泛型结构，我们知道它存储的值是T的子类，T是可以有多个不同表现的子类的，因此当进行写值时，编译器并不知道其中存储的到底是哪个子类，因此写值操作必然会出现问题，所以编译器直接禁止在使用<code>&lt;? extends T&gt;</code>泛型结构时进行写操作，只能进行取值，这就是所说的<em>PE</em>原则。</p>
+<p>2、<em>CS</em>原则</p>
+<p><em>CS原则说明：使用super确定下界的只能做消费者，只能往里塞东西</em>。</p>
+<p>分析：对于使用了<code>&lt;? super T&gt;</code>的泛型结构，我们知道它存储的值是T的父类，若将T的父类进行取值，取出时会无法确定父类类型只能转成<em>Object</em>类型，并且父类缺少子类中的一些信息，这显然是不合理的，因此编译器直接禁止在使用<code>&lt;? super T&gt;</code>泛型结构时进行取值操作，只能进行写值，这就是所说的<em>CS</em>原则。</p>
+<blockquote>
+<p>总结：如果要从集合中读取类型T的数据，并且不能写入，可以使用通配符上限<code>&lt;？extends T&gt;</code>，也就是<em>PE</em>原则。如果要从集合中写入类型T的数据，并且不需要读取，可以使用通配符下限<code>&lt;? super T&gt;</code>，也就是<em>CS</em>原则。如果既要存又要取，那么就不要使用通配符，使用类型参数。</p>
+</blockquote>
+<h2 id="53泛型桥方法">5.3、泛型桥方法</h2>
+<p>假设有一个<em>Parent</em>类与<em>Child</em>类，<em>Child</em>继承自<em>Parent</em>，并且重写了<em>showData</em>方法，如下代码所示：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Child</span> <span class="kd">extends</span> <span class="n">Parent</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nd">@Override</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">showData</span><span class="o">(</span><span class="n">String</span> <span class="n">s</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;Child-&gt;showData: &#34;</span> <span class="o">+</span> <span class="n">s</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">Parent</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">showData</span><span class="o">(</span><span class="n">T</span> <span class="n">t</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;Parent-&gt;showData: &#34;</span> <span class="o">+</span> <span class="n">t</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>依据之前学的泛型擦除原理，我们知道在<em>Parent</em>类编译之后，<em>showData</em>方法上的泛型没有了，参数类型变成了<em>Object</em>类型。而<em>Child</em>中的<em>showData</em>方法是重写了<em>Parent</em>的方法，但是根据<em>Java</em>重写的要求，方法的参数类型必须是一致的，那这样不就出错了吗？子类<em>showData</em>方法参数类型是<em>String</em>但是父类是<em>Object</em>。其实这样并不会出错，原因是编译器为了维护这种重写的原则，在<em>Child</em>类中自动生成了一个桥方法。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kt">void</span> <span class="nf">showData</span><span class="o">(</span><span class="n">Object</span> <span class="n">value</span><span class="o">){</span>
+</span></span><span class="line"><span class="cl">    <span class="n">showData</span><span class="o">((</span><span class="n">String</span><span class="o">)</span><span class="n">value</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以看出，这个桥方法实际上就是对超类中 <em>showData(Obejct)</em> 的重写。桥方法并不需要自己手动生成，一切都是编译器自动完成的。</p>
+<p>通过反编译<em>Child</em>类的字节码，可以发现多了一个<em>showData</em>方法，并且前面是<em>synthetic bridge</em>修饰，这个方法就是桥方法了。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">// class version 65.0 (65)
+</span></span><span class="line"><span class="cl">// access flags 0x21
+</span></span><span class="line"><span class="cl">// signature LParent&lt;Ljava/lang/String;&gt;;
+</span></span><span class="line"><span class="cl">// declaration: Child extends Parent&lt;java.lang.String&gt;
+</span></span><span class="line"><span class="cl">public class Child extends Parent {
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  // compiled from: Child.java
+</span></span><span class="line"><span class="cl">  // access flags 0x19
+</span></span><span class="line"><span class="cl">  public final static INNERCLASS java/lang/invoke/MethodHandles$Lookup java/lang/invoke/MethodHandles Lookup
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  // access flags 0x1
+</span></span><span class="line"><span class="cl">  public &lt;init&gt;()V
+</span></span><span class="line"><span class="cl">   L0
+</span></span><span class="line"><span class="cl">    LINENUMBER 1 L0
+</span></span><span class="line"><span class="cl">    ALOAD 0
+</span></span><span class="line"><span class="cl">    INVOKESPECIAL Parent.&lt;init&gt; ()V
+</span></span><span class="line"><span class="cl">    RETURN
+</span></span><span class="line"><span class="cl">   L1
+</span></span><span class="line"><span class="cl">    LOCALVARIABLE this LChild; L0 L1 0
+</span></span><span class="line"><span class="cl">    MAXSTACK = 1
+</span></span><span class="line"><span class="cl">    MAXLOCALS = 1
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  // access flags 0x1
+</span></span><span class="line"><span class="cl">  public showData(Ljava/lang/String;)V
+</span></span><span class="line"><span class="cl">   L0
+</span></span><span class="line"><span class="cl">    LINENUMBER 5 L0
+</span></span><span class="line"><span class="cl">    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+</span></span><span class="line"><span class="cl">    ALOAD 1
+</span></span><span class="line"><span class="cl">    INVOKEDYNAMIC makeConcatWithConstants(Ljava/lang/String;)Ljava/lang/String; [
+</span></span><span class="line"><span class="cl">      // handle kind 0x6 : INVOKESTATIC
+</span></span><span class="line"><span class="cl">      java/lang/invoke/StringConcatFactory.makeConcatWithConstants(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/invoke/CallSite;
+</span></span><span class="line"><span class="cl">      // arguments:
+</span></span><span class="line"><span class="cl">      &#34;Child-&gt;showData: \u0001&#34;
+</span></span><span class="line"><span class="cl">    ]
+</span></span><span class="line"><span class="cl">    INVOKEVIRTUAL java/io/PrintStream.println (Ljava/lang/String;)V
+</span></span><span class="line"><span class="cl">   L1
+</span></span><span class="line"><span class="cl">    LINENUMBER 6 L1
+</span></span><span class="line"><span class="cl">    RETURN
+</span></span><span class="line"><span class="cl">   L2
+</span></span><span class="line"><span class="cl">    LOCALVARIABLE this LChild; L0 L2 0
+</span></span><span class="line"><span class="cl">    LOCALVARIABLE s Ljava/lang/String; L0 L2 1
+</span></span><span class="line"><span class="cl">    MAXSTACK = 2
+</span></span><span class="line"><span class="cl">    MAXLOCALS = 2
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  // access flags 0x1041
+</span></span><span class="line"><span class="cl">  public synthetic bridge showData(Ljava/lang/Object;)V
+</span></span><span class="line"><span class="cl">    // parameter synthetic  &lt;no name&gt;
+</span></span><span class="line"><span class="cl">   L0
+</span></span><span class="line"><span class="cl">    LINENUMBER 1 L0
+</span></span><span class="line"><span class="cl">    ALOAD 0
+</span></span><span class="line"><span class="cl">    ALOAD 1
+</span></span><span class="line"><span class="cl">    CHECKCAST java/lang/String
+</span></span><span class="line"><span class="cl">    INVOKEVIRTUAL Child.showData (Ljava/lang/String;)V
+</span></span><span class="line"><span class="cl">    RETURN
+</span></span><span class="line"><span class="cl">   L1
+</span></span><span class="line"><span class="cl">    LOCALVARIABLE this LChild; L0 L1 0
+</span></span><span class="line"><span class="cl">    MAXSTACK = 2
+</span></span><span class="line"><span class="cl">    MAXLOCALS = 2
+</span></span><span class="line"><span class="cl">}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>除此之外，也可以使用使用<em>Java</em>反射判断<em>showData</em>方法是否桥方法，这个判断定义在<em>Method</em>类中。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isBridge</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="o">(</span><span class="n">getModifiers</span><span class="o">()</span> <span class="o">&amp;</span> <span class="n">Modifier</span><span class="o">.</span><span class="na">BRIDGE</span><span class="o">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>演示下<em>isBridge</em>方法的使用。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="k">try</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Method</span> <span class="n">method</span> <span class="o">=</span> <span class="n">Child</span><span class="o">.</span><span class="na">class</span><span class="o">.</span><span class="na">getMethod</span><span class="o">(</span><span class="s">&#34;showData&#34;</span><span class="o">,</span> <span class="n">Object</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">method</span><span class="o">.</span><span class="na">isBridge</span><span class="o">());</span>      <span class="c1">// 输出true
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">NoSuchMethodException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div>
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">文章作者</span>
+    <span class="item-content">AndDevMK</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">上次更新</span>
+    <span class="item-content">
+        2023-12-18
+        
+    </span>
+  </p>
+  
+  <p class="copyright-item">
+    <span class="item-title">许可协议</span>
+    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a></span>
+  </p>
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">赞赏支持</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat-qr-code.JPG">
+        <span>微信打赏</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay-qr-code.JPG">
+        <span>支付宝打赏</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      
+      <nav class="post-nav">
+        
+        <a class="next" href="/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8B%E7%BB%98%E5%88%B6paint%E8%BF%87%E7%A8%8B/">
+            <span class="next-text nav-default">解读Flutter源码之绘制Paint过程</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="AndDevMK/blog-utterances"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    
+    <div id="search_mask" class="search_mask">
+    <div class="search_modal">
+        <div id="close_search" class="close_search">关闭</div>
+        <div class="search_divider"></div>
+        <input id="input_search_key" class="input_search_key" placeholder="请输入你要搜索的内容" tabindex="0">
+        <ul id="search_list">
+        </ul>
+    </div>
+</div>
+
+<script src="/js/fuse.js"></script> 
+<script src="/js/fastsearch.js"></script>
+
+    <footer id="footer" class="footer">
+      
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a id="hexo-link" class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    
+    <span id="run-time" class="run-time"></span> 
+    <span class="heart"><i class="iconfont icon-heart"></i></span>
+    &copy; 
+    2023&nbsp;
+    <span>AndDevMK</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  <script type="text/javascript" src="/lib/jquery/jquery-3.2.1.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout-1.0.1.min.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox-3.1.20.min.js"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.11a4ba15caf2d921d57eaf6568c4ad21eafd5d2c001cbcb31693586c63f93005.js"></script>
+
+<script id="baidu_analytics">
+  var _hmt = _hmt || [];
+  (function() {
+    if (window.location.hostname === 'localhost') return;
+    var hm = document.createElement("script"); hm.async = true;
+    hm.src = "https://hm.baidu.com/hm.js?6db179fb88e600cf326b0515a8aa1de3";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+
+
+
+
+<script src="/js/codecopy.js"></script>
+
+
+
+<link disabled id="dark-mode-theme" rel="stylesheet" href="/css/dark.css"></link>
+<script src="/js/dark.js"></script>
+
+
+<script src="/js/site_runtime.js"></script>
+
+
+
+
+</body>
+</html>
