@@ -7,7 +7,16 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>AndDevMK</copyright>
-    <lastBuildDate>Mon, 18 Dec 2023 08:00:00 +0800</lastBuildDate><atom:link href="https://anddevmk.cn/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 19 Dec 2023 08:00:00 +0800</lastBuildDate><atom:link href="https://anddevmk.cn/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Java必备基础之注解</title>
+      <link>https://anddevmk.cn/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E6%B3%A8%E8%A7%A3/</link>
+      <pubDate>Tue, 19 Dec 2023 08:00:00 +0800</pubDate>
+      
+      <guid>https://anddevmk.cn/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E6%B3%A8%E8%A7%A3/</guid>
+      <description>注：本文代码基于JDK 11 一、概述 在Java中，注解就是给程序添加一些信息，用字符@开头，这些信息用于修饰它后面紧挨着的其它代码元素，比如类、接口、字段、方法、方法中的参数、构造方法等等，注解可以被编译器、程序运行时和其它工具使用，用于增强或修改程序行为等等。 二、内置注解 2.1、@</description>
+    </item>
+    
     <item>
       <title>Java必备基础之泛型</title>
       <link>https://anddevmk.cn/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E6%B3%9B%E5%9E%8B/</link>

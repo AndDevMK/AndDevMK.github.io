@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Java必备基础之注解 - AndDevMK&#39;s android blog site</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="AndDevMK" /><meta name="description" content="注：本文代码基于JDK 11 一、概述 在Java中，注解就是给程序添加一些信息，用字符@开头，这些信息用于修饰它后面紧挨着的其它代码元素，比如类、接口、字段、方法、方法中的参数、构造方法等等，注解可以被编译器、程序运行时和其它工具使用，用于增强或修改程序行为等等。 二、内置注解 2.1、@" /><meta name="keywords" content="Android, Java, Kotlin, C&#43;&#43;, C, Flutter, Dart, NDK" />
+
+
+<meta name="baidu-site-verification" content="codeva-wQ7uOo4V09" />
+<meta name="google-site-verification" content="yHzWB9BxTR74LiaUhuL5ncr89fnDYXiplTaPY565zqo" />
+
+
+<meta name="generator" content="Hugo 0.111.3 with theme even" />
+
+
+<link rel="canonical" href="https://anddevmk.cn/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E6%B3%A8%E8%A7%A3/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.c11aaf02bef1025d6b0813ba5e1a8a8551aee15fa8f2bcea906d41b20bdf5c69.css" rel="stylesheet">
+<link href="/lib/fancybox/jquery.fancybox-3.1.20.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/css/codecopy.css">
+
+
+<meta property="og:title" content="Java必备基础之注解" />
+<meta property="og:description" content="注：本文代码基于JDK 11 一、概述 在Java中，注解就是给程序添加一些信息，用字符@开头，这些信息用于修饰它后面紧挨着的其它代码元素，比如类、接口、字段、方法、方法中的参数、构造方法等等，注解可以被编译器、程序运行时和其它工具使用，用于增强或修改程序行为等等。 二、内置注解 2.1、@" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://anddevmk.cn/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E6%B3%A8%E8%A7%A3/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2023-12-19T08:00:00+08:00" />
+<meta property="article:modified_time" content="2023-12-19T08:00:00+08:00" />
+<meta itemprop="name" content="Java必备基础之注解">
+<meta itemprop="description" content="注：本文代码基于JDK 11 一、概述 在Java中，注解就是给程序添加一些信息，用字符@开头，这些信息用于修饰它后面紧挨着的其它代码元素，比如类、接口、字段、方法、方法中的参数、构造方法等等，注解可以被编译器、程序运行时和其它工具使用，用于增强或修改程序行为等等。 二、内置注解 2.1、@"><meta itemprop="datePublished" content="2023-12-19T08:00:00+08:00" />
+<meta itemprop="dateModified" content="2023-12-19T08:00:00+08:00" />
+<meta itemprop="wordCount" content="4318">
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Java必备基础之注解"/>
+<meta name="twitter:description" content="注：本文代码基于JDK 11 一、概述 在Java中，注解就是给程序添加一些信息，用字符@开头，这些信息用于修饰它后面紧挨着的其它代码元素，比如类、接口、字段、方法、方法中的参数、构造方法等等，注解可以被编译器、程序运行时和其它工具使用，用于增强或修改程序行为等等。 二、内置注解 2.1、@"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">AndDevMK</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">首页</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">归档</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">关于</li>
+      </a>
+
+    
+    <li class="mobile-menu-item-search">
+      <div id="mobile_open_search" class="mobile_open_search">
+        搜索
+      </div>
+    </li>
+
+    
+    <li class="mobile-menu-item-dark-mode">
+      <div id="mobile_dark_mode_toggle" class="mobile_light_mode">
+       
+      </div>
+    </li>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">AndDevMK</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">首页</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">归档</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">关于</a>
+      </li>
+    
+    <div id="open_search" class="open_search">
+      搜索
+    </div>
+
+    
+    <div id="dark_mode_toggle" class="light_mode">
+
+    </div>
+  
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Java必备基础之注解</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2023-12-19 </span>
+        <div class="post-category">
+            <a href="/categories/java/"> Java </a>
+            </div>
+          <span class="more-meta"> 约 4318 字 </span>
+          <span class="more-meta"> 预计阅读 9 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#一概述">一、概述</a></li>
+    <li><a href="#二内置注解">二、内置注解</a>
+      <ul>
+        <li><a href="#21override">2.1、<em>@Override</em></a></li>
+        <li><a href="#22deprecated">2.2、<em>@Deprecated</em></a></li>
+        <li><a href="#23suppresswarnings">2.3、<em>@SuppressWarnings</em></a></li>
+      </ul>
+    </li>
+    <li><a href="#三创建注解">三、创建注解</a></li>
+    <li><a href="#四查看注解信息">四、查看注解信息</a></li>
+    <li><a href="#五注解的应用">五、注解的应用</a>
+      <ul>
+        <li><a href="#51在运行时反射动态获取注解信息">5.1、在运行时反射动态获取注解信息</a></li>
+        <li><a href="#52apt编译时注解处理器">5.2、<em>APT</em>编译时注解处理器</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <blockquote>
+<p><em>注：本文代码基于JDK 11</em></p>
+</blockquote>
+<h1 id="一概述">一、概述</h1>
+<p>在<em>Java</em>中，注解就是给程序添加一些信息，用字符@开头，这些信息用于修饰它后面紧挨着的其它代码元素，比如类、接口、字段、方法、方法中的参数、构造方法等等，注解可以被编译器、程序运行时和其它工具使用，用于增强或修改程序行为等等。</p>
+<h1 id="二内置注解">二、内置注解</h1>
+<h2 id="21override">2.1、<em>@Override</em></h2>
+<p><em>@Override</em>修饰一个方法，表示该方法不是当前类首先声明的，而是在某个父类或实现的接口中声明的，当前类“重写”了该方法。举个例子，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Base</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">action</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">Child</span> <span class="kd">extends</span> <span class="n">Base</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nd">@Override</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">action</span><span class="o">(){</span>
+</span></span><span class="line"><span class="cl">        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;child action&#34;</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nd">@Override</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">String</span> <span class="nf">toString</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="s">&#34;child&#34;</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>解释一下，<em>Child</em>的<em>action</em>方法重写了父类<em>Base</em>中的<em>action</em>方法，<em>toString</em>方法重写了<em>Object</em>类中的<em>toString</em>方法。</p>
+<p>这个注解不写也不会改变这些方法是“重写”的本质，它的作用在于减少一些编程错误，如果方法有<em>Override</em>注解，但没有任何父类或实现的接口声明该方法，则编译器会报错，强制程序员修复该问题。</p>
+<h2 id="22deprecated">2.2、<em>@Deprecated</em></h2>
+<p><em>@Deprecated</em>可以修饰的范围很广，包括类、方法、字段、参数等等，它表示对应的代码已经过时了，程序员不应该使用它，不过它是一种警告而不是强制性的，在IDE中会给<em>Deprecated</em>元素加一条删除线以示警告，举个例子，<em>Date</em>中很多方法就过时了，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="nd">@Deprecated</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="kt">int</span> <span class="nf">getYear</span><span class="o">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nd">@Deprecated</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="kt">int</span> <span class="nf">getMonth</span><span class="o">()</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在声明元素为 <em>@Deprecated</em>时，应该用<em>Java</em>文档注释的方式同时说明替代方案，就像<em>Date</em>中的<em>API</em>文档那样，在调用 <em>@Deprecated</em>方法时，应该先考虑其建议的替代方案。</p>
+<p>从<em>Java 9</em>开始，<em>@Deprecated</em>多了两个属性：<em>since</em>和<em>forRemoval</em>。<em>since</em>是一个字符串，表示是从哪个版本开始过时的；<em>forRemoval</em>是一个<em>boolean</em>值，表示将来是否会删除。</p>
+<p>举个例子，<em>Java 9</em>中<em>Integer</em>的一个构造方法就从版本9开始过时了，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="nd">@Deprecated</span><span class="o">(</span><span class="n">since</span><span class="o">=</span><span class="s">&#34;9&#34;</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="nf">Integer</span><span class="o">(</span><span class="kt">int</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">this</span><span class="o">.</span><span class="na">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="23suppresswarnings">2.3、<em>@SuppressWarnings</em></h2>
+<p><em>@SuppressWarnings</em>表示压制<em>Java</em>的编译警告，它有一个必填参数，表示压制哪种类型的警告，它也可以修饰大部分代码元素，在更大范围的修饰也会对内部元素起效，比如在类上的注解会影响到方法，在方法上的注解会影响到代码行，举个例子，调用<em>Date</em>的过期方法，可以这样压制警告，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="nd">@SuppressWarnings</span><span class="o">({</span><span class="s">&#34;deprecation&#34;</span><span class="o">,</span> <span class="s">&#34;MagicConstant&#34;</span><span class="o">})</span> 
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Date</span> <span class="n">date</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Date</span><span class="o">(</span><span class="mi">2022</span><span class="o">,</span> <span class="mi">9</span><span class="o">,</span> <span class="mi">23</span><span class="o">);</span> 
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">year</span> <span class="o">=</span> <span class="n">date</span><span class="o">.</span><span class="na">getYear</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h1 id="三创建注解">三、创建注解</h1>
+<p>先学习下注解是怎么定义的，内置注解 <em>@Override</em>就是一个很好的例子，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="nd">@Target</span><span class="o">(</span><span class="n">ElementType</span><span class="o">.</span><span class="na">METHOD</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="nd">@Retention</span><span class="o">(</span><span class="n">RetentionPolicy</span><span class="o">.</span><span class="na">SOURCE</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="nd">@interface</span> <span class="n">Override</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>定义注解与定义接口有点类似，都用了<em>interface</em>，不过注解的<em>interface</em>前多了一个@。另外，它还有两个元注解 <em>@Target</em>和 <em>@Retention</em>，这两个注解专门用于定义注解本身。</p>
+<p><em>@Target</em>表示注解的目标，<em>ElementType</em>是一个枚举，主要可选值如下表所示。</p>
+<table>
+<thead>
+<tr>
+<th>可选值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TYPE</td>
+<td>类、接口（包括注解），或者枚举</td>
+</tr>
+<tr>
+<td>FIELD</td>
+<td>字段（包括枚举常量）</td>
+</tr>
+<tr>
+<td>METHOD</td>
+<td>方法</td>
+</tr>
+<tr>
+<td>PARAMETER</td>
+<td>形式参数</td>
+</tr>
+<tr>
+<td>CONSTRUCTOR</td>
+<td>构造函数</td>
+</tr>
+<tr>
+<td>LOCAL_VARIABLE</td>
+<td>本地变量</td>
+</tr>
+<tr>
+<td>ANNOTATION_TYPE</td>
+<td>注解</td>
+</tr>
+<tr>
+<td>PACKAGE</td>
+<td>包</td>
+</tr>
+<tr>
+<td>TYPE_PARAMETER</td>
+<td>类型参数（java 1.8引入）</td>
+</tr>
+<tr>
+<td>TYPE_USE</td>
+<td>使用参数（java 1.8引入）</td>
+</tr>
+<tr>
+<td>MODULE</td>
+<td>模块（java 9引入）</td>
+</tr>
+</tbody>
+</table>
+<p>目标可以有多个，用{}表示，比如 <em>@SuppressWarnings</em>的 <em>@Target</em>就有多个，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="nd">@Target</span><span class="o">({</span><span class="n">TYPE</span><span class="o">,</span> <span class="n">FIELD</span><span class="o">,</span> <span class="n">METHOD</span><span class="o">,</span> <span class="n">PARAMETER</span><span class="o">,</span> <span class="n">CONSTRUCTOR</span><span class="o">,</span> <span class="n">LOCAL_VARIABLE</span><span class="o">,</span> <span class="n">MODULE</span><span class="o">})</span> <span class="nd">@Retention</span><span class="o">(</span><span class="n">RetentionPolicy</span><span class="o">.</span><span class="na">SOURCE</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="nd">@interface</span> <span class="n">SuppressWarnings</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">String</span><span class="o">[]</span> <span class="nf">value</span><span class="o">();</span> 
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>如果没有声明 <em>@Target</em>，默认为适用于所有类型。</p>
+<p><em>@Retention</em>表示注解信息保留到什么时候，取值只能有一个，类型为<em>RetentionPolicy</em>，它是一个枚举，主要可选值如下表所示。</p>
+<table>
+<thead>
+<tr>
+<th>可选值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SOURCE</td>
+<td>只在源代码中保留，编译器将代码编译为字节码文件后就会丢掉</td>
+</tr>
+<tr>
+<td>CLASS</td>
+<td>保留到字节码文件中，但Java虚拟机将class文件加载到内存时不一定会在内存中保留</td>
+</tr>
+<tr>
+<td>RUNTIME</td>
+<td>一直保留到运行时</td>
+</tr>
+</tbody>
+</table>
+<p>如果没有声明 <em>@Retention</em>，则默认为<em>CLASS</em>。</p>
+<p><em>@Override</em>和 <em>@SuppressWarnings</em>都是给编译器用的， 所以 <em>@Retention</em>都是<em>Retention-Policy.SOURCE</em>。</p>
+<p>可以为注解定义一些参数，定义的方式是在注解内定义一些方法，比如 <em>@SuppressWarnings</em>内定义的方法<em>value</em>，返回值类型表示参数的类型，这里是<em>String[]</em>。使用 <em>@SuppressWarnings</em>时必须给<em>value</em>提供值，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="nd">@SuppressWarnings</span><span class="o">(</span><span class="n">value</span> <span class="o">=</span> <span class="o">{</span><span class="s">&#34;deprecation&#34;</span><span class="o">,</span> <span class="s">&#34;MagicConstant&#34;</span><span class="o">})</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>当只有一个参数，且名称为<em>value</em>时，提供参数值时可以省略&quot;value=&quot;，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="nd">@SuppressWarnings</span><span class="o">({</span><span class="s">&#34;deprecation&#34;</span><span class="o">,</span> <span class="s">&#34;MagicConstant&#34;</span><span class="o">})</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>注解内参数的类型不是什么都可以的，合法的类型有基本类型、<em>String</em>、<em>Class</em>、枚举、注解，以及这些类型的数组。</p>
+<p>参数定义时可以使用<em>default</em>指定一个默认值，比如 <em>@Deprecated</em>中的<em>forRemoval()</em>，默认值为<em>false</em>。如果类型为<em>String</em>，默认值可以为&quot;&quot;，但不能为<em>null</em>，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="nd">@Documented</span>
+</span></span><span class="line"><span class="cl"><span class="nd">@Retention</span><span class="o">(</span><span class="n">RetentionPolicy</span><span class="o">.</span><span class="na">RUNTIME</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="nd">@Target</span><span class="o">(</span><span class="n">value</span><span class="o">={</span><span class="n">CONSTRUCTOR</span><span class="o">,</span> <span class="n">FIELD</span><span class="o">,</span> <span class="n">LOCAL_VARIABLE</span><span class="o">,</span> <span class="n">METHOD</span><span class="o">,</span> <span class="n">PACKAGE</span><span class="o">,</span> <span class="n">MODULE</span><span class="o">,</span> <span class="n">PARAMETER</span><span class="o">,</span> <span class="n">TYPE</span><span class="o">})</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="nd">@interface</span> <span class="n">Deprecated</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">String</span> <span class="nf">since</span><span class="o">()</span> <span class="k">default</span> <span class="s">&#34;&#34;</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">boolean</span> <span class="nf">forRemoval</span><span class="o">()</span> <span class="k">default</span> <span class="kc">false</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><em>@Deprecated</em>多了一个元注解 <em>@Documented</em>，它表示注解信息包含到生成的文档中。</p>
+<p>与接口和类不同，注解不能继承。不过注解有一个与继承有关的元注解 <em>@Inherited</em>，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="nd">@Inherited</span>
+</span></span><span class="line"><span class="cl"><span class="nd">@Target</span><span class="o">(</span><span class="n">ElementType</span><span class="o">.</span><span class="na">TYPE</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="nd">@Retention</span><span class="o">(</span><span class="n">RetentionPolicy</span><span class="o">.</span><span class="na">RUNTIME</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="nd">@interface</span> <span class="n">Test</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nd">@Test</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Base</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Child</span> <span class="kd">extends</span> <span class="n">Base</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 如果此元素上存在指定类型的注解，则返回true，否则返回false
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 该方法返回的真值相当于：getAnnotation(annotationClass) != null
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">Child</span><span class="o">.</span><span class="na">class</span><span class="o">.</span><span class="na">isAnnotationPresent</span><span class="o">(</span><span class="n">Test</span><span class="o">.</span><span class="na">class</span><span class="o">));</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><em>Test</em>是一个注解，类<em>Base</em>有该注解，<em>Child</em>继承了<em>Base</em>但没有声明该注解。<em>main</em>方法检查<em>Child</em>类是否有<em>Test</em>注解，输出为<em>true</em>，这是因为<em>Test</em>有注解@<em>Inherited</em>，如果去掉，输出会变成<em>false</em>。</p>
+<h1 id="四查看注解信息">四、查看注解信息</h1>
+<p>创建了注解，就可以在程序中使用，注解指定的目标，提供需要的参数，但这还是不会影响到程序的运行。要影响程序，我们要先能查看这些信息。我们主要考虑 <em>@Retention</em>为<em>RetentionPolicy.RUNTIME</em>的注解，利用反射机制在运行时进行查看和利用这些信息。</p>
+<p>反射相关类<em>Class</em>、<em>Field</em>、<em>Method</em>、<em>Constructor</em>中都有与注解有关的方法，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// 如果存在指定类型的该元素的注解，则返回该元素的注解，否则返回null
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="o">&lt;</span><span class="n">T</span> <span class="kd">extends</span> <span class="n">Annotation</span><span class="o">&gt;</span> <span class="n">T</span> <span class="nf">getAnnotation</span><span class="o">(</span><span class="n">Class</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">annotationClass</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 返回直接出现在该元素上的注解。此方法忽略继承的注解
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">Annotation</span><span class="o">[]</span> <span class="nf">getDeclaredAnnotations</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 方法名带有Annotation的还有很多，请自行查阅...
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p><em>Annotation</em>是一个接口，它表示注解，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Annotation</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">boolean</span> <span class="nf">equals</span><span class="o">(</span><span class="n">Object</span> <span class="n">obj</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="nf">hashCode</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">String</span> <span class="nf">toString</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 返回真正的注解类型
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">Class</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">Annotation</span><span class="o">&gt;</span> <span class="nf">annotationType</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>实际上内部实现时，所有的注解类型都是扩展的<em>Annotation</em>。</p>
+<p>对于<em>Method</em>和<em>Contructor</em>，它们都有方法参数，而参数也可以有注解，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="n">Annotation</span><span class="o">[][]</span> <span class="nf">getParameterAnnotations</span><span class="o">()</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>返回值是一个二维数组，每个参数对应一个一维数组。举个例子，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="nd">@Target</span><span class="o">(</span><span class="n">ElementType</span><span class="o">.</span><span class="na">PARAMETER</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="nd">@Retention</span><span class="o">(</span><span class="n">RetentionPolicy</span><span class="o">.</span><span class="na">RUNTIME</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="nd">@interface</span> <span class="n">Test</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="nf">value</span><span class="o">()</span> <span class="k">default</span> <span class="mi">0</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nd">@Target</span><span class="o">(</span><span class="n">ElementType</span><span class="o">.</span><span class="na">PARAMETER</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="nd">@Retention</span><span class="o">(</span><span class="n">RetentionPolicy</span><span class="o">.</span><span class="na">RUNTIME</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="nd">@interface</span> <span class="n">Test2</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">String</span> <span class="nf">value</span><span class="o">()</span> <span class="k">default</span> <span class="s">&#34;&#34;</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Child</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">getUser</span><span class="o">(</span><span class="nd">@Test</span><span class="o">(</span><span class="mi">26</span><span class="o">)</span> <span class="kt">int</span> <span class="n">age</span><span class="o">,</span> <span class="nd">@Test2</span><span class="o">(</span><span class="s">&#34;MinKin&#34;</span><span class="o">)</span> <span class="n">String</span> <span class="n">name</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">try</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Method</span> <span class="n">method</span> <span class="o">=</span> <span class="n">Child</span><span class="o">.</span><span class="na">class</span><span class="o">.</span><span class="na">getMethod</span><span class="o">(</span><span class="s">&#34;getUser&#34;</span><span class="o">,</span> <span class="kt">int</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">String</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Annotation</span><span class="o">[][]</span> <span class="n">annotations</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="na">getParameterAnnotations</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="o">(</span><span class="n">Annotation</span><span class="o">[]</span> <span class="n">value</span> <span class="o">:</span> <span class="n">annotations</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">for</span> <span class="o">(</span><span class="n">Annotation</span> <span class="n">annotation</span> <span class="o">:</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="o">(</span><span class="n">annotation</span> <span class="k">instanceof</span> <span class="n">Test</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">Test</span> <span class="n">test</span> <span class="o">=</span> <span class="o">(</span><span class="n">Test</span><span class="o">)</span> <span class="n">annotation</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">test</span><span class="o">.</span><span class="na">annotationType</span><span class="o">().</span><span class="na">getSimpleName</span><span class="o">()</span> <span class="o">+</span> <span class="s">&#34;; &#34;</span> <span class="o">+</span> <span class="n">test</span><span class="o">.</span><span class="na">value</span><span class="o">());</span>
+</span></span><span class="line"><span class="cl">                <span class="o">}</span><span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">annotation</span> <span class="k">instanceof</span> <span class="n">Test2</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">Test2</span> <span class="n">test2</span> <span class="o">=</span> <span class="o">(</span><span class="n">Test2</span><span class="o">)</span> <span class="n">annotation</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">test2</span><span class="o">.</span><span class="na">annotationType</span><span class="o">().</span><span class="na">getSimpleName</span><span class="o">()</span> <span class="o">+</span> <span class="s">&#34;; &#34;</span> <span class="o">+</span> <span class="n">test2</span><span class="o">.</span><span class="na">value</span><span class="o">());</span>
+</span></span><span class="line"><span class="cl">                <span class="o">}</span>
+</span></span><span class="line"><span class="cl">            <span class="o">}</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span><span class="k">catch</span><span class="o">(</span><span class="n">NoSuchMethodException</span> <span class="n">e</span><span class="o">){</span>
+</span></span><span class="line"><span class="cl">        <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h1 id="五注解的应用">五、注解的应用</h1>
+<h2 id="51在运行时反射动态获取注解信息">5.1、在运行时反射动态获取注解信息</h2>
+<p><em>DI</em>（<em>Dependency Injection</em>）容器是指依赖注入容器，程序员一般不通过直接<em>new</em>创建对象，而是由容器管理对象的创建，对于依赖的服务，也不需要自己管理，而是使用注解表达依赖关系。这么做的好处有很多，代码更为简单，也更为灵活，比如容器可以根据配置返回一个动态代理，实现<em>AOP</em>。</p>
+<p>举个简单的<em>DI</em>容器例子，我们引入两个注解：一个是 <em>@Inject</em>，另一个是 <em>@Singleton</em>，先来看下 <em>@Inject</em>，它用来修饰类中字段，表达依赖关系，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="nd">@Target</span><span class="o">(</span><span class="n">ElementType</span><span class="o">.</span><span class="na">FIELD</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="nd">@Retention</span><span class="o">(</span><span class="n">RetentionPolicy</span><span class="o">.</span><span class="na">RUNTIME</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="nd">@interface</span> <span class="n">Inject</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>定义两个服务<em>ServiceA</em>与<em>ServiceB</em>，<em>ServiceA</em>依赖于<em>ServiceB</em>，<em>ServiceA</em>使用 <em>@Inject</em>表达对<em>ServiceB</em>的依赖，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ServiceA</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nd">@Inject</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ServiceB</span> <span class="n">serviceB</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">call</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">serviceB</span><span class="o">.</span><span class="na">action</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ServiceB</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">action</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;ServiceB action&#34;</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><em>DI</em>容器的类为<em>ServiceContainer</em>，提供一个方法获取对象的实例，而不是让对象自己<em>new</em>，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">static</span> <span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">T</span> <span class="nf">getInstance</span><span class="o">(</span><span class="n">Class</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">cls</span><span class="o">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><em>ServiceContainer</em>的使用方法，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">ServiceA</span> <span class="n">serviceA</span> <span class="o">=</span> <span class="n">ServiceContainer</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="n">ServiceA</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">serviceA</span><span class="o">.</span><span class="na">call</span><span class="o">();</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><em>ServiceContainer</em>的<em>getInstance</em>方法会创建需要的对象，并配置依赖关系，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ServiceContainer</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">static</span> <span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">T</span> <span class="nf">getInstance</span><span class="o">(</span><span class="n">Class</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">cls</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">try</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">T</span> <span class="n">t</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="na">getDeclaredConstructor</span><span class="o">().</span><span class="na">newInstance</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Field</span><span class="o">[]</span> <span class="n">fields</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="na">getDeclaredFields</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">            <span class="k">for</span> <span class="o">(</span><span class="n">Field</span> <span class="n">field</span> <span class="o">:</span> <span class="n">fields</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="o">(</span><span class="n">field</span><span class="o">.</span><span class="na">isAnnotationPresent</span><span class="o">(</span><span class="n">Inject</span><span class="o">.</span><span class="na">class</span><span class="o">))</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">if</span> <span class="o">(!</span><span class="n">field</span><span class="o">.</span><span class="na">canAccess</span><span class="o">(</span><span class="n">t</span><span class="o">))</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">                        <span class="n">field</span><span class="o">.</span><span class="na">setAccessible</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">                    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">Class</span><span class="o">&lt;?&gt;</span> <span class="n">fieldCls</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="na">getType</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">field</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="n">t</span><span class="o">,</span> <span class="n">getInstance</span><span class="o">(</span><span class="n">fieldCls</span><span class="o">));</span>
+</span></span><span class="line"><span class="cl">                <span class="o">}</span>
+</span></span><span class="line"><span class="cl">            <span class="o">}</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">t</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span><span class="k">catch</span> <span class="o">(</span><span class="n">InstantiationException</span> <span class="o">|</span> <span class="n">IllegalAccessException</span> <span class="o">|</span><span class="n">InvocationTargetException</span> <span class="o">|</span><span class="n">NoSuchMethodException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>上面的代码假定每个类型都有一个<em>public</em>默认构造方法，使用它创建对象，然后查看每个字段，如果有 <em>@Inject</em>注解，就根据字段类型获取该类型的实例，并设置字段的值。</p>
+<p><em>@Singleton</em>用于修饰类，表示类型是单例，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="nd">@Target</span><span class="o">(</span><span class="n">ElementType</span><span class="o">.</span><span class="na">TYPE</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="nd">@Retention</span><span class="o">(</span><span class="n">RetentionPolicy</span><span class="o">.</span><span class="na">RUNTIME</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="nd">@interface</span> <span class="n">Singleton</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>使用 <em>@Singleton</em>来修饰<em>ServiceB</em>，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="nd">@Singleton</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ServiceB</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">action</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;ServiceB action&#34;</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><em>ServiceContainer</em>也需要做修改，首先增加一个静态变量，用来缓存创建过的单例对象，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">private</span> <span class="kd">static</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">Class</span><span class="o">&lt;?&gt;,</span> <span class="n">Object</span><span class="o">&gt;</span> <span class="n">instances</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ConcurrentHashMap</span><span class="o">&lt;&gt;();</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>所以<em>getInstance</em>方法也需要做修改，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">static</span> <span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">T</span> <span class="nf">getInstance</span><span class="o">(</span><span class="n">Class</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">cls</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">try</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">boolean</span> <span class="n">singleton</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="na">isAnnotationPresent</span><span class="o">(</span><span class="n">Singleton</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span><span class="o">(!</span><span class="n">singleton</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">createInstance</span><span class="o">(</span><span class="n">cls</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Object</span> <span class="n">obj</span> <span class="o">=</span> <span class="n">instances</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">cls</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span><span class="o">(</span><span class="n">obj</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="o">(</span><span class="n">T</span><span class="o">)</span> <span class="n">obj</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">        <span class="kd">synchronized</span> <span class="o">(</span><span class="n">cls</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">obj</span> <span class="o">=</span> <span class="n">instances</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">cls</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span><span class="o">(</span><span class="n">obj</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">obj</span> <span class="o">=</span> <span class="n">createInstance</span><span class="o">(</span><span class="n">cls</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">instances</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">cls</span><span class="o">,</span> <span class="n">obj</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">            <span class="o">}</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="o">(</span><span class="n">T</span><span class="o">)</span> <span class="n">obj</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>首先检查类型是否是单例，如果不是就直接调用<em>createInstance</em>创建对象。否则检查缓存，如果有则直接返回，如果没有则调用<em>createInstance</em>创建对象，并放入缓存中。来看下<em>createInstance</em>的实现，请看如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">private</span> <span class="kd">static</span> <span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">T</span> <span class="nf">createInstance</span><span class="o">(</span><span class="n">Class</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">cls</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">T</span> <span class="n">obj</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="na">newInstance</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Field</span><span class="o">[]</span> <span class="n">fields</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="na">getDeclaredFields</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span><span class="o">(</span><span class="n">Field</span> <span class="n">f</span> <span class="o">:</span> <span class="n">fields</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span><span class="o">(</span><span class="n">f</span><span class="o">.</span><span class="na">isAnnotationPresent</span><span class="o">(</span><span class="n">SimpleInject</span><span class="o">.</span><span class="na">class</span><span class="o">))</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span><span class="o">(!</span><span class="n">f</span><span class="o">.</span><span class="na">canAccess</span><span class="o">(</span><span class="n">obj</span><span class="o">))</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">f</span><span class="o">.</span><span class="na">setAccessible</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">            <span class="o">}</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Class</span><span class="o">&lt;?&gt;</span> <span class="n">fieldCls</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="na">getType</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">            <span class="n">f</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="n">obj</span><span class="o">,</span> <span class="n">getInstance</span><span class="o">(</span><span class="n">fieldCls</span><span class="o">));</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">obj</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="52apt编译时注解处理器">5.2、<em>APT</em>编译时注解处理器</h2>
+<p>虽然<em>ButterKnife</em>已经过时了，但仍不失为一个学习<em>APT</em>编译时注解处理器的例子，所以接下来会手写一个简单版的<em>ButterKnife</em>。与此同时，将学习<em>Javac</em>的源码，深入理解注解处理器相关方法的执行过程。</p>
+<p>这个分析过程本文就省略了，学习成果在下面地址，可自行学习。</p>
+<blockquote>
+<p><a href="https://github.com/AndDevMK/AnalysisButterKnife">https://github.com/AndDevMK/AnalysisButterKnife</a></p>
+</blockquote>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">文章作者</span>
+    <span class="item-content">AndDevMK</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">上次更新</span>
+    <span class="item-content">
+        2023-12-19
+        
+    </span>
+  </p>
+  
+  <p class="copyright-item">
+    <span class="item-title">许可协议</span>
+    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a></span>
+  </p>
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">赞赏支持</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat-qr-code.JPG">
+        <span>微信打赏</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay-qr-code.JPG">
+        <span>支付宝打赏</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      
+      <nav class="post-nav">
+        
+        <a class="next" href="/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E6%B3%9B%E5%9E%8B/">
+            <span class="next-text nav-default">Java必备基础之泛型</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="AndDevMK/blog-utterances"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    
+    <div id="search_mask" class="search_mask">
+    <div class="search_modal">
+        <div id="close_search" class="close_search">关闭</div>
+        <div class="search_divider"></div>
+        <input id="input_search_key" class="input_search_key" placeholder="请输入你要搜索的内容" tabindex="0">
+        <ul id="search_list">
+        </ul>
+    </div>
+</div>
+
+<script src="/js/fuse.js"></script> 
+<script src="/js/fastsearch.js"></script>
+
+    <footer id="footer" class="footer">
+      
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a id="hexo-link" class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    
+    <span id="run-time" class="run-time"></span> 
+    <span class="heart"><i class="iconfont icon-heart"></i></span>
+    &copy; 
+    2023&nbsp;
+    <span>AndDevMK</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  <script type="text/javascript" src="/lib/jquery/jquery-3.2.1.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout-1.0.1.min.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox-3.1.20.min.js"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.11a4ba15caf2d921d57eaf6568c4ad21eafd5d2c001cbcb31693586c63f93005.js"></script>
+
+<script id="baidu_analytics">
+  var _hmt = _hmt || [];
+  (function() {
+    if (window.location.hostname === 'localhost') return;
+    var hm = document.createElement("script"); hm.async = true;
+    hm.src = "https://hm.baidu.com/hm.js?6db179fb88e600cf326b0515a8aa1de3";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+
+
+
+
+<script src="/js/codecopy.js"></script>
+
+
+
+<link disabled id="dark-mode-theme" rel="stylesheet" href="/css/dark.css"></link>
+<script src="/js/dark.js"></script>
+
+
+<script src="/js/site_runtime.js"></script>
+
+
+
+
+</body>
+</html>
