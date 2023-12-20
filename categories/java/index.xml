@@ -7,7 +7,16 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>AndDevMK</copyright>
-    <lastBuildDate>Tue, 19 Dec 2023 08:00:00 +0800</lastBuildDate><atom:link href="https://anddevmk.cn/categories/java/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 20 Dec 2023 08:00:00 +0800</lastBuildDate><atom:link href="https://anddevmk.cn/categories/java/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Java必备基础之反射</title>
+      <link>https://anddevmk.cn/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E5%8F%8D%E5%B0%84/</link>
+      <pubDate>Wed, 20 Dec 2023 08:00:00 +0800</pubDate>
+      
+      <guid>https://anddevmk.cn/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E5%8F%8D%E5%B0%84/</guid>
+      <description>注：本文代码基于JDK 11 一、Class类 每个已加载的类在内存都有一份类信息，每个对象都有指向它所属类信息的引用，Java中类信息对应的类就是java.lang.Class，所有类的根父类Object有一个方法，可以获取对象的Class对象，请看如下代码： 1 public final native Class&amp;lt;?&amp;gt; getClass(); Class是一</description>
+    </item>
+    
     <item>
       <title>Java必备基础之注解</title>
       <link>https://anddevmk.cn/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E6%B3%A8%E8%A7%A3/</link>
