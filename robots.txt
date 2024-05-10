@@ -1,2 +1,2 @@
 User-agent: *
-Sitemap: https://anddevmk.cn/sitemap.xml
+Sitemap: https://anddevmk.github.io/sitemap.xml

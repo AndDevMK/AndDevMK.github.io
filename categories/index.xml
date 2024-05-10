@@ -2,45 +2,45 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Categories on AndDevMK&#39;s android blog site</title>
-    <link>https://anddevmk.cn/categories/</link>
+    <link>https://anddevmk.github.io/categories/</link>
     <description>Recent content in Categories on AndDevMK&#39;s android blog site</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>AndDevMK</copyright>
-    <lastBuildDate>Wed, 20 Dec 2023 08:00:00 +0800</lastBuildDate><atom:link href="https://anddevmk.cn/categories/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 20 Dec 2023 08:00:00 +0800</lastBuildDate><atom:link href="https://anddevmk.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Java</title>
-      <link>https://anddevmk.cn/categories/java/</link>
+      <link>https://anddevmk.github.io/categories/java/</link>
       <pubDate>Wed, 20 Dec 2023 08:00:00 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/categories/java/</guid>
+      <guid>https://anddevmk.github.io/categories/java/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Flutter</title>
-      <link>https://anddevmk.cn/categories/flutter/</link>
+      <link>https://anddevmk.github.io/categories/flutter/</link>
       <pubDate>Tue, 05 Dec 2023 08:00:00 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/categories/flutter/</guid>
+      <guid>https://anddevmk.github.io/categories/flutter/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Kotlin</title>
-      <link>https://anddevmk.cn/categories/kotlin/</link>
+      <link>https://anddevmk.github.io/categories/kotlin/</link>
       <pubDate>Sun, 23 Jul 2023 14:41:31 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/categories/kotlin/</guid>
+      <guid>https://anddevmk.github.io/categories/kotlin/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Android</title>
-      <link>https://anddevmk.cn/categories/android/</link>
+      <link>https://anddevmk.github.io/categories/android/</link>
       <pubDate>Fri, 23 Jun 2023 14:41:31 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/categories/android/</guid>
+      <guid>https://anddevmk.github.io/categories/android/</guid>
       <description></description>
     </item>
     

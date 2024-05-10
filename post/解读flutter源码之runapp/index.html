@@ -26,7 +26,7 @@
 <meta name="generator" content="Hugo 0.111.3 with theme even" />
 
 
-<link rel="canonical" href="https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Brunapp/" />
+<link rel="canonical" href="https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Brunapp/" />
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -43,7 +43,7 @@
 <meta property="og:title" content="解读Flutter源码之runApp" />
 <meta property="og:description" content="注：本文代码基于Flutter SDK 3.13.5 一、前言 在上一文Flutter源码之三颗树分类中，我们对Flutter的三颗树Widget、Element、RenderObject进行了简单的分类，知道了Widget可分为RenderObjectWidget一类和非RenderObjectWi" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Brunapp/" /><meta property="article:section" content="post" />
+<meta property="og:url" content="https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Brunapp/" /><meta property="article:section" content="post" />
 <meta property="article:published_time" content="2023-10-14T11:28:31+08:00" />
 <meta property="article:modified_time" content="2023-10-14T11:28:31+08:00" />
 <meta itemprop="name" content="解读Flutter源码之runApp">
@@ -189,7 +189,7 @@
 <p><em>注：本文代码基于Flutter SDK 3.13.5</em></p>
 </blockquote>
 <h1 id="一前言">一、前言</h1>
-<p>在上一文<a href="https://anddevmk.cn/post/flutter%E6%BA%90%E7%A0%81%E4%B9%8B%E4%B8%89%E9%A2%97%E6%A0%91%E5%88%86%E7%B1%BB/"><em>Flutter源码之三颗树分类</em></a>中，我们对<em>Flutter</em>的三颗树<em>Widget</em>、<em>Element</em>、<em>RenderObject</em>进行了简单的分类，知道了<em>Widget</em>可分为<em>RenderObjectWidget</em>一类和非<em>RenderObjectWidget</em>另一类，并且<em>XXXWidget</em>基本上都有与之对应的<em>XXXElement</em>。</p>
+<p>在上一文<a href="https://anddevmk.github.io/post/flutter%E6%BA%90%E7%A0%81%E4%B9%8B%E4%B8%89%E9%A2%97%E6%A0%91%E5%88%86%E7%B1%BB/"><em>Flutter源码之三颗树分类</em></a>中，我们对<em>Flutter</em>的三颗树<em>Widget</em>、<em>Element</em>、<em>RenderObject</em>进行了简单的分类，知道了<em>Widget</em>可分为<em>RenderObjectWidget</em>一类和非<em>RenderObjectWidget</em>另一类，并且<em>XXXWidget</em>基本上都有与之对应的<em>XXXElement</em>。</p>
 <p>在本文中，将会通过一个小案例以及<em>Debug</em>调试源码的方式深入分析<em>runApp</em>方法的执行过程。</p>
 <h1 id="二小案例之设计问题">二、小案例之设计问题</h1>
 <p>笔者在最初设计小案例时，预期想要的<em>Widget</em>层次结构是下图这样的。</p>
@@ -622,7 +622,8 @@ View决定应用程序渲染到哪个FlutterView中。目前这是来自platform
     <span id="run-time" class="run-time"></span> 
     <span class="heart"><i class="iconfont icon-heart"></i></span>
     &copy; 
-    2023&nbsp;
+    2023 - 
+    2024&nbsp;
     <span>AndDevMK</span>
   </span>
 </div>

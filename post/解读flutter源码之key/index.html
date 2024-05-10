@@ -26,7 +26,7 @@
 <meta name="generator" content="Hugo 0.111.3 with theme even" />
 
 
-<link rel="canonical" href="https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bkey/" />
+<link rel="canonical" href="https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bkey/" />
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -43,7 +43,7 @@
 <meta property="og:title" content="解读Flutter源码之Key" />
 <meta property="og:description" content="注：本文代码基于Flutter SDK 3.13.5 一、Key是什么？ 在Flutter中，Key的使用是很常见的，就以Scaffold这个Widget来说，当人们使用它的Drawer功能时，必然会涉及openDrawer与closeDrawer这两个行为，它们的具体方法实现定义在ScaffoldS" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bkey/" /><meta property="article:section" content="post" />
+<meta property="og:url" content="https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bkey/" /><meta property="article:section" content="post" />
 <meta property="article:published_time" content="2023-10-27T11:28:31+08:00" />
 <meta property="article:modified_time" content="2023-10-27T11:28:31+08:00" />
 <meta itemprop="name" content="解读Flutter源码之Key">
@@ -1043,7 +1043,7 @@
 <p><em>OK</em>，不管怎样，接下来分析这3个小示例的执行原理之后谜底就会揭开。</p>
 <h1 id="三3个小示例之执行原理">三、3个小示例之执行原理</h1>
 <h2 id="31分析示例1">3.1、分析示例1</h2>
-<p>当点击<em>FloatingActionButton</em>按钮后，会执行<em>setState</em>方法，关于<em>setState</em>方法的分析可参考<a href="https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bsetstate/"><em>解读Flutter源码之setState</em></a>一文。</p>
+<p>当点击<em>FloatingActionButton</em>按钮后，会执行<em>setState</em>方法，关于<em>setState</em>方法的分析可参考<a href="https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bsetstate/"><em>解读Flutter源码之setState</em></a>一文。</p>
 <p>此处<em>setState</em>方法会先触发<em>Scaffold</em>的重建，<em>Scaffold</em>的重建也会触发其子<em>Widget</em>的重建，然后子<em>Widget</em>的重建也会触发其子<em>Widget</em>的重建，有点像“<em>核裂变的链式反应</em>”，直到所有子<em>Widget</em>均完成重建。</p>
 <p>因为从<em>Scaffold</em>的重建一直到<em>Row</em>的重建，中间实在嵌套太多层了，很不方便分析，所以这里只从<em>Row</em>的父组件<em>KeyedSubtree</em>开始讲起。</p>
 <p>当<em>KeyedSubtree</em>重建完成之后（即<em>KeyedSubtree</em>的父组件_<em>BodyBuilder</em>的<em>build</em>方法已执行），就会执行<em>Element</em>的<em>rebuild</em>方法，在<em>Element</em>的<em>rebuild</em>方法中，接着执行了<em>Element</em>的<em>performRebuild</em>方法，又因为<em>KeyedSubtree</em>是<em>StatelessWidget</em>的子类，所以执行的是<em>ComponentElement</em>的<em>performRebuild</em>方法。</p>
@@ -2893,7 +2893,8 @@
     <span id="run-time" class="run-time"></span> 
     <span class="heart"><i class="iconfont icon-heart"></i></span>
     &copy; 
-    2023&nbsp;
+    2023 - 
+    2024&nbsp;
     <span>AndDevMK</span>
   </span>
 </div>

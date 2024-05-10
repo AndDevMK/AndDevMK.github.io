@@ -2,234 +2,234 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>AndDevMK&#39;s android blog site</title>
-    <link>https://anddevmk.cn/</link>
+    <link>https://anddevmk.github.io/</link>
     <description>Recent content on AndDevMK&#39;s android blog site</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>AndDevMK</copyright>
-    <lastBuildDate>Wed, 20 Dec 2023 08:00:00 +0800</lastBuildDate><atom:link href="https://anddevmk.cn/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 20 Dec 2023 08:00:00 +0800</lastBuildDate><atom:link href="https://anddevmk.github.io/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Java必备基础之反射</title>
-      <link>https://anddevmk.cn/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E5%8F%8D%E5%B0%84/</link>
+      <link>https://anddevmk.github.io/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E5%8F%8D%E5%B0%84/</link>
       <pubDate>Wed, 20 Dec 2023 08:00:00 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E5%8F%8D%E5%B0%84/</guid>
+      <guid>https://anddevmk.github.io/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E5%8F%8D%E5%B0%84/</guid>
       <description>注：本文代码基于JDK 11 一、Class类 每个已加载的类在内存都有一份类信息，每个对象都有指向它所属类信息的引用，Java中类信息对应的类就是java.lang.Class，所有类的根父类Object有一个方法，可以获取对象的Class对象，请看如下代码： 1 public final native Class&amp;lt;?&amp;gt; getClass(); Class是一</description>
     </item>
     
     <item>
       <title>Java必备基础之注解</title>
-      <link>https://anddevmk.cn/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E6%B3%A8%E8%A7%A3/</link>
+      <link>https://anddevmk.github.io/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E6%B3%A8%E8%A7%A3/</link>
       <pubDate>Tue, 19 Dec 2023 08:00:00 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E6%B3%A8%E8%A7%A3/</guid>
+      <guid>https://anddevmk.github.io/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E6%B3%A8%E8%A7%A3/</guid>
       <description>注：本文代码基于JDK 11 一、概述 在Java中，注解就是给程序添加一些信息，用字符@开头，这些信息用于修饰它后面紧挨着的其它代码元素，比如类、接口、字段、方法、方法中的参数、构造方法等等，注解可以被编译器、程序运行时和其它工具使用，用于增强或修改程序行为等等。 二、内置注解 2.1、@</description>
     </item>
     
     <item>
       <title>Java必备基础之泛型</title>
-      <link>https://anddevmk.cn/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E6%B3%9B%E5%9E%8B/</link>
+      <link>https://anddevmk.github.io/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E6%B3%9B%E5%9E%8B/</link>
       <pubDate>Mon, 18 Dec 2023 08:00:00 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E6%B3%9B%E5%9E%8B/</guid>
+      <guid>https://anddevmk.github.io/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E6%B3%9B%E5%9E%8B/</guid>
       <description>注：本文代码基于JDK 11 一、基本概念和原理 “泛型”的字面意思是广泛的类型，类、接口和方法都可以应用于广泛的类型，也就是说，代码与它们能够操作的数据类型不再需要绑定到一起，同一套代码也可以用于多种数据类型，这样不仅可以复用代码，降低耦合，还可以提高代码的可读性和安全性。 1.1、泛型</description>
     </item>
     
     <item>
       <title>解读Flutter源码之绘制Paint过程</title>
-      <link>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8B%E7%BB%98%E5%88%B6paint%E8%BF%87%E7%A8%8B/</link>
+      <link>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8B%E7%BB%98%E5%88%B6paint%E8%BF%87%E7%A8%8B/</link>
       <pubDate>Tue, 05 Dec 2023 08:00:00 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8B%E7%BB%98%E5%88%B6paint%E8%BF%87%E7%A8%8B/</guid>
+      <guid>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8B%E7%BB%98%E5%88%B6paint%E8%BF%87%E7%A8%8B/</guid>
       <description>注：本文代码基于Flutter SDK 3.13.5 一、与绘制相关的对象 Flutter中与绘制相关的对象有三个，分别是Canvas、Layer和Scene。 Canvas：封装了Flutter Skia各种绘制指令，比如画线drawLine、画圆drawCircle、画矩形drawRect等指令。 La</description>
     </item>
     
     <item>
       <title>解读Flutter源码之布局Layout过程</title>
-      <link>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8B%E5%B8%83%E5%B1%80layout%E8%BF%87%E7%A8%8B/</link>
+      <link>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8B%E5%B8%83%E5%B1%80layout%E8%BF%87%E7%A8%8B/</link>
       <pubDate>Fri, 01 Dec 2023 08:00:00 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8B%E5%B8%83%E5%B1%80layout%E8%BF%87%E7%A8%8B/</guid>
+      <guid>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8B%E5%B8%83%E5%B1%80layout%E8%BF%87%E7%A8%8B/</guid>
       <description>注：本文代码基于Flutter SDK 3.13.5 一、理解布局约束 在学习Flutter的过程中可能会遇到这样一个问题：为什么给Widget设置了width: 100，但是不起作用？ 这时候最应该做的不是怎样去解决这个问题，而是要先去熟悉这条规则：首先，上层Widget向下层Widget传递约束条件；</description>
     </item>
     
     <item>
       <title>解读Flutter源码之Navigator（声明式）</title>
-      <link>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bnavigator%E5%A3%B0%E6%98%8E%E5%BC%8F/</link>
+      <link>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bnavigator%E5%A3%B0%E6%98%8E%E5%BC%8F/</link>
       <pubDate>Sun, 26 Nov 2023 09:28:31 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bnavigator%E5%A3%B0%E6%98%8E%E5%BC%8F/</guid>
+      <guid>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bnavigator%E5%A3%B0%E6%98%8E%E5%BC%8F/</guid>
       <description>注：本文代码基于Flutter SDK 3.13.5 一、前言 在之前解读Flutter源码之Navigator（命令式）一文中，已分析过Navigator的相关方法API与底层原理，知道了Navigator内部通过Overlay组件来管理路由页面堆栈。 在Flutter1.22版本发布之后，可以发现本</description>
     </item>
     
     <item>
       <title>解读Flutter源码之Navigator（命令式）</title>
-      <link>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bnavigator%E5%91%BD%E4%BB%A4%E5%BC%8F/</link>
+      <link>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bnavigator%E5%91%BD%E4%BB%A4%E5%BC%8F/</link>
       <pubDate>Sun, 19 Nov 2023 09:28:31 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bnavigator%E5%91%BD%E4%BB%A4%E5%BC%8F/</guid>
+      <guid>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bnavigator%E5%91%BD%E4%BB%A4%E5%BC%8F/</guid>
       <description>注：本文代码基于Flutter SDK 3.13.5 一、什么是Navigator？ 先来看下Navigator的注释。 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91</description>
     </item>
     
     <item>
       <title>解读Flutter源码之GestureDetector</title>
-      <link>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bgesturedetector/</link>
+      <link>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bgesturedetector/</link>
       <pubDate>Tue, 14 Nov 2023 09:28:31 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bgesturedetector/</guid>
+      <guid>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bgesturedetector/</guid>
       <description>注：本文代码基于Flutter SDK 3.13.5 一、前言 在之前解读Flutter源码之Listener一文中，我们已经知道Listener用来监听原始指针事件，它的事件处理流程分为命中测试-事件分发-事件清理三部分。 而本文所讲的GestureDetector，它的内部实际上是对Listener</description>
     </item>
     
     <item>
       <title>解读Flutter源码之Listener</title>
-      <link>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Blistener/</link>
+      <link>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Blistener/</link>
       <pubDate>Sat, 11 Nov 2023 09:28:31 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Blistener/</guid>
+      <guid>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Blistener/</guid>
       <description>注：本文代码基于Flutter SDK 3.13.5 一、什么是Listener？ Listener可以用来监听原始指针事件（Raw Pointer Event，在移动设备上通常为触摸事件），先来看下它的注释&amp;amp;部分源码。 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45</description>
     </item>
     
     <item>
       <title>解读Flutter源码之NotificationListener</title>
-      <link>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bnotificationlistener/</link>
+      <link>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bnotificationlistener/</link>
       <pubDate>Tue, 07 Nov 2023 11:28:31 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bnotificationlistener/</guid>
+      <guid>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bnotificationlistener/</guid>
       <description>注：本文代码基于Flutter SDK 3.13.5 一、前言 在之前解读Flutter源码之InheritedWidget一文中，我们已知晓，在Widget多层嵌套的情况下，将数据从父级Widget传递给子级Widget时，采用InheritedWidget的方式非常好用。 但是，如果传递方向是反过来</description>
     </item>
     
     <item>
       <title>解读Flutter源码之Animation</title>
-      <link>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Banimation/</link>
+      <link>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Banimation/</link>
       <pubDate>Sat, 04 Nov 2023 11:28:31 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Banimation/</guid>
+      <guid>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Banimation/</guid>
       <description>注：本文代码基于Flutter SDK 3.13.5 一、前言 如果你开发的App失去了交互动画，那么这将是一件很难想象的事情，此时它的体验必然一言难尽，用户会为它贴上“傻快”、“生硬”、“粗糙”等标签，从而你将不得不丢失一部分用户。 因此，精心设计的动画会使UI更生动，它有助于提升App更精巧的外观和</description>
     </item>
     
     <item>
       <title>解读Flutter源码之InheritedWidget</title>
-      <link>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Binheritedwidget/</link>
+      <link>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Binheritedwidget/</link>
       <pubDate>Tue, 31 Oct 2023 11:28:31 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Binheritedwidget/</guid>
+      <guid>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Binheritedwidget/</guid>
       <description>注：本文代码基于Flutter SDK 3.13.5 一、子Widget多层嵌套之状态管理问题 在Flutter开发中，如果父Widget想要控制子Widget的状态，最常见的办法是把子Widget的状态提升到父Widget中，当父Widget修改该状态并且执行了setState方法之后，子Widge</description>
     </item>
     
     <item>
       <title>解读Flutter源码之Key</title>
-      <link>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bkey/</link>
+      <link>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bkey/</link>
       <pubDate>Fri, 27 Oct 2023 11:28:31 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bkey/</guid>
+      <guid>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bkey/</guid>
       <description>注：本文代码基于Flutter SDK 3.13.5 一、Key是什么？ 在Flutter中，Key的使用是很常见的，就以Scaffold这个Widget来说，当人们使用它的Drawer功能时，必然会涉及openDrawer与closeDrawer这两个行为，它们的具体方法实现定义在ScaffoldS</description>
     </item>
     
     <item>
       <title>解读Flutter源码之setState</title>
-      <link>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bsetstate/</link>
+      <link>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bsetstate/</link>
       <pubDate>Sat, 21 Oct 2023 11:28:31 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bsetstate/</guid>
+      <guid>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bsetstate/</guid>
       <description>注：本文代码基于Flutter SDK 3.13.5 一、前言 在上一文解读Flutter源码之StatefulWidget&amp;amp;State的生命周期中，笔者分析了State生命周期的相关方法，但碍于篇幅有限，对于setState方法只是进行了简单描述，还未进行深入分析。 因此，本文将会深入分析se</description>
     </item>
     
     <item>
       <title>解读Flutter源码之StatefulWidget&amp;State的生命周期</title>
-      <link>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bstatefulwidgetstate%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/</link>
+      <link>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bstatefulwidgetstate%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/</link>
       <pubDate>Wed, 18 Oct 2023 11:28:31 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bstatefulwidgetstate%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/</guid>
+      <guid>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bstatefulwidgetstate%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/</guid>
       <description>注：本文代码基于Flutter SDK 3.13.5 一、前言 在上一文解读Flutter源码之runApp中，笔者对于StatefulWidget与StatefulElement源码的分析并未足够深入，而且State相关的分析也并未涉及。 因此，本文将会深入分析StatefulWidget的源码&amp;am</description>
     </item>
     
     <item>
       <title>解读Flutter源码之runApp</title>
-      <link>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Brunapp/</link>
+      <link>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Brunapp/</link>
       <pubDate>Sat, 14 Oct 2023 11:28:31 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Brunapp/</guid>
+      <guid>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Brunapp/</guid>
       <description>注：本文代码基于Flutter SDK 3.13.5 一、前言 在上一文Flutter源码之三颗树分类中，我们对Flutter的三颗树Widget、Element、RenderObject进行了简单的分类，知道了Widget可分为RenderObjectWidget一类和非RenderObjectWi</description>
     </item>
     
     <item>
       <title>Flutter源码之三颗树分类</title>
-      <link>https://anddevmk.cn/post/flutter%E6%BA%90%E7%A0%81%E4%B9%8B%E4%B8%89%E9%A2%97%E6%A0%91%E5%88%86%E7%B1%BB/</link>
+      <link>https://anddevmk.github.io/post/flutter%E6%BA%90%E7%A0%81%E4%B9%8B%E4%B8%89%E9%A2%97%E6%A0%91%E5%88%86%E7%B1%BB/</link>
       <pubDate>Tue, 10 Oct 2023 14:47:31 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/flutter%E6%BA%90%E7%A0%81%E4%B9%8B%E4%B8%89%E9%A2%97%E6%A0%91%E5%88%86%E7%B1%BB/</guid>
+      <guid>https://anddevmk.github.io/post/flutter%E6%BA%90%E7%A0%81%E4%B9%8B%E4%B8%89%E9%A2%97%E6%A0%91%E5%88%86%E7%B1%BB/</guid>
       <description>注：本文代码基于Flutter SDK 3.13.5 一、Widget的分类 作为一个初学者，我们知道在Flutter中万物皆Widget，这恰恰说明了Widget在Flutter中的一个重要性，那么以Android开发者的角度来看，Flutter中的Widget是否等同于Android中的View呢</description>
     </item>
     
     <item>
       <title>解读JDK动态代理</title>
-      <link>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBjdk%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/</link>
+      <link>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBjdk%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/</link>
       <pubDate>Fri, 11 Aug 2023 22:39:31 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBjdk%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/</guid>
+      <guid>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBjdk%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/</guid>
       <description>注：本文代码基于JDK 17 一、概述 动态代理，一个听起来很高深的名词，其实并非如此，在日常的开发中，你或多或少都有遇到过，比如你调用第三方SDK的方法时，该方法的具体实现或许就是使用了动态代理，这个本文后面会讲到。 不管是在Java开发还是Android开发中，动态代理的应用场景都非常</description>
     </item>
     
     <item>
       <title>解读Kotlin协程启动源码</title>
-      <link>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBkotlin%E5%8D%8F%E7%A8%8B%E5%90%AF%E5%8A%A8%E6%BA%90%E7%A0%81/</link>
+      <link>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBkotlin%E5%8D%8F%E7%A8%8B%E5%90%AF%E5%8A%A8%E6%BA%90%E7%A0%81/</link>
       <pubDate>Sun, 23 Jul 2023 14:41:31 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBkotlin%E5%8D%8F%E7%A8%8B%E5%90%AF%E5%8A%A8%E6%BA%90%E7%A0%81/</guid>
+      <guid>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBkotlin%E5%8D%8F%E7%A8%8B%E5%90%AF%E5%8A%A8%E6%BA%90%E7%A0%81/</guid>
       <description>注：本文代码基于Kotlin 1.9.0 前言 一般而言，Kotlin的协程实现分为两个层次： 基础设施层：标准库的协程API，主要对协程提供了概念和语义上最基本的支持，API所在包名的前缀为kotlin.coroutines.*。基于此，本文主要内容就是解读Kotlin协程启动源码。 业务框架层</description>
     </item>
     
     <item>
       <title>Android事件分发机制</title>
-      <link>https://anddevmk.cn/post/android%E4%BA%8B%E4%BB%B6%E5%88%86%E5%8F%91%E6%9C%BA%E5%88%B6/</link>
+      <link>https://anddevmk.github.io/post/android%E4%BA%8B%E4%BB%B6%E5%88%86%E5%8F%91%E6%9C%BA%E5%88%B6/</link>
       <pubDate>Fri, 23 Jun 2023 14:41:31 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/android%E4%BA%8B%E4%BB%B6%E5%88%86%E5%8F%91%E6%9C%BA%E5%88%B6/</guid>
+      <guid>https://anddevmk.github.io/post/android%E4%BA%8B%E4%BB%B6%E5%88%86%E5%8F%91%E6%9C%BA%E5%88%B6/</guid>
       <description>注：本文代码基于Android Sv2 一、概述 事件分发机制是View体系中一个非常重要的核心知识点，也是难点，不少Android开发者搞了几年的Android，或许也还没完全弄明白它的原理。 另外，在Android开发过程中难免会碰到滑动冲突的场景，而解决滑动冲突的理论基础就是事件分发机</description>
     </item>
     
     <item>
       <title>Android解析XML数据</title>
-      <link>https://anddevmk.cn/post/android%E8%A7%A3%E6%9E%90xml%E6%95%B0%E6%8D%AE/</link>
+      <link>https://anddevmk.github.io/post/android%E8%A7%A3%E6%9E%90xml%E6%95%B0%E6%8D%AE/</link>
       <pubDate>Sun, 07 May 2023 14:41:31 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/android%E8%A7%A3%E6%9E%90xml%E6%95%B0%E6%8D%AE/</guid>
+      <guid>https://anddevmk.github.io/post/android%E8%A7%A3%E6%9E%90xml%E6%95%B0%E6%8D%AE/</guid>
       <description>注：本文代码基于Android Sv2 一、概述 XML文件在Android中是一种非常常见的文件格式，例如你的主页面布局文件activity_main.xml、Android清单文件AndroidManifest.xml、XXX.xml的res资源文件等等，然而我们在日常开发中往往会忽略</description>
     </item>
     
     <item>
       <title>Java集合系列：一文解读ArrayDeque源码「JDK11」</title>
-      <link>https://anddevmk.cn/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBarraydeque%E6%BA%90%E7%A0%81jdk11/</link>
+      <link>https://anddevmk.github.io/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBarraydeque%E6%BA%90%E7%A0%81jdk11/</link>
       <pubDate>Mon, 24 Apr 2023 14:41:31 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBarraydeque%E6%BA%90%E7%A0%81jdk11/</guid>
+      <guid>https://anddevmk.github.io/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBarraydeque%E6%BA%90%E7%A0%81jdk11/</guid>
       <description>一、概述 假设你对ArrayDeque的源码一无所知，那么仅凭ArrayDeque名字来看的话，大概可以猜到它的实现和Array数组有关。 ArrayDeque是Java Collections Framework的一个成员，它的底层是基于定长数组实现的一个双端队列，如果数组存放满了，就会通过扩容机制重新生</description>
     </item>
     
     <item>
       <title>Java集合系列：一文解读LinkedList源码「JDK11」</title>
-      <link>https://anddevmk.cn/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBlinkedlist%E6%BA%90%E7%A0%81jdk11/</link>
+      <link>https://anddevmk.github.io/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBlinkedlist%E6%BA%90%E7%A0%81jdk11/</link>
       <pubDate>Wed, 19 Apr 2023 14:41:31 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBlinkedlist%E6%BA%90%E7%A0%81jdk11/</guid>
+      <guid>https://anddevmk.github.io/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBlinkedlist%E6%BA%90%E7%A0%81jdk11/</guid>
       <description>一、概述 LinkedList是Java Collections Framework的一个成员，然后底层是基于双向链表来实现的。对于LinkedList来说，可能平常开发用的频率并没有ArrayList多，这并不是我们不去学习LinkedList原理的理由。我们知道，ArrayList的特点是随机访问效率</description>
     </item>
     
     <item>
       <title>关于</title>
-      <link>https://anddevmk.cn/about/</link>
+      <link>https://anddevmk.github.io/about/</link>
       <pubDate>Sun, 16 Apr 2023 20:53:15 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/about/</guid>
+      <guid>https://anddevmk.github.io/about/</guid>
       <description>此博客主要用来对日常的开发等相关的内容进行记录，如果需要转载请表明出处。</description>
     </item>
     
     <item>
       <title>Java集合系列：一文解读ArrayList源码「JDK11」</title>
-      <link>https://anddevmk.cn/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBarraylist%E6%BA%90%E7%A0%81jdk11/</link>
+      <link>https://anddevmk.github.io/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBarraylist%E6%BA%90%E7%A0%81jdk11/</link>
       <pubDate>Sun, 16 Apr 2023 14:41:31 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBarraylist%E6%BA%90%E7%A0%81jdk11/</guid>
+      <guid>https://anddevmk.github.io/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBarraylist%E6%BA%90%E7%A0%81jdk11/</guid>
       <description>一、概述 ArrayList是经常用到的一个容器，它是Java Collections Framework的一个成员，然后底层是基于定长数组来实现的，如果数组存放满了，就会通过扩容机制重新生成一个更大的数组来存放数据。 因此，扩容机制是ArrayList的核心所在，这一点是务必要掌握的；除此之外，本文还会叙</description>
     </item>
     

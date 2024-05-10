@@ -26,7 +26,7 @@
 <meta name="generator" content="Hugo 0.111.3 with theme even" />
 
 
-<link rel="canonical" href="https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bgesturedetector/" />
+<link rel="canonical" href="https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bgesturedetector/" />
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -43,7 +43,7 @@
 <meta property="og:title" content="解读Flutter源码之GestureDetector" />
 <meta property="og:description" content="注：本文代码基于Flutter SDK 3.13.5 一、前言 在之前解读Flutter源码之Listener一文中，我们已经知道Listener用来监听原始指针事件，它的事件处理流程分为命中测试-事件分发-事件清理三部分。 而本文所讲的GestureDetector，它的内部实际上是对Listener" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bgesturedetector/" /><meta property="article:section" content="post" />
+<meta property="og:url" content="https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Bgesturedetector/" /><meta property="article:section" content="post" />
 <meta property="article:published_time" content="2023-11-14T09:28:31+08:00" />
 <meta property="article:modified_time" content="2023-11-14T09:28:31+08:00" />
 <meta itemprop="name" content="解读Flutter源码之GestureDetector">
@@ -200,7 +200,7 @@
 <p><em>注：本文代码基于Flutter SDK 3.13.5</em></p>
 </blockquote>
 <h1 id="一前言">一、前言</h1>
-<p>在之前<a href="https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Blistener/"><em>解读Flutter源码之Listener</em></a>一文中，我们已经知道<em>Listener</em>用来监听原始指针事件，它的事件处理流程分为命中测试-事件分发-事件清理三部分。</p>
+<p>在之前<a href="https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Blistener/"><em>解读Flutter源码之Listener</em></a>一文中，我们已经知道<em>Listener</em>用来监听原始指针事件，它的事件处理流程分为命中测试-事件分发-事件清理三部分。</p>
 <p>而本文所讲的<em>GestureDetector</em>，它的内部实际上是对<em>Listener</em>的进一步封装，用以识别语义化的手势。相较于<em>Listener</em>，<em>GestureDetector</em>还会涉及手势冲突，那么相应地就需要了解如何去解决手势冲突。</p>
 <h1 id="二什么是gesturedetector">二、什么是<em>GestureDetector</em>？</h1>
 <p>遇事不决，先来看下<em>GestureDetector</em>的注释&amp;部分源码。</p>
@@ -820,7 +820,7 @@
 </tbody>
 </table>
 <h1 id="三gesturedetector示例">三、<em>GestureDetector</em>示例</h1>
-<p>为了便于分析，在<em>GestureDetector</em>示例中丢弃了<em>runApp</em>方法带来的一个<em>View</em>结构（在实际项目中不能这样做），具体分析看<a href="https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Brunapp/"><em>解读Flutter源码之runApp一文</em></a>。</p>
+<p>为了便于分析，在<em>GestureDetector</em>示例中丢弃了<em>runApp</em>方法带来的一个<em>View</em>结构（在实际项目中不能这样做），具体分析看<a href="https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBflutter%E6%BA%90%E7%A0%81%E4%B9%8Brunapp/"><em>解读Flutter源码之runApp一文</em></a>。</p>
 <p>程序运行起来后，通过<em>Flutter Inspector</em>查看<em>Widget</em>层次结构如下所示。</p>
 <img title="" src="/img/flutter/解读Flutter源码之GestureDetector/GestureDetector示例层次结构.png" alt="" width="535">
 <p>对应的代码为：</p>
@@ -2975,7 +2975,8 @@
     <span id="run-time" class="run-time"></span> 
     <span class="heart"><i class="iconfont icon-heart"></i></span>
     &copy; 
-    2023&nbsp;
+    2023 - 
+    2024&nbsp;
     <span>AndDevMK</span>
   </span>
 </div>

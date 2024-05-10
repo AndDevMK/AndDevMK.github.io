@@ -2,72 +2,72 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Java on AndDevMK&#39;s android blog site</title>
-    <link>https://anddevmk.cn/categories/java/</link>
+    <link>https://anddevmk.github.io/categories/java/</link>
     <description>Recent content in Java on AndDevMK&#39;s android blog site</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>AndDevMK</copyright>
-    <lastBuildDate>Wed, 20 Dec 2023 08:00:00 +0800</lastBuildDate><atom:link href="https://anddevmk.cn/categories/java/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 20 Dec 2023 08:00:00 +0800</lastBuildDate><atom:link href="https://anddevmk.github.io/categories/java/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Java必备基础之反射</title>
-      <link>https://anddevmk.cn/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E5%8F%8D%E5%B0%84/</link>
+      <link>https://anddevmk.github.io/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E5%8F%8D%E5%B0%84/</link>
       <pubDate>Wed, 20 Dec 2023 08:00:00 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E5%8F%8D%E5%B0%84/</guid>
+      <guid>https://anddevmk.github.io/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E5%8F%8D%E5%B0%84/</guid>
       <description>注：本文代码基于JDK 11 一、Class类 每个已加载的类在内存都有一份类信息，每个对象都有指向它所属类信息的引用，Java中类信息对应的类就是java.lang.Class，所有类的根父类Object有一个方法，可以获取对象的Class对象，请看如下代码： 1 public final native Class&amp;lt;?&amp;gt; getClass(); Class是一</description>
     </item>
     
     <item>
       <title>Java必备基础之注解</title>
-      <link>https://anddevmk.cn/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E6%B3%A8%E8%A7%A3/</link>
+      <link>https://anddevmk.github.io/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E6%B3%A8%E8%A7%A3/</link>
       <pubDate>Tue, 19 Dec 2023 08:00:00 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E6%B3%A8%E8%A7%A3/</guid>
+      <guid>https://anddevmk.github.io/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E6%B3%A8%E8%A7%A3/</guid>
       <description>注：本文代码基于JDK 11 一、概述 在Java中，注解就是给程序添加一些信息，用字符@开头，这些信息用于修饰它后面紧挨着的其它代码元素，比如类、接口、字段、方法、方法中的参数、构造方法等等，注解可以被编译器、程序运行时和其它工具使用，用于增强或修改程序行为等等。 二、内置注解 2.1、@</description>
     </item>
     
     <item>
       <title>Java必备基础之泛型</title>
-      <link>https://anddevmk.cn/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E6%B3%9B%E5%9E%8B/</link>
+      <link>https://anddevmk.github.io/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E6%B3%9B%E5%9E%8B/</link>
       <pubDate>Mon, 18 Dec 2023 08:00:00 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E6%B3%9B%E5%9E%8B/</guid>
+      <guid>https://anddevmk.github.io/post/java%E5%BF%85%E5%A4%87%E5%9F%BA%E7%A1%80%E4%B9%8B%E6%B3%9B%E5%9E%8B/</guid>
       <description>注：本文代码基于JDK 11 一、基本概念和原理 “泛型”的字面意思是广泛的类型，类、接口和方法都可以应用于广泛的类型，也就是说，代码与它们能够操作的数据类型不再需要绑定到一起，同一套代码也可以用于多种数据类型，这样不仅可以复用代码，降低耦合，还可以提高代码的可读性和安全性。 1.1、泛型</description>
     </item>
     
     <item>
       <title>解读JDK动态代理</title>
-      <link>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBjdk%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/</link>
+      <link>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBjdk%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/</link>
       <pubDate>Fri, 11 Aug 2023 22:39:31 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/%E8%A7%A3%E8%AF%BBjdk%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/</guid>
+      <guid>https://anddevmk.github.io/post/%E8%A7%A3%E8%AF%BBjdk%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/</guid>
       <description>注：本文代码基于JDK 17 一、概述 动态代理，一个听起来很高深的名词，其实并非如此，在日常的开发中，你或多或少都有遇到过，比如你调用第三方SDK的方法时，该方法的具体实现或许就是使用了动态代理，这个本文后面会讲到。 不管是在Java开发还是Android开发中，动态代理的应用场景都非常</description>
     </item>
     
     <item>
       <title>Java集合系列：一文解读ArrayDeque源码「JDK11」</title>
-      <link>https://anddevmk.cn/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBarraydeque%E6%BA%90%E7%A0%81jdk11/</link>
+      <link>https://anddevmk.github.io/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBarraydeque%E6%BA%90%E7%A0%81jdk11/</link>
       <pubDate>Mon, 24 Apr 2023 14:41:31 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBarraydeque%E6%BA%90%E7%A0%81jdk11/</guid>
+      <guid>https://anddevmk.github.io/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBarraydeque%E6%BA%90%E7%A0%81jdk11/</guid>
       <description>一、概述 假设你对ArrayDeque的源码一无所知，那么仅凭ArrayDeque名字来看的话，大概可以猜到它的实现和Array数组有关。 ArrayDeque是Java Collections Framework的一个成员，它的底层是基于定长数组实现的一个双端队列，如果数组存放满了，就会通过扩容机制重新生</description>
     </item>
     
     <item>
       <title>Java集合系列：一文解读LinkedList源码「JDK11」</title>
-      <link>https://anddevmk.cn/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBlinkedlist%E6%BA%90%E7%A0%81jdk11/</link>
+      <link>https://anddevmk.github.io/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBlinkedlist%E6%BA%90%E7%A0%81jdk11/</link>
       <pubDate>Wed, 19 Apr 2023 14:41:31 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBlinkedlist%E6%BA%90%E7%A0%81jdk11/</guid>
+      <guid>https://anddevmk.github.io/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBlinkedlist%E6%BA%90%E7%A0%81jdk11/</guid>
       <description>一、概述 LinkedList是Java Collections Framework的一个成员，然后底层是基于双向链表来实现的。对于LinkedList来说，可能平常开发用的频率并没有ArrayList多，这并不是我们不去学习LinkedList原理的理由。我们知道，ArrayList的特点是随机访问效率</description>
     </item>
     
     <item>
       <title>Java集合系列：一文解读ArrayList源码「JDK11」</title>
-      <link>https://anddevmk.cn/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBarraylist%E6%BA%90%E7%A0%81jdk11/</link>
+      <link>https://anddevmk.github.io/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBarraylist%E6%BA%90%E7%A0%81jdk11/</link>
       <pubDate>Sun, 16 Apr 2023 14:41:31 +0800</pubDate>
       
-      <guid>https://anddevmk.cn/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBarraylist%E6%BA%90%E7%A0%81jdk11/</guid>
+      <guid>https://anddevmk.github.io/post/java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%E4%B8%80%E6%96%87%E8%A7%A3%E8%AF%BBarraylist%E6%BA%90%E7%A0%81jdk11/</guid>
       <description>一、概述 ArrayList是经常用到的一个容器，它是Java Collections Framework的一个成员，然后底层是基于定长数组来实现的，如果数组存放满了，就会通过扩容机制重新生成一个更大的数组来存放数据。 因此，扩容机制是ArrayList的核心所在，这一点是务必要掌握的；除此之外，本文还会叙</description>
     </item>
     
